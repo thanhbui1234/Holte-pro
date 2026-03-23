@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@ui/*": ["packages/shared-ui/*"],
+      "@utils/*": ["packages/shared-utils/*"]
+    }
+  }
+}
