@@ -1,3 +1,4 @@
+import { Button, Spinner } from "shared-ui";
 export function App() {
   return (
     <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
@@ -6,6 +7,7 @@ export function App() {
         <p className="text-muted-foreground text-red-500">
           Admin Vite app — ready to build.
         </p>
+        <Button>Button</Button>
       </div>
     </div>
   );
