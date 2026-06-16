@@ -29,25 +29,28 @@ export function OAuthCallbackPage() {
     http
       .post("/cms-api/v1/login-google-auth", { code, redirectUrl })
       .then(({ data }) => {
-        // Hỗ trợ nhiều dạng response: { token }, { accessToken }, { data: { token } }
-        const token: string = data.token ?? data.accessToken ?? data.data?.token ?? "";
+        // Hỗ trợ nhiều dạng response: { token }, { accessToken }, { data: { token/accessToken } }
+        const nested = data.data ?? {};
+        const nestedUser = nested.user ?? {};
+        const token: string =
+          data.token ?? data.accessToken ?? nested.token ?? nested.accessToken ?? "";
         if (!token) throw new Error("no_token");
 
         let user: AuthUser = { name: "", email: "", picture: "", sub: "" };
         try {
           const payload = decodeJwt(token);
           user = {
-            name: payload["name"] ?? data.name ?? data.data?.name ?? "",
-            email: payload["email"] ?? data.email ?? data.data?.email ?? "",
-            picture: payload["picture"] ?? data.picture ?? data.data?.picture ?? "",
-            sub: payload["sub"] ?? data.sub ?? data.data?.sub ?? "",
+            name: payload["name"] ?? nestedUser.displayName ?? nestedUser.name ?? data.name ?? "",
+            email: payload["email"] ?? nestedUser.email ?? data.email ?? "",
+            picture: payload["picture"] ?? nestedUser.avatarUrl ?? nestedUser.picture ?? data.picture ?? "",
+            sub: payload["sub"] ?? nestedUser.googleSub ?? nestedUser.sub ?? data.sub ?? "",
           };
         } catch {
           user = {
-            name: data.name ?? data.data?.name ?? "",
-            email: data.email ?? data.data?.email ?? "",
-            picture: data.picture ?? data.data?.picture ?? "",
-            sub: data.sub ?? data.data?.sub ?? "",
+            name: nestedUser.displayName ?? nestedUser.name ?? data.name ?? "",
+            email: nestedUser.email ?? data.email ?? "",
+            picture: nestedUser.avatarUrl ?? nestedUser.picture ?? data.picture ?? "",
+            sub: nestedUser.googleSub ?? nestedUser.sub ?? data.sub ?? "",
           };
         }
 
