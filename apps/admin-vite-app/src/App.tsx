@@ -9,9 +9,11 @@ import { WeddingReelsPage } from "./pages/WeddingReelsPage";
 import { TraditionalFilmsPage } from "./pages/TraditionalFilmsPage";
 import { ContactCtaPage } from "./pages/ContactCtaPage";
 import { HeaderPage } from "./pages/HeaderPage";
+import { MenuConfigPage } from "./pages/MenuConfigPage";
 import { FooterConfigPage } from "./pages/FooterConfigPage";
 import { CustomSectionsPage } from "./pages/CustomSectionsPage";
 import { CustomSectionEditorPage } from "./pages/CustomSectionEditorPage";
+import { SectionsHubPage } from "./pages/SectionsHubPage";
 import { ContactInboxPage } from "./pages/ContactInboxPage";
 import { LoginPage } from "./pages/LoginPage";
 import { OAuthCallbackPage } from "./pages/OAuthCallbackPage";
@@ -31,6 +33,7 @@ export function App() {
         <Route element={<AdminLayout />}>
           <Route index element={<DashboardPage />} />
           <Route path="layout" element={<LayoutPage />} />
+          <Route path="sections" element={<SectionsHubPage />} />
           <Route path="banner" element={<BannerPage />} />
           <Route path="about" element={<AboutPage />} />
           <Route path="wedding-highlights" element={<WeddingHighlightsPage />} />
@@ -38,6 +41,7 @@ export function App() {
           <Route path="traditional-films" element={<TraditionalFilmsPage />} />
           <Route path="contact-cta" element={<ContactCtaPage />} />
           <Route path="header" element={<HeaderPage />} />
+          <Route path="menu" element={<MenuConfigPage />} />
           <Route path="footer" element={<FooterConfigPage />} />
           <Route path="custom-sections" element={<CustomSectionsPage />} />
           <Route path="custom-sections/:id" element={<CustomSectionEditorPage />} />

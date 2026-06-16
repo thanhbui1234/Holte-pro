@@ -171,6 +171,13 @@ export const INITIAL_STATE: AdminState = {
     { key: "reels", visible: true },
     { key: "films", visible: true },
   ],
+  menuConfig: [
+    { id: "home", label: "Home", href: "/", visible: true },
+    { id: "wedding-highlights", label: "Wedding Highlights", href: "/wedding-highlight", visible: true },
+    { id: "wedding-reels", label: "Wedding Reels", href: "/wedding-reels", visible: true },
+    { id: "traditional-films", label: "Traditional Films", href: "/traditional-film", visible: false },
+    { id: "contact", label: "Contact Us", href: "/contact", visible: true },
+  ],
   customSections: [],
   contactSubmissions: [
     {

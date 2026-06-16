@@ -2,19 +2,15 @@ import { NavLink } from "react-router-dom";
 import { motion } from "motion/react";
 import {
   ChevronsLeft,
-  Clapperboard,
   Film,
-  Image as ImageIcon,
   Inbox,
-  Info,
+  Layers,
   LayoutDashboard,
   LayoutGrid,
-  LayoutTemplate,
-  Mail,
+  Navigation,
   PanelsTopLeft,
   Settings2,
   Sparkles,
-  Video,
 } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
 import { cn } from "@/lib/utils";
@@ -44,13 +40,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: "Site sections",
     items: [
-      { label: "Banner", path: "/banner", icon: ImageIcon },
-      { label: "About", path: "/about", icon: Info },
-      { label: "Wedding Highlights", path: "/wedding-highlights", icon: Film },
-      { label: "Wedding Reels", path: "/wedding-reels", icon: Clapperboard },
-      { label: "Traditional Films", path: "/traditional-films", icon: Video },
-      { label: "Contact CTA", path: "/contact-cta", icon: Mail },
-      { label: "Custom sections", path: "/custom-sections", icon: LayoutTemplate },
+      { label: "Sections", path: "/sections", icon: Layers },
     ],
   },
   {
@@ -63,6 +53,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Chrome",
     items: [
       { label: "Header", path: "/header", icon: PanelsTopLeft },
+      { label: "Menu", path: "/menu", icon: Navigation },
       { label: "Footer", path: "/footer", icon: Settings2 },
     ],
   },

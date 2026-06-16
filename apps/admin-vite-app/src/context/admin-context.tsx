@@ -16,13 +16,13 @@ import type {
   CollectionKey,
   ContactCtaData,
   ContactStatus,
-  ContactSubmission,
   ContentBlock,
   CustomSection,
   FooterData,
   HeaderData,
   LayoutSection,
   LayoutSectionKey,
+  NavMenuItem,
   ThemedSection,
 } from "@/types";
 import { INITIAL_STATE } from "@/data/mock-data";
@@ -58,6 +58,9 @@ type Action =
   | { type: "REORDER_BLOCKS"; sectionId: string; payload: ContentBlock[] }
   | { type: "SET_CANVAS_ELEMENTS"; sectionId: string; payload: CanvasElement[] }
   | { type: "SET_CANVAS_HEIGHT"; sectionId: string; height: number }
+  | { type: "SET_MENU_CONFIG"; payload: NavMenuItem[] }
+  | { type: "TOGGLE_MENU_ITEM"; id: string }
+  | { type: "UPDATE_MENU_ITEM_LABEL"; id: string; label: string }
   | { type: "SET_CONTACT_STATUS"; id: string; status: ContactStatus }
   | { type: "DELETE_CONTACT"; id: string };
 
@@ -200,6 +203,22 @@ function reducer(state: AdminState, action: Action): AdminState {
           s.id === action.sectionId
             ? { ...s, canvasHeight: action.height, updatedAt: Date.now() }
             : s,
+        ),
+      };
+    case "SET_MENU_CONFIG":
+      return { ...state, menuConfig: action.payload };
+    case "TOGGLE_MENU_ITEM":
+      return {
+        ...state,
+        menuConfig: state.menuConfig.map((item) =>
+          item.id === action.id ? { ...item, visible: !item.visible } : item,
+        ),
+      };
+    case "UPDATE_MENU_ITEM_LABEL":
+      return {
+        ...state,
+        menuConfig: state.menuConfig.map((item) =>
+          item.id === action.id ? { ...item, label: action.label } : item,
         ),
       };
     case "SET_CONTACT_STATUS":
@@ -418,6 +437,25 @@ export function useCustomSections() {
     setCanvasElements,
     setCanvasHeight,
   };
+}
+
+export function useMenuConfig() {
+  const { state, dispatch } = useAdminContext();
+
+  const reorder = useCallback(
+    (payload: NavMenuItem[]) => dispatch({ type: "SET_MENU_CONFIG", payload }),
+    [dispatch],
+  );
+  const toggle = useCallback(
+    (id: string) => dispatch({ type: "TOGGLE_MENU_ITEM", id }),
+    [dispatch],
+  );
+  const updateLabel = useCallback(
+    (id: string, label: string) => dispatch({ type: "UPDATE_MENU_ITEM_LABEL", id, label }),
+    [dispatch],
+  );
+
+  return { menuConfig: state.menuConfig, reorder, toggle, updateLabel };
 }
 
 export function useContactSubmissions() {

@@ -125,6 +125,13 @@ export interface LayoutSection {
   visible: boolean;
 }
 
+export interface NavMenuItem {
+  id: string;
+  label: string;
+  href: string;
+  visible: boolean;
+}
+
 export type ContactStatus = "new" | "read" | "archived";
 
 export interface ContactSubmission {
@@ -147,6 +154,7 @@ export interface AdminState {
   contactCta: ContactCtaData;
   footer: FooterData;
   layout: LayoutSection[];
+  menuConfig: NavMenuItem[];
   customSections: CustomSection[];
   contactSubmissions: ContactSubmission[];
 }
