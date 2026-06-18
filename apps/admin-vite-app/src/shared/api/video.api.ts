@@ -28,7 +28,7 @@ interface VideoRecord {
   updatedTime: number;
 }
 
-interface UploadVideoResponse {
+export interface UploadVideoResponse {
   youtubeVideoId: string;
   youtubeUrl: string;
   youtubeEmbedUrl: string;
@@ -54,7 +54,10 @@ export const videoApi = {
     apiClient.post<CmsApiResponse<UploadVideoResponse>>(
       API_ENDPOINTS.UPLOAD_VIDEO,
       formData,
-      { headers: { "Content-Type": "multipart/form-data" } },
+      { 
+        headers: { "Content-Type": undefined as any },
+        timeout: 0 // Vô hiệu hoá timeout cho request upload file nặng
+      },
     ),
 
   /** Save video metadata to DB after YouTube upload */

@@ -17,6 +17,7 @@ import { CustomSectionEditorPage } from "@/pages/custom-sections/CustomSectionEd
 import { SectionsHubPage } from "@/pages/sections-hub/SectionsHubPage";
 import { LoginPage } from "@/pages/auth/LoginPage";
 import { OAuthCallbackPage } from "@/pages/auth/OAuthCallbackPage";
+import { VideoLibraryPage } from "@/pages/videos/VideoLibraryPage";
 import { useAuth } from "@/features/auth";
 
 function PrivateRoute() {
@@ -46,6 +47,7 @@ export function App() {
           <Route path="custom-sections" element={<CustomSectionsPage />} />
           <Route path="custom-sections/:id" element={<CustomSectionEditorPage />} />
           <Route path="contact-inbox" element={<ContactInboxPage />} />
+          <Route path="video-library" element={<VideoLibraryPage />} />
         </Route>
       </Route>
     </Routes>

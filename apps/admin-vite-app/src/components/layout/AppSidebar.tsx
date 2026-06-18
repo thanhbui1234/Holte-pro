@@ -51,6 +51,12 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    label: "Media",
+    items: [
+      { label: "Video Library", path: "/video-library", icon: Film },
+    ],
+  },
+  {
     label: "Chrome",
     items: [
       { label: "Header", path: "/header", icon: PanelsTopLeft },
