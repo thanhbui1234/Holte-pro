@@ -7,7 +7,7 @@ import { FormField } from "@/components/composite/FormField";
 import { SectionCard } from "@/components/composite/SectionCard";
 import { ColorField } from "@/components/composite/ColorField";
 import { SaveBar } from "@/components/composite/SaveBar";
-import type { ThemedSection } from "@/types";
+import type { ThemedSection } from "@/shared/types";
 
 interface SectionConfigFormProps {
   value: ThemedSection;

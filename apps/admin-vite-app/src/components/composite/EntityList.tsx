@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Pencil, Trash2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 
 interface EntityListProps<T> {
   items: T[];

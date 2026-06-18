@@ -1,6 +1,6 @@
 import { Copy, Trash2 } from "lucide-react";
-import type { CanvasElement } from "@/types";
-import { cn } from "@/lib/utils";
+import type { CanvasElement } from "@/shared/types";
+import { cn } from "@/shared/lib/utils";
 import { BLOCK_META } from "./constants";
 
 function PropField({ label, children }: { label: string; children: React.ReactNode }) {

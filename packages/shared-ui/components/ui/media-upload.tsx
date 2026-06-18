@@ -5,7 +5,7 @@ import { cn } from "../../lib/utils";
 
 export interface MediaUploadProps {
   value: string;
-  onChange: (url: string) => void;
+  onChange: (url: string, file?: File) => void;
   accept?: string;
   maxSize?: number;
   placeholder?: string;
@@ -14,8 +14,9 @@ export interface MediaUploadProps {
   disabled?: boolean;
 }
 
-function inferMediaType(url: string, accept: string): "image" | "video" {
+function inferMediaType(url: string, accept: string): "image" | "video" | "youtube" {
   if (!url) return "image";
+  if (url.includes("youtube.com") || url.includes("youtu.be")) return "youtube";
   const lower = url.toLowerCase();
   if (lower.match(/\.(mp4|webm|mov|avi|mkv)(\?|$)/)) return "video";
   if (lower.match(/\.(jpg|jpeg|png|gif|webp|svg|avif)(\?|$)/)) return "image";
@@ -37,13 +38,14 @@ export function MediaUpload({
   const onChangeRef = React.useRef(onChange);
   onChangeRef.current = onChange;
 
-  const handleFilesAdded = React.useCallback((added: { preview?: string }[]) => {
+  const handleFilesAdded = React.useCallback((added: { preview?: string; file: any }[]) => {
     const entry = added[0];
     if (!entry) return;
     if (blobRef.current) URL.revokeObjectURL(blobRef.current);
     const preview = entry.preview ?? "";
     blobRef.current = preview.startsWith("blob:") ? preview : null;
-    onChangeRef.current(preview);
+    const isFile = typeof File !== "undefined" && entry.file instanceof File;
+    onChangeRef.current(preview, isFile ? entry.file : undefined);
   }, []);
 
   const { isDragging, handleDragEnter, handleDragLeave, handleDragOver, handleDrop, openFileDialog, getInputProps } =
@@ -84,7 +86,14 @@ export function MediaUpload({
       <>
         <div className={cn("relative overflow-hidden rounded-lg border bg-muted/30", className)}>
           <div className="aspect-video cursor-pointer" onClick={() => setLightbox(true)}>
-            {mediaType === "video" ? (
+            {mediaType === "youtube" ? (
+              <iframe
+                src={value.includes("watch?v=") ? value.replace("watch?v=", "embed/") : value}
+                className="pointer-events-none h-full w-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                title="YouTube preview"
+              />
+            ) : mediaType === "video" ? (
               <video
                 key={value}
                 src={value}
@@ -141,7 +150,15 @@ export function MediaUpload({
               className="max-h-[90vh] max-w-[90vw]"
               onClick={(e) => e.stopPropagation()}
             >
-              {mediaType === "video" ? (
+              {mediaType === "youtube" ? (
+                <iframe
+                  src={value.includes("watch?v=") ? value.replace("watch?v=", "embed/") : value}
+                  className="h-[80vh] w-[80vw] rounded-lg border-0 bg-black"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  title="YouTube full preview"
+                />
+              ) : mediaType === "video" ? (
                 <video
                   src={value}
                   controls

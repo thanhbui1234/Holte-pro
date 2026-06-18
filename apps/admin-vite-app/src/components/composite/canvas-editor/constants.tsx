@@ -1,5 +1,5 @@
 import { ImageIcon, MousePointerClick, Text, Video } from "lucide-react";
-import type { BlockType, CanvasElement } from "@/types";
+import type { BlockType, CanvasElement } from "@/shared/types";
 
 export const CANVAS_W = 1200;
 export const SNAP = 8;

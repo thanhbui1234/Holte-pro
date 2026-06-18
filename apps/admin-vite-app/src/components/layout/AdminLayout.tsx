@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { AppSidebar, NAV_GROUPS } from "./AppSidebar";
 import { PageHeader } from "./PageHeader";
-import { useTheme } from "@/hooks/use-theme";
-import { cn } from "@/lib/utils";
+import { useTheme } from "@/shared/hooks/use-theme";
+import { cn } from "@/shared/lib/utils";
 
 function findRoute(pathname: string) {
   for (const group of NAV_GROUPS) {

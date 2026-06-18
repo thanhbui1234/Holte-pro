@@ -11,11 +11,13 @@ import {
   PanelsTopLeft,
   Settings2,
   Sparkles,
+  LogOut,
 } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 import { ThemeToggle } from "@/components/composite/ThemeToggle";
-import { useContactSubmissions } from "@/context/admin-context";
+import { useContactSubmissions } from "@/features/contact";
+import { useAuth } from "@/features/auth";
 
 type NavItem = {
   label: string;
@@ -50,6 +52,12 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    label: "Media",
+    items: [
+      { label: "Video Library", path: "/video-library", icon: Film },
+    ],
+  },
+  {
     label: "Chrome",
     items: [
       { label: "Header", path: "/header", icon: PanelsTopLeft },
@@ -65,7 +73,9 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
-  const { unreadCount } = useContactSubmissions();
+  const { user, logout } = useAuth();
+  const { data: submissions = [] } = useContactSubmissions();
+  const unreadCount = submissions.filter((s: any) => s.status === "unread").length;
 
   // Inject unread badge count into nav
   const navGroupsWithBadges = NAV_GROUPS.map((group) => ({
@@ -187,37 +197,63 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
             collapsed && "justify-center bg-transparent shadow-none",
           )}
         >
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500 text-xs font-semibold text-stone-950">
-            A
-          </div>
+          {user?.picture ? (
+            <img
+              src={user.picture}
+              alt={user.name}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full object-cover"
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500 text-xs font-semibold text-stone-950">
+              {user?.name?.charAt(0)?.toUpperCase() || "A"}
+            </div>
+          )}
           {!collapsed && (
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-semibold">Admin</p>
-              <p className="truncate text-[10px] text-muted-foreground">
-                jowfilm.vn
+              <p className="truncate text-xs font-semibold" title={user?.name}>
+                {user?.name || "Admin"}
+              </p>
+              <p className="truncate text-[10px] text-muted-foreground" title={user?.email}>
+                {user?.email || "jowfilm.vn"}
               </p>
             </div>
           )}
           {!collapsed && <ThemeToggle variant="icon" />}
         </div>
 
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className={cn(
-            "flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent/40 hover:text-foreground",
-            collapsed && "justify-center",
-          )}
-        >
-          <ChevronsLeft
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             className={cn(
-              "h-3.5 w-3.5 transition-transform duration-300",
-              collapsed && "rotate-180",
+              "flex flex-1 items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent/40 hover:text-foreground",
+              collapsed && "justify-center",
             )}
-          />
-          {!collapsed && <span>Collapse</span>}
-        </button>
+          >
+            <ChevronsLeft
+              className={cn(
+                "h-3.5 w-3.5 transition-transform duration-300",
+                collapsed && "rotate-180",
+              )}
+            />
+            {!collapsed && <span>Collapse</span>}
+          </button>
+          
+          <button
+            type="button"
+            onClick={logout}
+            aria-label="Logout"
+            className={cn(
+              "flex flex-1 items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-medium text-red-500 transition-colors hover:bg-red-500/10 hover:text-red-600 dark:text-red-400 dark:hover:bg-red-500/20 dark:hover:text-red-300",
+              collapsed && "justify-center",
+            )}
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            {!collapsed && <span>Logout</span>}
+          </button>
+        </div>
       </div>
     </aside>
   );

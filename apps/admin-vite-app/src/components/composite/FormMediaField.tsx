@@ -8,6 +8,7 @@ interface FormMediaFieldProps<T extends FieldValues>
   name: Path<T>;
   label: string;
   hint?: string;
+  onChange?: (url: string, file?: File) => void;
 }
 
 export function FormMediaField<T extends FieldValues>({
@@ -16,6 +17,7 @@ export function FormMediaField<T extends FieldValues>({
   label,
   hint,
   className,
+  onChange: customOnChange,
   ...mediaProps
 }: FormMediaFieldProps<T>) {
   return (
@@ -27,7 +29,13 @@ export function FormMediaField<T extends FieldValues>({
           <MediaUpload
             id={name}
             value={field.value ?? ""}
-            onChange={field.onChange}
+            onChange={(url, file) => {
+              if (customOnChange) {
+                 customOnChange(url, file as any);
+              } else {
+                 field.onChange(url);
+              }
+            }}
             {...mediaProps}
           />
         )}
