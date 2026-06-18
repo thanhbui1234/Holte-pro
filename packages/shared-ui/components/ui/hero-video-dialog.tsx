@@ -134,14 +134,21 @@ export function HeroVideoDialog({
                 }
               }}
               onClick={() => handleClose()}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md"
+              className="fixed inset-0 z-[9999] pointer-events-auto flex items-center justify-center bg-black/50 backdrop-blur-md"
             >
               <motion.div
                 {...selectedAnimation}
                 transition={{ type: "spring", damping: 30, stiffness: 300 }}
                 className="relative mx-4 aspect-video w-full max-w-4xl md:mx-0"
+                onClick={(e) => e.stopPropagation()}
               >
-                <motion.button className="absolute -top-16 right-0 rounded-full bg-neutral-900/50 p-2 text-xl text-white ring-1 backdrop-blur-md dark:bg-neutral-100/50 dark:text-black">
+                <motion.button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleClose();
+                  }}
+                  className="absolute -top-16 right-0 rounded-full bg-neutral-900/50 p-2 text-xl text-white ring-1 backdrop-blur-md transition hover:bg-neutral-900 dark:bg-neutral-100/50 dark:text-black dark:hover:bg-neutral-100"
+                >
                   <XIcon className="size-5" />
                 </motion.button>
                 <div className="relative isolate z-1 size-full overflow-hidden rounded-2xl border-2 border-white">
@@ -162,3 +169,4 @@ export function HeroVideoDialog({
     </div>
   )
 }
+
