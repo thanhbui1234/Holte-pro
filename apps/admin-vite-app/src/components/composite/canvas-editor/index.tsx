@@ -17,8 +17,8 @@ import {
   Trash2,
   ZoomIn,
 } from "lucide-react";
-import type { BlockType, CanvasElement, CustomSection } from "@/types";
-import { cn } from "@/lib/utils";
+import type { BlockType, CanvasElement, CustomSection } from "@/shared/types";
+import { cn } from "@/shared/lib/utils";
 import { BLOCK_DEFAULTS, BLOCK_META, CANVAS_W, SNAP, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from "./constants";
 import { buildBgStyle, buildElementStyle, makeId } from "./helpers";
 import { BackgroundPanel } from "./BackgroundPanel";

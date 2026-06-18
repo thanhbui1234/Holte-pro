@@ -1,6 +1,6 @@
 import { Layers } from "lucide-react";
-import type { CanvasBgType, CustomSection } from "@/types";
-import { cn } from "@/lib/utils";
+import type { CanvasBgType, CustomSection } from "@/shared/types";
+import { cn } from "@/shared/lib/utils";
 import { ColorField } from "../ColorField";
 import { inputCls } from "./constants";
 import { buildBgStyle } from "./helpers";

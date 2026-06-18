@@ -32,9 +32,9 @@ export default function Home() {
       <AboutSection />
       <WeddingHighlightSection />
       <WeddingReelsSection />
-      {CUSTOM_SECTIONS.map((section) => (
+      {/* {CUSTOM_SECTIONS.map((section) => (
         <CustomSectionRenderer key={section.id} section={section} />
-      ))}
+      ))} */}
       <ContactPreview />
     </main>
   );

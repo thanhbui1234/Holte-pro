@@ -7,7 +7,10 @@ interface PageHeaderProps {
   onMenuClick: () => void;
 }
 
+import { useAuth } from "@/features/auth";
+
 export function PageHeader({ title, breadcrumb, onMenuClick }: PageHeaderProps) {
+  const { user } = useAuth();
   return (
     <header className="sticky top-0 z-30 border-b border-border/60 surface-frosted">
       <div className="flex h-[68px] items-center gap-3 px-4 sm:px-6">
@@ -48,12 +51,21 @@ export function PageHeader({ title, breadcrumb, onMenuClick }: PageHeaderProps) 
           <ThemeToggle className="hidden sm:inline-flex" />
 
           <div className="hidden h-9 items-center gap-2 rounded-full border bg-background pl-1 pr-3 text-xs shadow-sm md:flex">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500 font-semibold text-stone-950">
-              A
-            </span>
+            {user?.picture ? (
+              <img
+                src={user.picture}
+                alt={user.name}
+                className="flex h-7 w-7 items-center justify-center rounded-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500 font-semibold text-stone-950">
+                {user?.name?.charAt(0)?.toUpperCase() || "A"}
+              </span>
+            )}
             <div className="leading-tight">
-              <p className="text-[11px] font-semibold">Admin</p>
-              <p className="text-[10px] text-muted-foreground">Studio owner</p>
+              <p className="text-[11px] font-semibold">{user?.name || "Admin"}</p>
+              <p className="text-[10px] text-muted-foreground">{user?.email || "Studio owner"}</p>
             </div>
           </div>
         </div>

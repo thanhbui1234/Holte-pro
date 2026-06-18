@@ -2,7 +2,7 @@ import { useState, type KeyboardEvent } from "react";
 import { X } from "lucide-react";
 import { Input } from "shared-ui";
 import { Badge } from "shared-ui";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 
 interface TagInputProps {
   value: string[];

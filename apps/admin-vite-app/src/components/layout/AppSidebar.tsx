@@ -13,9 +13,10 @@ import {
   Sparkles,
 } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 import { ThemeToggle } from "@/components/composite/ThemeToggle";
-import { useContactSubmissions } from "@/context/admin-context";
+import { useContactSubmissions } from "@/features/contact";
+import { useAuth } from "@/features/auth";
 
 type NavItem = {
   label: string;
@@ -65,7 +66,9 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
-  const { unreadCount } = useContactSubmissions();
+  const { user } = useAuth();
+  const { data: submissions = [] } = useContactSubmissions();
+  const unreadCount = submissions.filter((s: any) => s.status === "unread").length;
 
   // Inject unread badge count into nav
   const navGroupsWithBadges = NAV_GROUPS.map((group) => ({
@@ -187,14 +190,25 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
             collapsed && "justify-center bg-transparent shadow-none",
           )}
         >
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500 text-xs font-semibold text-stone-950">
-            A
-          </div>
+          {user?.picture ? (
+            <img
+              src={user.picture}
+              alt={user.name}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full object-cover"
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500 text-xs font-semibold text-stone-950">
+              {user?.name?.charAt(0)?.toUpperCase() || "A"}
+            </div>
+          )}
           {!collapsed && (
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-semibold">Admin</p>
-              <p className="truncate text-[10px] text-muted-foreground">
-                jowfilm.vn
+              <p className="truncate text-xs font-semibold" title={user?.name}>
+                {user?.name || "Admin"}
+              </p>
+              <p className="truncate text-[10px] text-muted-foreground" title={user?.email}>
+                {user?.email || "jowfilm.vn"}
               </p>
             </div>
           )}

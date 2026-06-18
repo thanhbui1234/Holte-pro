@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AlignCenter, AlignLeft, AlignRight, ChevronDown } from "lucide-react";
-import type { CanvasElement } from "@/types";
-import { cn } from "@/lib/utils";
+import type { CanvasElement } from "@/shared/types";
+import { cn } from "@/shared/lib/utils";
 import { BLOCK_META } from "./constants";
 import { CATEGORY_LABELS, FONT_OPTIONS, ensureGoogleFontsLoaded } from "./fonts";
 

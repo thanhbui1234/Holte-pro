@@ -1,5 +1,5 @@
 import { ImageIcon, Video } from "lucide-react";
-import type { CanvasElement } from "@/types";
+import type { CanvasElement } from "@/shared/types";
 import { extractYtId } from "./helpers";
 
 export function ElementPreview({ element }: { element: CanvasElement }) {

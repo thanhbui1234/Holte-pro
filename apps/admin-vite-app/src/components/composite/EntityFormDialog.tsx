@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "shared-ui";
 import { Button } from "shared-ui";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 
 interface EntityFormDialogProps {
   open: boolean;
