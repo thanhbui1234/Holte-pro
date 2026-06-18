@@ -11,6 +11,7 @@ import {
   PanelsTopLeft,
   Settings2,
   Sparkles,
+  LogOut,
 } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
 import { cn } from "@/shared/lib/utils";
@@ -72,7 +73,7 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { data: submissions = [] } = useContactSubmissions();
   const unreadCount = submissions.filter((s: any) => s.status === "unread").length;
 
@@ -221,23 +222,38 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
           {!collapsed && <ThemeToggle variant="icon" />}
         </div>
 
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className={cn(
-            "flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent/40 hover:text-foreground",
-            collapsed && "justify-center",
-          )}
-        >
-          <ChevronsLeft
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             className={cn(
-              "h-3.5 w-3.5 transition-transform duration-300",
-              collapsed && "rotate-180",
+              "flex flex-1 items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent/40 hover:text-foreground",
+              collapsed && "justify-center",
             )}
-          />
-          {!collapsed && <span>Collapse</span>}
-        </button>
+          >
+            <ChevronsLeft
+              className={cn(
+                "h-3.5 w-3.5 transition-transform duration-300",
+                collapsed && "rotate-180",
+              )}
+            />
+            {!collapsed && <span>Collapse</span>}
+          </button>
+          
+          <button
+            type="button"
+            onClick={logout}
+            aria-label="Logout"
+            className={cn(
+              "flex flex-1 items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-medium text-red-500 transition-colors hover:bg-red-500/10 hover:text-red-600 dark:text-red-400 dark:hover:bg-red-500/20 dark:hover:text-red-300",
+              collapsed && "justify-center",
+            )}
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            {!collapsed && <span>Logout</span>}
+          </button>
+        </div>
       </div>
     </aside>
   );

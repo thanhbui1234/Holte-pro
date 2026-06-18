@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Film, Loader2, Plus, Upload as UploadIcon, Link as LinkIcon, CheckCircle2, Video } from "lucide-react";
+import { Film, Loader2, Plus, Upload as UploadIcon, Link as LinkIcon, CheckCircle2, Video, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Input, Button, MediaUpload, HeroVideoDialog } from "shared-ui";
 import { PageContainer } from "@/components/composite/PageContainer";
 import { videoApi } from "@/shared/api";
@@ -143,11 +143,28 @@ function AddVideoModal({ open, onOpenChange, onSuccess }: { open: boolean, onOpe
 
 export function VideoLibraryPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [videoToRemove, setVideoToRemove] = useState<number | null>(null);
+  const [isRemoving, setIsRemoving] = useState(false);
 
   const { data: videos, isLoading, refetch } = useQuery({
     queryKey: ["video-list"],
     queryFn: () => videoApi.getList().then((res) => res.data.data.videos),
   });
+
+  const handleConfirmRemove = async () => {
+    if (videoToRemove === null) return;
+    setIsRemoving(true);
+    try {
+      await videoApi.remove(videoToRemove);
+      refetch();
+      setVideoToRemove(null);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to remove video.");
+    } finally {
+      setIsRemoving(false);
+    }
+  };
 
   return (
     <PageContainer
@@ -193,9 +210,22 @@ export function VideoLibraryPage() {
                 )}
               </div>
               <div className="p-3">
-                <p className="line-clamp-1 text-sm font-medium" title={video.title}>
-                  {video.title || "Untitled Video"}
-                </p>
+                <div className="flex items-start justify-between gap-2">
+                  <p className="line-clamp-1 text-sm font-medium" title={video.title}>
+                    {video.title || "Untitled Video"}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setVideoToRemove(video.id);
+                    }}
+                    title="Remove Video"
+                    className="shrink-0 rounded text-muted-foreground hover:bg-red-500/10 hover:text-red-500 p-1 transition-colors"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
                 <div className="mt-1 flex items-center justify-between text-[11px] text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <CheckCircle2 className="h-3 w-3 text-emerald-500" />
@@ -214,6 +244,36 @@ export function VideoLibraryPage() {
         onOpenChange={setIsAddModalOpen} 
         onSuccess={() => refetch()} 
       />
+
+      <Dialog open={videoToRemove !== null} onOpenChange={(open) => !open && setVideoToRemove(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-red-600 dark:text-red-400">Remove Video</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to remove this video? This action cannot be undone. 
+              The video will be permanently deleted from the database and YouTube.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-6 flex justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setVideoToRemove(null)}
+              disabled={isRemoving}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmRemove}
+              disabled={isRemoving}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {isRemoving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
+              {isRemoving ? "Removing..." : "Remove"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }
