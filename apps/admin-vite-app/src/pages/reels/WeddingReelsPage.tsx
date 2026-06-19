@@ -206,7 +206,7 @@ export function WeddingReelsPage() {
                 control={form.control}
                 name="videoUrl"
                 label=""
-                accept="video/*"
+                accept=".mp4,.mov,.avi,.mkv,.wmv,.flv,.webm,video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/x-ms-wmv,video/x-flv,video/webm"
                 placeholder="Drag & drop or click to upload video file"
               />
             </FormField>

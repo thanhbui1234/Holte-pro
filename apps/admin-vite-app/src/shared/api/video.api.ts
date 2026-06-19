@@ -50,13 +50,15 @@ interface CreateVideoRequest {
 
 export const videoApi = {
   /** Upload video file to YouTube (multipart/form-data) */
-  upload: (formData: FormData) =>
+  upload: (formData: FormData, onUploadProgress?: (progressEvent: any) => void, signal?: AbortSignal) =>
     apiClient.post<CmsApiResponse<UploadVideoResponse>>(
       API_ENDPOINTS.UPLOAD_VIDEO,
       formData,
-      { 
+      {
         headers: { "Content-Type": undefined as any },
-        timeout: 0 // Vô hiệu hoá timeout cho request upload file nặng
+        timeout: 0, // Vô hiệu hoá timeout cho request upload file nặng
+        onUploadProgress,
+        signal,
       },
     ),
 
@@ -83,7 +85,7 @@ export const videoApi = {
 
   /** Remove video from DB (async delete on YouTube) */
   remove: (videoId: number) =>
-    apiClient.delete<CmsApiResponse<{ videoId: number; result: boolean }>>(
+    apiClient.post<CmsApiResponse<{ videoId: number; result: boolean }>>(
       API_ENDPOINTS.REMOVE_VIDEO,
       { data: { videoId } },
     ),
