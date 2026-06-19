@@ -176,3 +176,31 @@ Token không hợp lệ hoặc thiếu:
   }
 }
 ```
+
+## Frontend Background Upload Architecture
+
+Hệ thống Frontend quản lý tiến trình upload file video lên YouTube và lưu vào CMS thông qua mô hình **Background Upload Manager** với `UploadContext`.
+
+### 1. Luồng hoạt động (Workflow)
+
+1. **Khởi tạo (Initiation):** 
+   Khi người dùng chọn file và ấn "Upload" ở `AddVideoModal`, hàm `startUpload` trong `UploadContext` được gọi. Modal lập tức tự đóng, không chặn UI (non-blocking).
+2. **Quản lý Job (Job Queue):**
+   Một `UploadJob` mới được tạo với `id` ngẫu nhiên và trạng thái ban đầu là `uploading`. Job này được lưu vào mảng `jobs` trong state toàn cục của `UploadProvider`.
+3. **Upload & Theo dõi tiến độ:**
+   - Hệ thống dùng `Axios` (`videoApi.upload`) để đẩy file lên backend.
+   - Hàm `onUploadProgress` của Axios được sử dụng để tính toán `%` (`progressEvent.loaded / progressEvent.total * 100`).
+   - Mọi thay đổi về `progress` đều trigger React state update, giúp `GlobalUploadProgress` (thanh Toast ở góc màn hình) hiển thị thanh trượt trực quan.
+4. **Xử lý hậu kỳ (Processing):**
+   - Khi tiến trình `uploading` đạt `100%`, trạng thái chuyển sang `processing`.
+   - Hệ thống ngầm gọi API `create-video` để báo cho server lưu metadata vào cơ sở dữ liệu.
+5. **Hoàn tất / Thất bại:**
+   - Nếu thành công, trạng thái đổi thành `success`, danh sách video tự động refetch (bằng React Query `invalidateQueries`). Toast báo xanh và tự biến mất sau 3 giây.
+   - Nếu lỗi, trạng thái đổi thành `error`, thông báo lỗi hiển thị và Toast tự biến mất sau 5 giây.
+
+### 2. Tính năng bảo vệ UX nâng cao
+
+- **Hủy Upload (Abort Request):** 
+  Người dùng có thể ấn dấu X trên Toast để hủy upload. Hệ thống sẽ bật lên một `AlertDialog` của Shadcn để xác nhận. Nếu đồng ý, `UploadContext` sử dụng `AbortController.abort()` để ngay lập tức ngắt hoàn toàn kết nối HTTP của Axios, tiết kiệm băng thông.
+- **Bảo vệ chống mất dữ liệu (BeforeUnload Interceptor):** 
+  Bằng cách lắng nghe sự kiện `beforeunload` của trình duyệt, nếu có bất kỳ job nào đang `uploading` hoặc `processing`, hệ thống sẽ chặn hành động vô tình ấn F5 hoặc đóng Tab của người dùng bằng popup cảnh báo native của trình duyệt.

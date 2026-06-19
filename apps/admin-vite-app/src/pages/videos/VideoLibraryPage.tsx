@@ -21,7 +21,7 @@ function AddVideoModal({ open, onOpenChange, onSuccess }: { open: boolean, onOpe
   const [urlTitle, setUrlTitle] = useState("");
   const [urlDescription, setUrlDescription] = useState("");
 
-  const { upload, isUploading } = useVideoUpload({
+  const { upload } = useVideoUpload({
     privacyStatus: "unlisted",
     onSuccess: () => {
       setSelectedFile(null);
@@ -31,7 +31,7 @@ function AddVideoModal({ open, onOpenChange, onSuccess }: { open: boolean, onOpe
       onOpenChange(false);
     },
     onError: () => {
-      alert("Upload failed. Please try again.");
+      // Errors are handled by the background upload manager now
     }
   });
 
@@ -109,20 +109,18 @@ function AddVideoModal({ open, onOpenChange, onSuccess }: { open: boolean, onOpe
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Video Title</label>
                     <Input 
-                      placeholder="Enter YouTube title" 
-                      value={youtubeTitle} 
-                      onChange={(e) => setYoutubeTitle(e.target.value)} 
-                      disabled={isUploading} 
+                      placeholder="Enter a descriptive title" 
+                      value={youtubeTitle}
+                      onChange={(e) => setYoutubeTitle(e.target.value)}
                     />
                   </div>
                   
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Description (Optional)</label>
                     <Textarea 
-                      placeholder="Enter video description" 
-                      value={youtubeDescription} 
-                      onChange={(e) => setYoutubeDescription(e.target.value)} 
-                      disabled={isUploading} 
+                      placeholder="Enter video description (optional)" 
+                      value={youtubeDescription}
+                      onChange={(e) => setYoutubeDescription(e.target.value)}
                       rows={3}
                     />
                   </div>
@@ -134,29 +132,18 @@ function AddVideoModal({ open, onOpenChange, onSuccess }: { open: boolean, onOpe
                         setSelectedFile(null);
                         setYoutubeTitle("");
                         setYoutubeDescription("");
-                      }} 
-                      disabled={isUploading}
+                      }}
                     >
                       Cancel
                     </Button>
                     <Button 
                       onClick={() => upload(selectedFile, { youtubeTitle, youtubeDescription })} 
-                      disabled={!youtubeTitle || isUploading}
+                      disabled={!youtubeTitle}
                     >
-                      {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadIcon className="mr-2 h-4 w-4" />}
-                      {isUploading ? "Uploading..." : "Upload Video"}
+                      <UploadIcon className="mr-2 h-4 w-4" />
+                      Upload Video
                     </Button>
                   </div>
-
-                  {isUploading && (
-                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-lg bg-background/80 backdrop-blur-sm">
-                      <Loader2 className="mb-2 h-8 w-8 animate-spin text-amber-500" />
-                      <p className="text-sm font-medium text-amber-600">Uploading to YouTube...</p>
-                      <p className="mt-1 text-xs text-muted-foreground text-center px-4">
-                        Please keep this window open until the upload completes.
-                      </p>
-                    </div>
-                  )}
                 </div>
               ) : (
                 <MediaUpload
@@ -170,7 +157,6 @@ function AddVideoModal({ open, onOpenChange, onSuccess }: { open: boolean, onOpe
                       setYoutubeTitle(file.name.replace(/\.[^/.]+$/, ""));
                     }
                   }}
-                  disabled={isUploading}
                   className="h-[250px]"
                 />
               )}

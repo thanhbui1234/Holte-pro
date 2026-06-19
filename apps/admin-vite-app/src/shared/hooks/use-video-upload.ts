@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { videoApi } from "@/shared/api";
+import { useUploadContext } from "@/shared/context/UploadContext";
 import type { UploadVideoResponse } from "@/shared/api/video.api";
 
 export interface UseVideoUploadOptions {
@@ -11,7 +10,7 @@ export interface UseVideoUploadOptions {
 }
 
 export function useVideoUpload(defaultOptions?: UseVideoUploadOptions) {
-  const [isUploading, setIsUploading] = useState(false);
+  const { startUpload } = useUploadContext();
 
   const upload = async (
     file: File,
@@ -19,39 +18,17 @@ export function useVideoUpload(defaultOptions?: UseVideoUploadOptions) {
   ) => {
     const options = { ...defaultOptions, ...overrideOptions };
     
-    try {
-      setIsUploading(true);
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("youtubeTitle", options.youtubeTitle || "Uploaded Video");
-      if (options.youtubeDescription) {
-        formData.append("youtubeDescription", options.youtubeDescription);
-      }
-      formData.append("privacyStatus", options.privacyStatus || "unlisted");
-      
-      const res = await videoApi.upload(formData);
-      const data = res.data.data;
-      
-      // Auto-save the uploaded video to the database
-      await videoApi.create({
-        youtubeVideoId: data.youtubeVideoId,
-        title: options.youtubeTitle || "Uploaded Video",
-        description: options.youtubeDescription,
-        privacyStatus: options.privacyStatus || "unlisted",
-        fileSize: file.size,
-        visible: true,
-      });
-      
-      options.onSuccess?.(data);
-      return data;
-    } catch (error) {
-      console.error("Upload failed", error);
-      options.onError?.(error);
-      throw error;
-    } finally {
-      setIsUploading(false);
-    }
+    startUpload(file, {
+      youtubeTitle: options.youtubeTitle || "Uploaded Video",
+      youtubeDescription: options.youtubeDescription,
+      privacyStatus: options.privacyStatus || "unlisted"
+    });
+    
+    // Call onSuccess immediately so UI can close modal
+    // Background upload manager handles the real progress/success
+    options.onSuccess?.({} as any);
+    return {} as any;
   };
 
-  return { upload, isUploading };
+  return { upload, isUploading: false };
 }

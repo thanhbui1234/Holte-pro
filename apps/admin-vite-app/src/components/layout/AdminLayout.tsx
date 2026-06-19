@@ -4,6 +4,7 @@ import { AppSidebar, NAV_GROUPS } from "./AppSidebar";
 import { PageHeader } from "./PageHeader";
 import { useTheme } from "@/shared/hooks/use-theme";
 import { cn } from "@/shared/lib/utils";
+import { GlobalUploadProgress } from "../composite/GlobalUploadProgress";
 
 function findRoute(pathname: string) {
   for (const group of NAV_GROUPS) {
@@ -64,6 +65,7 @@ export function AdminLayout() {
           <Outlet />
         </main>
       </div>
+      <GlobalUploadProgress />
     </div>
   );
 }

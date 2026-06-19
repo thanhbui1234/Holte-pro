@@ -50,13 +50,15 @@ interface CreateVideoRequest {
 
 export const videoApi = {
   /** Upload video file to YouTube (multipart/form-data) */
-  upload: (formData: FormData) =>
+  upload: (formData: FormData, onUploadProgress?: (progressEvent: any) => void, signal?: AbortSignal) =>
     apiClient.post<CmsApiResponse<UploadVideoResponse>>(
       API_ENDPOINTS.UPLOAD_VIDEO,
       formData,
       {
         headers: { "Content-Type": undefined as any },
-        timeout: 0 // Vô hiệu hoá timeout cho request upload file nặng
+        timeout: 0, // Vô hiệu hoá timeout cho request upload file nặng
+        onUploadProgress,
+        signal,
       },
     ),
 
