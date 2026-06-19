@@ -16,4 +16,9 @@ export const API_ENDPOINTS = {
   CONTACT_CTA: "/cms-api/v1/contact/cta",
   CONTACT_SUBMISSIONS: "/cms-api/v1/contact/submissions",
   FOOTER: "/cms-api/v1/footer",
+  GET_LIST_SECTION: "/cms-api/v1/get-list-section",
+  GET_SECTION: "/cms-api/v1/get-section",
+  CREATE_SECTION: "/cms-api/v1/create-section",
+  UPDATE_SECTION: "/cms-api/v1/update-section",
+  REMOVE_SECTION: "/cms-api/v1/remove-section",
 } as const;

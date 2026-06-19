@@ -18,6 +18,8 @@ import { SectionsHubPage } from "@/pages/sections-hub/SectionsHubPage";
 import { LoginPage } from "@/pages/auth/LoginPage";
 import { OAuthCallbackPage } from "@/pages/auth/OAuthCallbackPage";
 import { VideoLibraryPage } from "@/pages/videos/VideoLibraryPage";
+import { SectionCrudListPage } from "@/pages/section-crud/SectionCrudListPage";
+import { SectionCrudFormPage } from "@/pages/section-crud/SectionCrudFormPage";
 import { useAuth } from "@/features/auth";
 
 function PrivateRoute() {
@@ -45,6 +47,9 @@ export function App() {
           <Route path="menu" element={<MenuConfigPage />} />
           <Route path="footer" element={<FooterConfigPage />} />
           <Route path="custom-sections" element={<CustomSectionsPage />} />
+          <Route path="section-crud" element={<SectionCrudListPage />} />
+          <Route path="section-crud/new" element={<SectionCrudFormPage />} />
+          <Route path="section-crud/:id" element={<SectionCrudFormPage />} />
           <Route path="custom-sections/:id" element={<CustomSectionEditorPage />} />
           <Route path="contact-inbox" element={<ContactInboxPage />} />
           <Route path="video-library" element={<VideoLibraryPage />} />

@@ -42,7 +42,8 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: "Site sections",
     items: [
-      { label: "Sections", path: "/sections", icon: Layers },
+      { label: "Sections Hub", path: "/sections", icon: Layers },
+      { label: "Dynamic Sections", path: "/section-crud", icon: PanelsTopLeft },
     ],
   },
   {
