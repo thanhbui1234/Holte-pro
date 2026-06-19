@@ -54,7 +54,7 @@ export const videoApi = {
     apiClient.post<CmsApiResponse<UploadVideoResponse>>(
       API_ENDPOINTS.UPLOAD_VIDEO,
       formData,
-      { 
+      {
         headers: { "Content-Type": undefined as any },
         timeout: 0 // Vô hiệu hoá timeout cho request upload file nặng
       },
@@ -83,7 +83,7 @@ export const videoApi = {
 
   /** Remove video from DB (async delete on YouTube) */
   remove: (videoId: number) =>
-    apiClient.delete<CmsApiResponse<{ videoId: number; result: boolean }>>(
+    apiClient.post<CmsApiResponse<{ videoId: number; result: boolean }>>(
       API_ENDPOINTS.REMOVE_VIDEO,
       { data: { videoId } },
     ),

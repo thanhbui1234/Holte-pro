@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Film, Loader2, Plus, Upload as UploadIcon, Link as LinkIcon, CheckCircle2, Video, Trash2 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Input, Button, MediaUpload, HeroVideoDialog } from "shared-ui";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Input, Textarea, Button, MediaUpload, HeroVideoDialog } from "shared-ui";
 import { PageContainer } from "@/components/composite/PageContainer";
 import { videoApi } from "@/shared/api";
 import { useVideoUpload } from "@/shared/hooks/use-video-upload";
@@ -13,11 +13,20 @@ function AddVideoModal({ open, onOpenChange, onSuccess }: { open: boolean, onOpe
   const [activeTab, setActiveTab] = useState<AddTabValue>("upload");
   const [youtubeLink, setYoutubeLink] = useState("");
   const [isCreatingFromUrl, setIsCreatingFromUrl] = useState(false);
+  
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [youtubeTitle, setYoutubeTitle] = useState("");
+  const [youtubeDescription, setYoutubeDescription] = useState("");
+  
+  const [urlTitle, setUrlTitle] = useState("");
+  const [urlDescription, setUrlDescription] = useState("");
 
   const { upload, isUploading } = useVideoUpload({
-    youtubeTitle: "Uploaded via Library",
     privacyStatus: "unlisted",
     onSuccess: () => {
+      setSelectedFile(null);
+      setYoutubeTitle("");
+      setYoutubeDescription("");
       onSuccess();
       onOpenChange(false);
     },
@@ -36,13 +45,16 @@ function AddVideoModal({ open, onOpenChange, onSuccess }: { open: boolean, onOpe
       setIsCreatingFromUrl(true);
       await videoApi.create({
         youtubeVideoId: match[1],
-        title: "Imported via URL",
+        title: urlTitle || "Imported via URL",
+        description: urlDescription,
         privacyStatus: "public",
         visible: true,
       });
       onSuccess();
       onOpenChange(false);
       setYoutubeLink("");
+      setUrlTitle("");
+      setUrlDescription("");
     } catch (error) {
       console.error(error);
       alert("Failed to import video. Please try again.");
@@ -87,51 +99,126 @@ function AddVideoModal({ open, onOpenChange, onSuccess }: { open: boolean, onOpe
         <div className="mt-4">
           {activeTab === "upload" && (
             <div className="relative">
-              <MediaUpload
-                id="modal-video-upload"
-                value=""
-                accept="video/*"
-                placeholder="Drag & drop a video or click to upload"
-                onChange={(_, file) => {
-                  if (file) upload(file);
-                }}
-                disabled={isUploading}
-                className="h-[250px]"
-              />
-              {isUploading && (
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-lg bg-background/80 backdrop-blur-sm">
-                  <Loader2 className="mb-2 h-8 w-8 animate-spin text-amber-500" />
-                  <p className="text-sm font-medium text-amber-600">Uploading to YouTube...</p>
-                  <p className="mt-1 text-xs text-muted-foreground text-center px-4">
-                    Please keep this window open until the upload completes.
-                  </p>
+              {selectedFile ? (
+                <div className="space-y-4 rounded-lg border p-4">
+                  <div className="flex items-center gap-2 text-sm font-medium text-amber-600 dark:text-amber-500 mb-2">
+                    <Video className="h-4 w-4" />
+                    <span className="truncate" title={selectedFile.name}>Selected: {selectedFile.name}</span>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Video Title</label>
+                    <Input 
+                      placeholder="Enter YouTube title" 
+                      value={youtubeTitle} 
+                      onChange={(e) => setYoutubeTitle(e.target.value)} 
+                      disabled={isUploading} 
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Description (Optional)</label>
+                    <Textarea 
+                      placeholder="Enter video description" 
+                      value={youtubeDescription} 
+                      onChange={(e) => setYoutubeDescription(e.target.value)} 
+                      disabled={isUploading} 
+                      rows={3}
+                    />
+                  </div>
+                  
+                  <div className="flex justify-end gap-2 pt-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setSelectedFile(null);
+                        setYoutubeTitle("");
+                        setYoutubeDescription("");
+                      }} 
+                      disabled={isUploading}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={() => upload(selectedFile, { youtubeTitle, youtubeDescription })} 
+                      disabled={!youtubeTitle || isUploading}
+                    >
+                      {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadIcon className="mr-2 h-4 w-4" />}
+                      {isUploading ? "Uploading..." : "Upload Video"}
+                    </Button>
+                  </div>
+
+                  {isUploading && (
+                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-lg bg-background/80 backdrop-blur-sm">
+                      <Loader2 className="mb-2 h-8 w-8 animate-spin text-amber-500" />
+                      <p className="text-sm font-medium text-amber-600">Uploading to YouTube...</p>
+                      <p className="mt-1 text-xs text-muted-foreground text-center px-4">
+                        Please keep this window open until the upload completes.
+                      </p>
+                    </div>
+                  )}
                 </div>
+              ) : (
+                <MediaUpload
+                  id="modal-video-upload"
+                  value=""
+                  accept=".mp4,.mov,.avi,.mkv,.wmv,.flv,.webm,video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/x-ms-wmv,video/x-flv,video/webm"
+                  placeholder="Drag & drop a video or click to upload"
+                  onChange={(_, file) => {
+                    if (file) {
+                      setSelectedFile(file);
+                      setYoutubeTitle(file.name.replace(/\.[^/.]+$/, ""));
+                    }
+                  }}
+                  disabled={isUploading}
+                  className="h-[250px]"
+                />
               )}
             </div>
           )}
 
           {activeTab === "url" && (
-            <div className="flex h-[250px] flex-col justify-center space-y-4">
+            <div className="flex flex-col justify-center space-y-4 rounded-lg border p-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">YouTube Video URL</label>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="https://www.youtube.com/watch?v=..."
-                    value={youtubeLink}
-                    onChange={(e) => setYoutubeLink(e.target.value)}
-                    disabled={isCreatingFromUrl}
-                  />
-                  <Button 
-                    onClick={handleCreateFromUrl}
-                    disabled={!youtubeLink || isCreatingFromUrl}
-                    className="shrink-0"
-                  >
-                    {isCreatingFromUrl ? <Loader2 className="h-4 w-4 animate-spin" /> : "Import"}
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Paste any public or unlisted YouTube video link.
-                </p>
+                <Input
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  value={youtubeLink}
+                  onChange={(e) => setYoutubeLink(e.target.value)}
+                  disabled={isCreatingFromUrl}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Video Title</label>
+                <Input
+                  placeholder="Enter video title"
+                  value={urlTitle}
+                  onChange={(e) => setUrlTitle(e.target.value)}
+                  disabled={isCreatingFromUrl}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Description (Optional)</label>
+                <Textarea
+                  placeholder="Enter video description"
+                  value={urlDescription}
+                  onChange={(e) => setUrlDescription(e.target.value)}
+                  disabled={isCreatingFromUrl}
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <Button 
+                  onClick={handleCreateFromUrl}
+                  disabled={!youtubeLink || !urlTitle || isCreatingFromUrl}
+                  className="shrink-0"
+                >
+                  {isCreatingFromUrl ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LinkIcon className="mr-2 h-4 w-4" />}
+                  {isCreatingFromUrl ? "Importing..." : "Import Video"}
+                </Button>
               </div>
             </div>
           )}
@@ -146,7 +233,8 @@ export function VideoLibraryPage() {
   const [videoToRemove, setVideoToRemove] = useState<number | null>(null);
   const [isRemoving, setIsRemoving] = useState(false);
 
-  const { data: videos, isLoading, refetch } = useQuery({
+  const queryClient = useQueryClient();
+  const { data: videos, isLoading } = useQuery({
     queryKey: ["video-list"],
     queryFn: () => videoApi.getList().then((res) => res.data.data.videos),
   });
@@ -156,7 +244,7 @@ export function VideoLibraryPage() {
     setIsRemoving(true);
     try {
       await videoApi.remove(videoToRemove);
-      refetch();
+      queryClient.invalidateQueries({ queryKey: ["video-list"] });
       setVideoToRemove(null);
     } catch (error) {
       console.error(error);
@@ -242,7 +330,7 @@ export function VideoLibraryPage() {
       <AddVideoModal 
         open={isAddModalOpen} 
         onOpenChange={setIsAddModalOpen} 
-        onSuccess={() => refetch()} 
+        onSuccess={() => queryClient.invalidateQueries({ queryKey: ["video-list"] })} 
       />
 
       <Dialog open={videoToRemove !== null} onOpenChange={(open) => !open && setVideoToRemove(null)}>

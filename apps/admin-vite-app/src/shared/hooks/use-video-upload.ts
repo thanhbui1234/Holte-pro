@@ -6,6 +6,7 @@ export interface UseVideoUploadOptions {
   onSuccess?: (data: UploadVideoResponse) => void;
   onError?: (error: unknown) => void;
   youtubeTitle?: string;
+  youtubeDescription?: string;
   privacyStatus?: "public" | "unlisted" | "private";
 }
 
@@ -23,6 +24,9 @@ export function useVideoUpload(defaultOptions?: UseVideoUploadOptions) {
       const formData = new FormData();
       formData.append("file", file);
       formData.append("youtubeTitle", options.youtubeTitle || "Uploaded Video");
+      if (options.youtubeDescription) {
+        formData.append("youtubeDescription", options.youtubeDescription);
+      }
       formData.append("privacyStatus", options.privacyStatus || "unlisted");
       
       const res = await videoApi.upload(formData);
@@ -32,6 +36,7 @@ export function useVideoUpload(defaultOptions?: UseVideoUploadOptions) {
       await videoApi.create({
         youtubeVideoId: data.youtubeVideoId,
         title: options.youtubeTitle || "Uploaded Video",
+        description: options.youtubeDescription,
         privacyStatus: options.privacyStatus || "unlisted",
         fileSize: file.size,
         visible: true,
