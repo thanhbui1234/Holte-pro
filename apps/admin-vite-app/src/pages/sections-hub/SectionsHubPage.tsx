@@ -18,9 +18,8 @@ import { useCustomSections } from "@/features/custom-sections/hooks/use-custom-s
 import { useHighlights } from "@/features/highlights";
 import { useReels } from "@/features/reels";
 import { useFilms } from "@/features/films";
-import { useLayout } from "@/features/layout/hooks/use-layout";
+import { useSections } from "@/features/layout/hooks/use-layout";
 import { PageContainer } from "@/components/composite/PageContainer";
-import type { LayoutSectionKey, LayoutSection } from "@/shared/types";
 import { cn } from "@/shared/lib/utils";
 
 type IconComp = ComponentType<SVGProps<SVGSVGElement> & { className?: string }>;
@@ -31,7 +30,7 @@ interface SectionCard {
   description: string;
   path: string;
   icon: IconComp;
-  layoutKey?: LayoutSectionKey;
+  sectionName?: string;
   fixed?: boolean;
   isCustom?: boolean;
 }
@@ -51,7 +50,7 @@ const SECTIONS: SectionCard[] = [
     description: "Studio intro, origin story and credibility stats.",
     path: "/about",
     icon: Sparkles,
-    layoutKey: "about",
+    sectionName: "about",
   },
   {
     key: "highlights",
@@ -59,7 +58,7 @@ const SECTIONS: SectionCard[] = [
     description: "Featured highlight reel carousel.",
     path: "/wedding-highlights",
     icon: Film,
-    layoutKey: "highlights",
+    sectionName: "wedding-highlights",
   },
   {
     key: "reels",
@@ -67,7 +66,7 @@ const SECTIONS: SectionCard[] = [
     description: "Short-form vertical reels scroller.",
     path: "/wedding-reels",
     icon: Clapperboard,
-    layoutKey: "reels",
+    sectionName: "wedding-reels",
   },
   {
     key: "films",
@@ -75,7 +74,7 @@ const SECTIONS: SectionCard[] = [
     description: "Long-form heritage film grid.",
     path: "/traditional-films",
     icon: Video,
-    layoutKey: "films",
+    sectionName: "traditional-films",
   },
   {
     key: "contact-cta",
@@ -97,15 +96,17 @@ const SECTIONS: SectionCard[] = [
 
 export function SectionsHubPage() {
   const navigate = useNavigate();
-  const { data: layout = [] } = useLayout();
+  const { data: sections = [] } = useSections();
   const { data: customSections = [] } = useCustomSections();
   const { data: highlights = [] } = useHighlights();
   const { data: reels = [] } = useReels();
   const { data: films = [] } = useFilms();
 
-  const getVisibility = (layoutKey?: LayoutSectionKey) => {
-    if (!layoutKey) return null;
-    return layout.find((l: LayoutSection) => l.key === layoutKey)?.visible ?? true;
+  const getVisibility = (sectionName?: string): boolean | null => {
+    if (!sectionName) return null;
+    const found = sections.find((s) => s.name === sectionName);
+    if (!found) return null;
+    return found.status === "ACTIVE";
   };
 
   const getMeta = (card: SectionCard): string | null => {
@@ -113,15 +114,9 @@ export function SectionsHubPage() {
       const count = customSections.length;
       return count === 0 ? "No sections yet" : `${count} section${count > 1 ? "s" : ""}`;
     }
-    if (card.layoutKey === "highlights") {
-      return `${highlights.length} videos`;
-    }
-    if (card.layoutKey === "reels") {
-      return `${reels.length} reels`;
-    }
-    if (card.layoutKey === "films") {
-      return `${films.length} films`;
-    }
+    if (card.sectionName === "wedding-highlights") return `${highlights.length} videos`;
+    if (card.sectionName === "wedding-reels") return `${reels.length} reels`;
+    if (card.sectionName === "traditional-films") return `${films.length} films`;
     return null;
   };
 
@@ -133,7 +128,7 @@ export function SectionsHubPage() {
     >
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {SECTIONS.map((card, i) => {
-          const visible = getVisibility(card.layoutKey);
+          const visible = getVisibility(card.sectionName);
           const meta = getMeta(card);
           const isHidden = visible === false;
 
