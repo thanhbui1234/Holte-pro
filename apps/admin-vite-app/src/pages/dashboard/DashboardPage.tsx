@@ -80,13 +80,13 @@ export function DashboardPage() {
   const recent = [
     {
       label: "Banner video updated",
-      to: "/banner",
+      to: "/sections/banner",
       preview: banner?.videoSrc ?? "No video",
       icon: ImageIcon,
     },
     {
       label: "About story",
-      to: "/about",
+      to: "/sections/about",
       preview: `${about?.titlePrefix ?? ""} ${about?.titleHighlight ?? ""}`.trim(),
       icon: Sparkles,
     },
@@ -99,10 +99,10 @@ export function DashboardPage() {
   ];
 
   const shortcuts = [
-    { label: "Update hero banner", to: "/banner", icon: ImageIcon },
-    { label: "Edit About story", to: "/about", icon: Sparkles },
-    { label: "Adjust contact CTA", to: "/contact-cta", icon: Mail },
-    { label: "Recolour a section", to: "/wedding-highlights", icon: Palette },
+    { label: "Update hero banner", to: "/sections/banner", icon: ImageIcon },
+    { label: "Edit About story", to: "/sections/about", icon: Sparkles },
+    { label: "Adjust contact CTA", to: "/sections/contact-cta", icon: Mail },
+    { label: "Recolour a section", to: "/sections/wedding-highlights", icon: Palette },
   ];
 
   return (

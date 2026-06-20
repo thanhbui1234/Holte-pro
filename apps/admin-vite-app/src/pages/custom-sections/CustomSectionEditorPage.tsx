@@ -114,7 +114,7 @@ export function CustomSectionEditorPage() {
           title="Section not found"
           description="This section may have been deleted."
           action={
-            <Button variant="outline" onClick={() => navigate("/custom-sections")}>
+            <Button variant="outline" onClick={() => navigate("/sections/custom-sections")}>
               Back to sections
             </Button>
           }
@@ -183,7 +183,7 @@ export function CustomSectionEditorPage() {
       {/* Back */}
       <button
         type="button"
-        onClick={() => navigate("/custom-sections")}
+        onClick={() => navigate("/sections/custom-sections")}
         className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
