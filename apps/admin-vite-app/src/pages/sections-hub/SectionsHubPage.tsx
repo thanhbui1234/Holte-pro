@@ -42,6 +42,7 @@ const SECTIONS: SectionCard[] = [
     description: "Hero video and logo shown at the very top of the homepage.",
     path: "/sections/banner",
     icon: ImageIcon,
+    sectionName: "banner",
     fixed: true,
   },
   {
@@ -82,6 +83,7 @@ const SECTIONS: SectionCard[] = [
     description: "Call-to-action block that closes the homepage.",
     path: "/sections/contact-cta",
     icon: Mail,
+    sectionName: "contact-cta",
     fixed: true,
   },
   {
@@ -108,6 +110,9 @@ export function SectionsHubPage() {
     if (!found) return null;
     return found.status === "ACTIVE";
   };
+
+  const getSectionId = (sectionName?: string): number | undefined =>
+    sectionName ? sections.find((s) => s.name === sectionName)?.id : undefined;
 
   const getMeta = (card: SectionCard): string | null => {
     if (card.isCustom) {
@@ -139,7 +144,10 @@ export function SectionsHubPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.22, delay: i * 0.04 }}
               whileHover={{ y: -2 }}
-              onClick={() => navigate(card.path)}
+              onClick={() => {
+                const id = getSectionId(card.sectionName);
+                navigate(id ? `${card.path}?id=${id}` : card.path);
+              }}
               className={cn(
                 "group relative flex cursor-pointer flex-col gap-4 rounded-2xl border bg-background p-5 shadow-sm transition-all duration-200",
                 "hover:border-amber-500/50 hover:shadow-[0_8px_32px_-8px_rgba(217,119,6,0.18)]",

@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { Film, Loader2 } from "lucide-react";
-import { useBanner, useUpdateBanner } from "@/features/banner/hooks/use-banner";
+import { Film } from "lucide-react";
+import { useSection, useUpdateSectionData } from "@/features/layout/hooks/use-layout";
 import { PageContainer } from "@/components/composite/PageContainer";
 import { SectionCard } from "@/components/composite/SectionCard";
 import { FormField } from "@/components/composite/FormField";
@@ -10,32 +11,48 @@ import { FormVideoPicker } from "@/components/composite/FormVideoPicker";
 import { SaveBar } from "@/components/composite/SaveBar";
 import { Input } from "shared-ui";
 import type { BannerData } from "@/features/banner/types/banner.types";
-import { videoApi } from "@/shared/api";
+
+function mapToBannerData(map: Record<string, unknown>): BannerData {
+  return {
+    videoSrc: (map.videoSrc as string) ?? "",
+    logoSrc: (map.logoSrc as string) ?? "",
+    logoAlt: (map.logoAlt as string) ?? "",
+    scrollLabel: (map.scrollLabel as string) ?? "",
+  };
+}
 
 export function BannerPage() {
-  const { data, isLoading } = useBanner();
-  const { mutate: save } = useUpdateBanner();
+  const [searchParams] = useSearchParams();
+  const sectionId = Number(searchParams.get("id"));
+
+  const { data: section, isLoading } = useSection(sectionId);
+  const { mutate: save } = useUpdateSectionData();
 
   const {
     register,
     handleSubmit,
     reset,
     control,
-    setValue,
     formState: { isDirty },
-  } = useForm<BannerData>({ defaultValues: data });
+  } = useForm<BannerData>({
+    defaultValues: mapToBannerData({}),
+  });
 
   useEffect(() => {
-    if (data) reset(data);
-  }, [data, reset]);
+    if (section) reset(mapToBannerData(section.data.map));
+  }, [section, reset]);
 
   const submit = handleSubmit((values) => {
-    save(values);
+    save({ id: sectionId, data: values as unknown as Record<string, unknown> });
     reset(values);
   });
 
   if (isLoading) {
-    return <PageContainer title="Hero Banner" description="Loading..."><div className="p-8">Loading...</div></PageContainer>;
+    return (
+      <PageContainer title="Hero Banner" description="Loading...">
+        <div className="p-8">Loading...</div>
+      </PageContainer>
+    );
   }
 
   return (
@@ -57,10 +74,9 @@ export function BannerPage() {
                 label="Video source"
                 onChange={(youtubeEmbedUrl) => {
                   if (youtubeEmbedUrl) {
-                    // Auto save banner config immediately
                     handleSubmit((values) => {
                       const newValues = { ...values, videoSrc: youtubeEmbedUrl };
-                      save(newValues);
+                      save({ id: sectionId, data: newValues as unknown as Record<string, unknown> });
                       reset(newValues);
                     })();
                   }
@@ -90,7 +106,7 @@ export function BannerPage() {
         <SaveBar
           isDirty={isDirty}
           onSave={submit}
-          onReset={() => reset(data)}
+          onReset={() => reset(mapToBannerData(section?.data?.map ?? {}))}
           saveLabel="Save banner"
         />
       </PageContainer>

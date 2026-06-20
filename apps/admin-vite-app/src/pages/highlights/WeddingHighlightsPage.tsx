@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Film, Plus } from "lucide-react";
-import { useHighlights, useHighlightsConfig, useUpdateHighlightsConfig, useCreateHighlight, useUpdateHighlight, useRemoveHighlight } from "@/features/highlights/hooks/use-highlights";
+import { useSection, useUpdateSectionData } from "@/features/layout/hooks/use-layout";
 import { PageContainer } from "@/components/composite/PageContainer";
 import { SectionCard } from "@/components/composite/SectionCard";
 import { SectionConfigForm } from "@/components/composite/SectionConfigForm";
@@ -14,21 +15,22 @@ import { FormMediaField } from "@/components/composite/FormMediaField";
 import { Input } from "shared-ui";
 import { Button } from "shared-ui";
 import type { HighlightVideo } from "@/features/highlights/types/highlights.types";
+import type { ThemedSection } from "@/shared/types";
 
 const BLANK: HighlightVideo = { id: "", videoUrl: "", title: "", subtitle: "" };
 
 export function WeddingHighlightsPage() {
-  const { data: items = [], isLoading: loadingItems } = useHighlights();
-  const { data: config, isLoading: loadingConfig } = useHighlightsConfig();
-  const { mutate: saveConfig } = useUpdateHighlightsConfig();
-  const { mutate: add } = useCreateHighlight();
-  const { mutate: update } = useUpdateHighlight();
-  const { mutate: remove } = useRemoveHighlight();
+  const [searchParams] = useSearchParams();
+  const sectionId = Number(searchParams.get("id"));
 
-  const [dialog, setDialog] = useState<{
-    mode: "add" | "edit";
-    initial: HighlightVideo;
-  } | null>(null);
+  const { data: section, isLoading } = useSection(sectionId);
+  const { mutate: updateSection } = useUpdateSectionData();
+
+  const map = section?.data?.map ?? {};
+  const config = (map.config ?? {}) as ThemedSection;
+  const items = (map.items ?? []) as HighlightVideo[];
+
+  const [dialog, setDialog] = useState<{ mode: "add" | "edit"; initial: HighlightVideo } | null>(null);
   const [pendingDelete, setPendingDelete] = useState<HighlightVideo | null>(null);
   const [videoSourceType, setVideoSourceType] = useState<"upload" | "youtube">("upload");
 
@@ -48,16 +50,30 @@ export function WeddingHighlightsPage() {
 
   const submit = form.handleSubmit((values) => {
     if (!dialog) return;
-    if (dialog.mode === "add") {
-      add(values);
-    } else {
-      update(values);
-    }
+    const next =
+      dialog.mode === "add"
+        ? [...items, values]
+        : items.map((i) => (i.id === dialog.initial.id ? values : i));
+    updateSection({ id: sectionId, data: { config, items: next } as unknown as Record<string, unknown> });
     setDialog(null);
   });
 
-  if (loadingItems || loadingConfig) {
-    return <PageContainer title="Wedding Highlights" description="Loading..."><div className="p-8">Loading...</div></PageContainer>;
+  const saveConfig = (newConfig: ThemedSection) => {
+    updateSection({ id: sectionId, data: { config: newConfig, items } as unknown as Record<string, unknown> });
+  };
+
+  const confirmDelete = () => {
+    if (!pendingDelete) return;
+    updateSection({ id: sectionId, data: { config, items: items.filter((i) => i.id !== pendingDelete.id) } as unknown as Record<string, unknown> });
+    setPendingDelete(null);
+  };
+
+  if (isLoading) {
+    return (
+      <PageContainer title="Wedding Highlights" description="Loading...">
+        <div className="p-8">Loading...</div>
+      </PageContainer>
+    );
   }
 
   return (
@@ -65,7 +81,7 @@ export function WeddingHighlightsPage() {
       title="Wedding Highlights"
       description="Featured highlight videos. Card-stack carousel on desktop, grid on mobile."
     >
-      {config && <SectionConfigForm value={config} onSave={saveConfig} />}
+      <SectionConfigForm value={config} onSave={saveConfig} />
 
       <SectionCard
         icon={<Film className="h-4 w-4" />}
@@ -106,10 +122,7 @@ export function WeddingHighlightsPage() {
                     className="h-full w-full object-cover"
                   />
                 ) : item.videoUrl ? (
-                  <video
-                    src={item.videoUrl}
-                    className="h-full w-full object-cover"
-                  />
+                  <video src={item.videoUrl} className="h-full w-full object-cover" />
                 ) : (
                   <Film className="h-4 w-4 text-muted-foreground" />
                 )}
@@ -172,11 +185,7 @@ export function WeddingHighlightsPage() {
           <Input id="hl-title" {...form.register("title")} />
         </FormField>
         <FormField label="Subtitle" htmlFor="hl-sub">
-          <Input
-            id="hl-sub"
-            placeholder="Đà Lạt · Spring 2024"
-            {...form.register("subtitle")}
-          />
+          <Input id="hl-sub" placeholder="Đà Lạt · Spring 2024" {...form.register("subtitle")} />
         </FormField>
       </EntityFormDialog>
 
@@ -191,7 +200,7 @@ export function WeddingHighlightsPage() {
         }
         confirmLabel="Delete"
         destructive
-        onConfirm={() => pendingDelete && remove(pendingDelete.id)}
+        onConfirm={confirmDelete}
       />
     </PageContainer>
   );

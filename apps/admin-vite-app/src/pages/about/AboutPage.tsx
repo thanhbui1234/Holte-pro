@@ -1,7 +1,8 @@
 import { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { BarChart3, Image as ImageIcon, Palette, Sparkles, Type } from "lucide-react";
-import { useAbout, useUpdateAbout } from "@/features/about/hooks/use-about";
+import { useSection, useUpdateSectionData } from "@/features/layout/hooks/use-layout";
 import { PageContainer } from "@/components/composite/PageContainer";
 import { SectionCard } from "@/components/composite/SectionCard";
 import { FormField } from "@/components/composite/FormField";
@@ -12,9 +13,27 @@ import { Input } from "shared-ui";
 import { Textarea } from "shared-ui";
 import type { AboutData } from "@/features/about/types/about.types";
 
+function mapToAboutData(map: Record<string, unknown>): AboutData {
+  return {
+    eyebrow: (map.eyebrow as string) ?? "",
+    titlePrefix: (map.titlePrefix as string) ?? "",
+    titleHighlight: (map.titleHighlight as string) ?? "",
+    descriptionEn: (map.descriptionEn as string) ?? "",
+    descriptionVi: (map.descriptionVi as string) ?? "",
+    pillars: (map.pillars as string[]) ?? [],
+    legacyLabel: (map.legacyLabel as string) ?? "",
+    backgroundColor: (map.backgroundColor as string) ?? "#0a0a0a",
+    stats: (map.stats as AboutData["stats"]) ?? [],
+    images: (map.images as AboutData["images"]) ?? [],
+  };
+}
+
 export function AboutPage() {
-  const { data, isLoading } = useAbout();
-  const { mutate: save } = useUpdateAbout();
+  const [searchParams] = useSearchParams();
+  const sectionId = Number(searchParams.get("id"));
+
+  const { data: section, isLoading } = useSection(sectionId);
+  const { mutate: save } = useUpdateSectionData();
 
   const {
     register,
@@ -22,22 +41,26 @@ export function AboutPage() {
     control,
     reset,
     formState: { isDirty },
-  } = useForm<AboutData>({ defaultValues: data });
+  } = useForm<AboutData>({ defaultValues: mapToAboutData({}) });
 
   useEffect(() => {
-    if (data) reset(data);
-  }, [data, reset]);
+    if (section) reset(mapToAboutData(section.data.map));
+  }, [section, reset]);
 
   const stats = useFieldArray({ control, name: "stats" });
   const images = useFieldArray({ control, name: "images" });
 
   const submit = handleSubmit((values) => {
-    save(values);
+    save({ id: sectionId, data: values as unknown as Record<string, unknown> });
     reset(values);
   });
 
   if (isLoading) {
-    return <PageContainer title="About section" description="Loading..."><div className="p-8">Loading...</div></PageContainer>;
+    return (
+      <PageContainer title="About section" description="Loading...">
+        <div className="p-8">Loading...</div>
+      </PageContainer>
+    );
   }
 
   return (
@@ -74,11 +97,7 @@ export function AboutPage() {
               control={control}
               name="backgroundColor"
               render={({ field }) => (
-                <ColorField
-                  id="about-bg"
-                  value={field.value}
-                  onChange={field.onChange}
-                />
+                <ColorField id="about-bg" value={field.value} onChange={field.onChange} />
               )}
             />
           </FormField>
@@ -97,10 +116,7 @@ export function AboutPage() {
               <Textarea id="about-desc-vi" rows={4} {...register("descriptionVi")} />
             </FormField>
             <div className="grid gap-4 md:grid-cols-2">
-              <FormField
-                label="Core pillars"
-                hint="Shown inline inside the description."
-              >
+              <FormField label="Core pillars" hint="Shown inline inside the description.">
                 <Controller
                   control={control}
                   name="pillars"
@@ -173,7 +189,7 @@ export function AboutPage() {
         <SaveBar
           isDirty={isDirty}
           onSave={submit}
-          onReset={() => reset(data)}
+          onReset={() => reset(mapToAboutData(section?.data?.map ?? {}))}
           saveLabel="Save About"
         />
       </PageContainer>

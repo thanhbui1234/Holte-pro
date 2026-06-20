@@ -3,6 +3,28 @@ import { queryKeys } from "shared-api/query-keys";
 import { sectionApi } from "@/shared/api/section.api";
 import type { SectionRecord, UpdateSectionRequest } from "shared-api";
 
+export function useSection(id: number) {
+  return useQuery({
+    queryKey: queryKeys.sections.detail(id),
+    queryFn: async () => {
+      const res = await sectionApi.getById(id);
+      return res.data.data.section;
+    },
+    enabled: !!id,
+  });
+}
+
+export function useUpdateSectionData() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: UpdateSectionRequest) => sectionApi.update(payload),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.sections.detail(variables.id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sections.list() });
+    },
+  });
+}
+
 export function useSections() {
   return useQuery({
     queryKey: queryKeys.sections.list(),

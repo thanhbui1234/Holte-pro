@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Clapperboard, Clock, Link2, MapPin, Plus, Youtube } from "lucide-react";
-import { useReels, useReelsConfig, useUpdateReelsConfig, useCreateReel, useUpdateReel, useRemoveReel } from "@/features/reels/hooks/use-reels";
+import { useSection, useUpdateSectionData } from "@/features/layout/hooks/use-layout";
 import { PageContainer } from "@/components/composite/PageContainer";
 import { SectionCard } from "@/components/composite/SectionCard";
 import { SectionConfigForm } from "@/components/composite/SectionConfigForm";
@@ -15,6 +16,7 @@ import { Input } from "shared-ui";
 import { Textarea } from "shared-ui";
 import { Button } from "shared-ui";
 import type { ReelItem } from "@/features/reels/types/reels.types";
+import type { ThemedSection } from "@/shared/types";
 
 const blankReel = (): ReelItem => ({
   id: `reel-${Date.now().toString(36)}`,
@@ -26,7 +28,6 @@ const blankReel = (): ReelItem => ({
   location: "",
 });
 
-/** Extract a YouTube video id from a watch / shorts / youtu.be / embed URL, or return the bare id. */
 function extractYoutubeId(input: string): string | null {
   const value = input?.trim();
   if (!value) return null;
@@ -43,14 +44,17 @@ function extractYoutubeId(input: string): string | null {
 }
 
 export function WeddingReelsPage() {
-  const { data: items = [], isLoading: loadingItems } = useReels();
-  const { data: config, isLoading: loadingConfig } = useReelsConfig();
-  const { mutate: saveConfig } = useUpdateReelsConfig();
-  const { mutate: add } = useCreateReel();
-  const { mutate: update } = useUpdateReel();
-  const { mutate: remove } = useRemoveReel();
+  const [searchParams] = useSearchParams();
+  const sectionId = Number(searchParams.get("id"));
 
-  const [dialog, setDialog] = useState<{ mode: "add" | "edit" } | null>(null);
+  const { data: section, isLoading } = useSection(sectionId);
+  const { mutate: updateSection } = useUpdateSectionData();
+
+  const map = section?.data?.map ?? {};
+  const config = (map.config ?? {}) as ThemedSection;
+  const items = (map.items ?? []) as ReelItem[];
+
+  const [dialog, setDialog] = useState<{ mode: "add" | "edit"; initial: ReelItem } | null>(null);
   const [pendingDelete, setPendingDelete] = useState<ReelItem | null>(null);
   const [videoSourceType, setVideoSourceType] = useState<"upload" | "youtube">("upload");
 
@@ -60,24 +64,41 @@ export function WeddingReelsPage() {
   const openAdd = () => {
     form.reset(blankReel());
     setVideoSourceType("upload");
-    setDialog({ mode: "add" });
+    setDialog({ mode: "add", initial: blankReel() });
   };
 
   const openEdit = (item: ReelItem) => {
     form.reset(item);
     setVideoSourceType(item.youtubeUrl ? "youtube" : "upload");
-    setDialog({ mode: "edit" });
+    setDialog({ mode: "edit", initial: item });
   };
 
   const submit = form.handleSubmit((values) => {
     if (!dialog) return;
-    if (dialog.mode === "add") add(values);
-    else update(values);
+    const next =
+      dialog.mode === "add"
+        ? [...items, values]
+        : items.map((i) => (i.id === dialog.initial.id ? values : i));
+    updateSection({ id: sectionId, data: { config, items: next } as unknown as Record<string, unknown> });
     setDialog(null);
   });
 
-  if (loadingItems || loadingConfig) {
-    return <PageContainer title="Wedding Reels" description="Loading..."><div className="p-8">Loading...</div></PageContainer>;
+  const saveConfig = (newConfig: ThemedSection) => {
+    updateSection({ id: sectionId, data: { config: newConfig, items } as unknown as Record<string, unknown> });
+  };
+
+  const confirmDelete = () => {
+    if (!pendingDelete) return;
+    updateSection({ id: sectionId, data: { config, items: items.filter((i) => i.id !== pendingDelete.id) } as unknown as Record<string, unknown> });
+    setPendingDelete(null);
+  };
+
+  if (isLoading) {
+    return (
+      <PageContainer title="Wedding Reels" description="Loading...">
+        <div className="p-8">Loading...</div>
+      </PageContainer>
+    );
   }
 
   return (
@@ -85,7 +106,7 @@ export function WeddingReelsPage() {
       title="Wedding Reels"
       description="Short-form vertical reels rendered as a horizontal scroller."
     >
-      {config && <SectionConfigForm value={config} onSave={saveConfig} />}
+      <SectionConfigForm value={config} onSave={saveConfig} />
 
       <SectionCard
         icon={<Clapperboard className="h-4 w-4" />}
@@ -128,10 +149,7 @@ export function WeddingReelsPage() {
                       className="h-full w-full object-cover"
                     />
                   ) : item.videoUrl ? (
-                    <video
-                      src={item.videoUrl}
-                      className="h-full w-full object-cover"
-                    />
+                    <video src={item.videoUrl} className="h-full w-full object-cover" />
                   ) : (
                     <Clapperboard className="h-4 w-4 text-muted-foreground" />
                   )}
@@ -139,9 +157,7 @@ export function WeddingReelsPage() {
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{item.title}</p>
                   {item.description && (
-                    <p className="truncate text-xs text-muted-foreground">
-                      {item.description}
-                    </p>
+                    <p className="truncate text-xs text-muted-foreground">{item.description}</p>
                   )}
                   <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                     <span className="inline-flex items-center gap-1">
@@ -199,7 +215,7 @@ export function WeddingReelsPage() {
               </button>
             </div>
           </div>
-          
+
           {videoSourceType === "upload" ? (
             <FormField label="Upload Video" htmlFor="reel-video">
               <FormMediaField
@@ -261,7 +277,7 @@ export function WeddingReelsPage() {
         }
         confirmLabel="Delete"
         destructive
-        onConfirm={() => pendingDelete && remove(pendingDelete.id)}
+        onConfirm={confirmDelete}
       />
     </PageContainer>
   );
@@ -287,9 +303,7 @@ function YoutubePreview({ url }: { url: string }) {
       />
       <div className="min-w-0">
         <p className="text-xs font-medium">Detected video</p>
-        <p className="truncate font-mono text-[11px] text-muted-foreground">
-          {id}
-        </p>
+        <p className="truncate font-mono text-[11px] text-muted-foreground">{id}</p>
       </div>
     </div>
   );

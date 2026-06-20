@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { Link2, Plus, Trash2, Video, Youtube } from "lucide-react";
-import { useFilms, useFilmsConfig, useUpdateFilmsConfig, useCreateFilm, useUpdateFilm, useRemoveFilm } from "@/features/films/hooks/use-films";
+import { useSection, useUpdateSectionData } from "@/features/layout/hooks/use-layout";
 import { PageContainer } from "@/components/composite/PageContainer";
 import { SectionCard } from "@/components/composite/SectionCard";
 import { SectionConfigForm } from "@/components/composite/SectionConfigForm";
@@ -17,6 +18,7 @@ import { Input } from "shared-ui";
 import { Textarea } from "shared-ui";
 import { Button } from "shared-ui";
 import type { FilmItem, FilmPreviewImage } from "@/features/films/types/films.types";
+import type { ThemedSection } from "@/shared/types";
 
 const blankPreviewImage = (): FilmPreviewImage => ({
   src: "",
@@ -38,15 +40,33 @@ const blankFilm = (): FilmItem => ({
   previewImages: [],
 });
 
-export function TraditionalFilmsPage() {
-  const { data: items = [], isLoading: loadingItems } = useFilms();
-  const { data: config, isLoading: loadingConfig } = useFilmsConfig();
-  const { mutate: saveConfig } = useUpdateFilmsConfig();
-  const { mutate: add } = useCreateFilm();
-  const { mutate: update } = useUpdateFilm();
-  const { mutate: remove } = useRemoveFilm();
+function extractYoutubeId(input: string): string | null {
+  const value = input?.trim();
+  if (!value) return null;
+  if (/^[A-Za-z0-9_-]{11}$/.test(value)) return value;
+  const patterns = [
+    /(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/|v\/))([A-Za-z0-9_-]{11})/,
+    /youtu\.be\/([A-Za-z0-9_-]{11})/,
+  ];
+  for (const re of patterns) {
+    const match = value.match(re);
+    if (match) return match[1];
+  }
+  return null;
+}
 
-  const [dialog, setDialog] = useState<{ mode: "add" | "edit" } | null>(null);
+export function TraditionalFilmsPage() {
+  const [searchParams] = useSearchParams();
+  const sectionId = Number(searchParams.get("id"));
+
+  const { data: section, isLoading } = useSection(sectionId);
+  const { mutate: updateSection } = useUpdateSectionData();
+
+  const map = section?.data?.map ?? {};
+  const config = (map.config ?? {}) as ThemedSection;
+  const items = (map.items ?? []) as FilmItem[];
+
+  const [dialog, setDialog] = useState<{ mode: "add" | "edit"; initial: FilmItem } | null>(null);
   const [pendingDelete, setPendingDelete] = useState<FilmItem | null>(null);
   const [videoSourceType, setVideoSourceType] = useState<"upload" | "youtube">("upload");
 
@@ -57,24 +77,41 @@ export function TraditionalFilmsPage() {
   const openAdd = () => {
     form.reset(blankFilm());
     setVideoSourceType("upload");
-    setDialog({ mode: "add" });
+    setDialog({ mode: "add", initial: blankFilm() });
   };
 
   const openEdit = (item: FilmItem) => {
     form.reset(item);
     setVideoSourceType(item.youtubeUrl ? "youtube" : "upload");
-    setDialog({ mode: "edit" });
+    setDialog({ mode: "edit", initial: item });
   };
 
   const submit = form.handleSubmit((values) => {
     if (!dialog) return;
-    if (dialog.mode === "add") add(values);
-    else update(values);
+    const next =
+      dialog.mode === "add"
+        ? [...items, values]
+        : items.map((i) => (i.id === dialog.initial.id ? values : i));
+    updateSection({ id: sectionId, data: { config, items: next } as unknown as Record<string, unknown> });
     setDialog(null);
   });
 
-  if (loadingItems || loadingConfig) {
-    return <PageContainer title="Traditional Films" description="Loading..."><div className="p-8">Loading...</div></PageContainer>;
+  const saveConfig = (newConfig: ThemedSection) => {
+    updateSection({ id: sectionId, data: { config: newConfig, items } as unknown as Record<string, unknown> });
+  };
+
+  const confirmDelete = () => {
+    if (!pendingDelete) return;
+    updateSection({ id: sectionId, data: { config, items: items.filter((i) => i.id !== pendingDelete.id) } as unknown as Record<string, unknown> });
+    setPendingDelete(null);
+  };
+
+  if (isLoading) {
+    return (
+      <PageContainer title="Traditional Films" description="Loading...">
+        <div className="p-8">Loading...</div>
+      </PageContainer>
+    );
   }
 
   return (
@@ -82,7 +119,7 @@ export function TraditionalFilmsPage() {
       title="Traditional Films"
       description="Long-form films featured in the heritage section."
     >
-      {config && <SectionConfigForm value={config} onSave={saveConfig} />}
+      <SectionConfigForm value={config} onSave={saveConfig} />
 
       <SectionCard
         icon={<Video className="h-4 w-4" />}
@@ -125,16 +162,9 @@ export function TraditionalFilmsPage() {
                       className="h-full w-full object-cover"
                     />
                   ) : item.videoUrl ? (
-                    <video
-                      src={item.videoUrl}
-                      className="h-full w-full object-cover"
-                    />
+                    <video src={item.videoUrl} className="h-full w-full object-cover" />
                   ) : item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="h-full w-full object-cover"
-                    />
+                    <img src={item.image} alt={item.title} className="h-full w-full object-cover" />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
                       No media
@@ -200,7 +230,7 @@ export function TraditionalFilmsPage() {
               </button>
             </div>
           </div>
-          
+
           {videoSourceType === "upload" ? (
             <FormField label="Upload Video" htmlFor="film-video">
               <FormMediaField
@@ -235,22 +265,13 @@ export function TraditionalFilmsPage() {
             <Input id="film-title" {...form.register("title")} />
           </FormField>
           <FormField label="Subtitle" htmlFor="film-sub">
-            <Input
-              id="film-sub"
-              placeholder="Hà Nội · 2024"
-              {...form.register("subtitle")}
-            />
+            <Input id="film-sub" placeholder="Hà Nội · 2024" {...form.register("subtitle")} />
           </FormField>
         </div>
         <FormField label="Description" htmlFor="film-desc">
           <Textarea id="film-desc" rows={3} {...form.register("description")} />
         </FormField>
-        <FormMediaField
-          control={form.control}
-          name="image"
-          label="Image source"
-          accept="image/*"
-        />
+        <FormMediaField control={form.control} name="image" label="Image source" accept="image/*" />
         <FormField label="Tags">
           <Controller
             control={form.control}
@@ -312,21 +333,14 @@ export function TraditionalFilmsPage() {
                   />
                   <div className="grid gap-3 sm:grid-cols-2">
                     <FormField label="Image title">
-                      <Input
-                        {...form.register(`previewImages.${index}.title` as const)}
-                      />
+                      <Input {...form.register(`previewImages.${index}.title` as const)} />
                     </FormField>
                     <FormField label="Image topic">
-                      <Input
-                        {...form.register(`previewImages.${index}.topic` as const)}
-                      />
+                      <Input {...form.register(`previewImages.${index}.topic` as const)} />
                     </FormField>
                   </div>
                   <FormField label="Image description">
-                    <Textarea
-                      rows={2}
-                      {...form.register(`previewImages.${index}.description` as const)}
-                    />
+                    <Textarea rows={2} {...form.register(`previewImages.${index}.description` as const)} />
                   </FormField>
                   <FormField label="Image attribute">
                     <Input
@@ -352,25 +366,10 @@ export function TraditionalFilmsPage() {
         }
         confirmLabel="Delete"
         destructive
-        onConfirm={() => pendingDelete && remove(pendingDelete.id)}
+        onConfirm={confirmDelete}
       />
     </PageContainer>
   );
-}
-
-function extractYoutubeId(input: string): string | null {
-  const value = input?.trim();
-  if (!value) return null;
-  if (/^[A-Za-z0-9_-]{11}$/.test(value)) return value;
-  const patterns = [
-    /(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/|v\/))([A-Za-z0-9_-]{11})/,
-    /youtu\.be\/([A-Za-z0-9_-]{11})/,
-  ];
-  for (const re of patterns) {
-    const match = value.match(re);
-    if (match) return match[1];
-  }
-  return null;
 }
 
 function YoutubePreview({ url }: { url: string }) {
@@ -393,9 +392,7 @@ function YoutubePreview({ url }: { url: string }) {
       />
       <div className="min-w-0">
         <p className="text-xs font-medium">Detected video</p>
-        <p className="truncate font-mono text-[11px] text-muted-foreground">
-          {id}
-        </p>
+        <p className="truncate font-mono text-[11px] text-muted-foreground">{id}</p>
       </div>
     </div>
   );

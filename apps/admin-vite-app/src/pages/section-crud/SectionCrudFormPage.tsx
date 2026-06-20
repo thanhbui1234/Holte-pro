@@ -47,8 +47,9 @@ export function SectionCrudFormPage() {
 
   useEffect(() => {
     if (section && isEditing) {
-      const meta = section.data?.__meta || {};
-      const dynamicFields = Object.entries(section.data || {})
+      const map = section.data?.map ?? {};
+      const meta = (map.__meta as Record<string, string>) ?? {};
+      const dynamicFields = Object.entries(map)
         .filter(([key]) => key !== "__meta")
         .map(([key, value]) => {
           const type = (meta[key] as "text" | "video" | "video_list") || "text";
