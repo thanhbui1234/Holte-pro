@@ -1,20 +1,22 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { Clapperboard, Clock, Link2, MapPin, Plus, Youtube } from "lucide-react";
-import { useReels, useReelsConfig, useUpdateReelsConfig, useCreateReel, useUpdateReel, useRemoveReel } from "@/features/reels/hooks/use-reels";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Controller, useForm } from "react-hook-form";
+import { Clapperboard, Clock, MapPin, Palette, Plus, Video, X, Youtube } from "lucide-react";
+import { useSection, useUpdateSectionData } from "@/features/layout/hooks/use-layout";
 import { PageContainer } from "@/components/composite/PageContainer";
 import { SectionCard } from "@/components/composite/SectionCard";
-import { SectionConfigForm } from "@/components/composite/SectionConfigForm";
 import { EntityList } from "@/components/composite/EntityList";
 import { EntityFormDialog } from "@/components/composite/EntityFormDialog";
 import { ConfirmDialog } from "@/components/composite/ConfirmDialog";
 import { EmptyState } from "@/components/composite/EmptyState";
 import { FormField } from "@/components/composite/FormField";
-import { FormMediaField } from "@/components/composite/FormMediaField";
-import { Input } from "shared-ui";
-import { Textarea } from "shared-ui";
-import { Button } from "shared-ui";
+import { ColorField } from "@/components/composite/ColorField";
+import { RichTextEditor } from "@/components/composite/RichTextEditor";
+import { VideoLibraryModal } from "@/components/composite/VideoLibraryModal";
+import { SaveBar } from "@/components/composite/SaveBar";
+import { Input, Textarea, Button } from "shared-ui";
 import type { ReelItem } from "@/features/reels/types/reels.types";
+import type { ThemedSection } from "@/shared/types";
 
 const blankReel = (): ReelItem => ({
   id: `reel-${Date.now().toString(36)}`,
@@ -26,7 +28,6 @@ const blankReel = (): ReelItem => ({
   location: "",
 });
 
-/** Extract a YouTube video id from a watch / shorts / youtu.be / embed URL, or return the bare id. */
 function extractYoutubeId(input: string): string | null {
   const value = input?.trim();
   if (!value) return null;
@@ -43,75 +44,158 @@ function extractYoutubeId(input: string): string | null {
 }
 
 export function WeddingReelsPage() {
-  const { data: items = [], isLoading: loadingItems } = useReels();
-  const { data: config, isLoading: loadingConfig } = useReelsConfig();
-  const { mutate: saveConfig } = useUpdateReelsConfig();
-  const { mutate: add } = useCreateReel();
-  const { mutate: update } = useUpdateReel();
-  const { mutate: remove } = useRemoveReel();
+  const [searchParams] = useSearchParams();
+  const sectionId = Number(searchParams.get("id"));
 
-  const [dialog, setDialog] = useState<{ mode: "add" | "edit" } | null>(null);
+  const { data: section, isLoading } = useSection(sectionId);
+  const { mutate: updateSection, isPending: isSaving } = useUpdateSectionData();
+
+  const map = section?.data?.map ?? {};
+  const rawConfig = map.config ?? {};
+  const serverConfig = (typeof rawConfig === "string" ? JSON.parse(rawConfig) : rawConfig) as ThemedSection;
+  const serverItems = (Array.isArray(map.items) ? map.items : []) as ReelItem[];
+
+  // ── Config form (no own SaveBar) ─────────────────────────────────
+  const configForm = useForm<ThemedSection>({ defaultValues: serverConfig });
+  const { register: regCfg, control: ctrlCfg, formState: { isDirty: isConfigDirty } } = configForm;
+
+  useEffect(() => {
+    if (section) configForm.reset(serverConfig);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [section]);
+
+  // ── Items local state ────────────────────────────────────────────
+  const [localItems, setLocalItems] = useState<ReelItem[] | null>(null);
+  const displayItems = localItems ?? serverItems;
+  const isDirty = localItems !== null || isConfigDirty;
+
+  // ── Dialog / delete / video modal ────────────────────────────────
+  const [dialog, setDialog] = useState<{ mode: "add" | "edit"; initial: ReelItem } | null>(null);
   const [pendingDelete, setPendingDelete] = useState<ReelItem | null>(null);
-  const [videoSourceType, setVideoSourceType] = useState<"upload" | "youtube">("upload");
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
 
-  const form = useForm<ReelItem>({ defaultValues: blankReel() });
-  const watchedYoutubeUrl = form.watch("youtubeUrl");
+  const itemForm = useForm<ReelItem>({ defaultValues: blankReel() });
+  const watchedYoutubeUrl = itemForm.watch("youtubeUrl");
+  const ytIdPreview = extractYoutubeId(watchedYoutubeUrl);
 
-  const openAdd = () => {
-    form.reset(blankReel());
-    setVideoSourceType("upload");
-    setDialog({ mode: "add" });
-  };
+  const openAdd = () => { itemForm.reset(blankReel()); setDialog({ mode: "add", initial: blankReel() }); };
+  const openEdit = (item: ReelItem) => { itemForm.reset(item); setDialog({ mode: "edit", initial: item }); };
 
-  const openEdit = (item: ReelItem) => {
-    form.reset(item);
-    setVideoSourceType(item.youtubeUrl ? "youtube" : "upload");
-    setDialog({ mode: "edit" });
-  };
-
-  const submit = form.handleSubmit((values) => {
+  const submitDialog = itemForm.handleSubmit((values) => {
     if (!dialog) return;
-    if (dialog.mode === "add") add(values);
-    else update(values);
+    setLocalItems(
+      dialog.mode === "add"
+        ? [...displayItems, values]
+        : displayItems.map((i) => (i.id === dialog.initial.id ? values : i)),
+    );
     setDialog(null);
   });
 
-  if (loadingItems || loadingConfig) {
-    return <PageContainer title="Wedding Reels" description="Loading..."><div className="p-8">Loading...</div></PageContainer>;
+  const confirmDelete = () => {
+    if (!pendingDelete) return;
+    setLocalItems(displayItems.filter((i) => i.id !== pendingDelete.id));
+    setPendingDelete(null);
+  };
+
+  // ── Main save ────────────────────────────────────────────────────
+  const save = () => {
+    const config = configForm.getValues();
+    updateSection(
+      { id: sectionId, data: { config, items: localItems ?? serverItems } as unknown as Record<string, unknown> },
+      {
+        onSuccess: () => {
+          setLocalItems(null);
+          configForm.reset(config);
+        },
+      },
+    );
+  };
+
+  const resetAll = () => {
+    setLocalItems(null);
+    configForm.reset(serverConfig);
+  };
+
+  if (isLoading) {
+    return (
+      <PageContainer title="Reels Đám Cưới" description="Đang tải...">
+        <div className="p-8">Đang tải...</div>
+      </PageContainer>
+    );
   }
 
   return (
     <PageContainer
-      title="Wedding Reels"
-      description="Short-form vertical reels rendered as a horizontal scroller."
+      title="Reels Đám Cưới"
+      description="Reels ngắn dọc hiển thị dạng cuộn ngang."
     >
-      {config && <SectionConfigForm value={config} onSave={saveConfig} />}
+      {/* Config fields */}
+      <SectionCard
+        icon={<Palette className="h-4 w-4" />}
+        title="Tiêu đề phần"
+        description="Kiểm soát cách phần này hiển thị trên trang công khai."
+      >
+        <div className="grid gap-4 md:grid-cols-2">
+          <FormField label="Eyebrow" htmlFor="cfg-eyebrow">
+            <Input id="cfg-eyebrow" placeholder="Featured Works" {...regCfg("eyebrow")} />
+          </FormField>
+          <FormField label="Màu nền" htmlFor="cfg-bg">
+            <Controller
+              control={ctrlCfg}
+              name="backgroundColor"
+              render={({ field }) => (
+                <ColorField id="cfg-bg" value={field.value} onChange={field.onChange} />
+              )}
+            />
+          </FormField>
+          <FormField label="Tiền tố tiêu đề" htmlFor="cfg-title">
+            <Input id="cfg-title" placeholder="Wedding" {...regCfg("titlePrefix")} />
+          </FormField>
+          <FormField label="Từ in nghiêng nổi bật" htmlFor="cfg-highlight">
+            <Input id="cfg-highlight" placeholder="Reels" {...regCfg("titleHighlight")} />
+          </FormField>
+          <FormField label="Mô tả" className="md:col-span-2">
+            <Controller
+              control={ctrlCfg}
+              name="description"
+              render={({ field }) => (
+                <RichTextEditor
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                  placeholder="Mô tả ngắn cho phần này"
+                />
+              )}
+            />
+          </FormField>
+        </div>
+      </SectionCard>
 
+      {/* Reel list */}
       <SectionCard
         icon={<Clapperboard className="h-4 w-4" />}
         title="Reels"
-        description={`${items.length} reels in rotation`}
+        description={`${displayItems.length} reel đang xoay vòng`}
         actions={
           <Button size="sm" onClick={openAdd}>
             <Plus className="h-4 w-4" />
-            Add reel
+            Thêm reel
           </Button>
         }
       >
         <EntityList
-          items={items}
+          items={displayItems}
           getKey={(item) => item.id}
           onEdit={openEdit}
           onDelete={(item) => setPendingDelete(item)}
           emptyState={
             <EmptyState
               icon={<Clapperboard className="h-4 w-4" />}
-              title="No reels yet"
-              description="Add a short reel to start the rotation."
+              title="Chưa có reel nào"
+              description="Thêm reel ngắn để bắt đầu xoay vòng."
               action={
                 <Button size="sm" onClick={openAdd}>
                   <Plus className="h-4 w-4" />
-                  Add first reel
+                  Thêm reel đầu tiên
                 </Button>
               }
             />
@@ -128,10 +212,7 @@ export function WeddingReelsPage() {
                       className="h-full w-full object-cover"
                     />
                   ) : item.videoUrl ? (
-                    <video
-                      src={item.videoUrl}
-                      className="h-full w-full object-cover"
-                    />
+                    <video src={item.videoUrl} className="h-full w-full object-cover" />
                   ) : (
                     <Clapperboard className="h-4 w-4 text-muted-foreground" />
                   )}
@@ -139,19 +220,21 @@ export function WeddingReelsPage() {
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{item.title}</p>
                   {item.description && (
-                    <p className="truncate text-xs text-muted-foreground">
-                      {item.description}
-                    </p>
+                    <p className="truncate text-xs text-muted-foreground">{item.description}</p>
                   )}
                   <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                    <span className="inline-flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {item.duration}
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <MapPin className="h-3 w-3" />
-                      {item.location}
-                    </span>
+                    {item.duration && (
+                      <span className="inline-flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {item.duration}
+                      </span>
+                    )}
+                    {item.location && (
+                      <span className="inline-flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        {item.location}
+                      </span>
+                    )}
                     {item.youtubeUrl && (
                       <a
                         href={item.youtubeUrl}
@@ -172,125 +255,100 @@ export function WeddingReelsPage() {
         />
       </SectionCard>
 
+      {/* Add / edit dialog */}
       <EntityFormDialog
         open={dialog !== null}
         onOpenChange={(open) => !open && setDialog(null)}
         mode={dialog?.mode ?? "add"}
         entityLabel="Reel"
-        onSubmit={submit}
+        onSubmit={submitDialog}
       >
-        <div className="space-y-4 rounded-lg border border-border/60 bg-muted/30 p-4">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">Video Source</p>
-            <div className="flex items-center rounded-md border border-border/60 bg-background p-1">
-              <button
-                type="button"
-                className={`rounded-sm px-3 py-1 text-xs font-medium transition-colors ${videoSourceType === "upload" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-                onClick={() => setVideoSourceType("upload")}
-              >
-                Upload File
-              </button>
-              <button
-                type="button"
-                className={`rounded-sm px-3 py-1 text-xs font-medium transition-colors ${videoSourceType === "youtube" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-                onClick={() => setVideoSourceType("youtube")}
-              >
-                YouTube Link
-              </button>
-            </div>
-          </div>
-          
-          {videoSourceType === "upload" ? (
-            <FormField label="Upload Video" htmlFor="reel-video">
-              <FormMediaField
-                control={form.control}
-                name="videoUrl"
-                label=""
-                accept=".mp4,.mov,.avi,.mkv,.wmv,.flv,.webm,video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/x-ms-wmv,video/x-flv,video/webm"
-                placeholder="Drag & drop or click to upload video file"
-              />
-            </FormField>
-          ) : (
-            <FormField
-              label="YouTube link"
-              htmlFor="reel-youtube"
-              hint="Paste a full YouTube URL (watch, shorts, or youtu.be) or the bare 11-character video ID."
-            >
-              <div className="relative">
-                <Link2 className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="reel-youtube"
-                  className="pl-9"
-                  placeholder="https://www.youtube.com/shorts/..."
-                  {...form.register("youtubeUrl")}
+        {/* Video picker */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Video</label>
+          {ytIdPreview ? (
+            <div className="relative overflow-hidden rounded-lg border border-border/60 bg-muted/30">
+              <div className="aspect-video">
+                <img
+                  src={`https://img.youtube.com/vi/${ytIdPreview}/mqdefault.jpg`}
+                  alt="Thumbnail"
+                  className="h-full w-full object-cover"
                 />
               </div>
-              <YoutubePreview url={watchedYoutubeUrl} />
-            </FormField>
+              <button
+                type="button"
+                onClick={() => { itemForm.setValue("youtubeUrl", ""); itemForm.setValue("videoUrl", ""); }}
+                className="absolute right-2 top-2 z-20 rounded-full bg-black/60 p-1.5 text-white transition hover:bg-black/80"
+                aria-label="Xóa video"
+              >
+                <X className="h-4 w-4" />
+              </button>
+              <div
+                className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-black/50 opacity-0 transition-opacity hover:opacity-100"
+                onClick={() => setVideoModalOpen(true)}
+              >
+                <p className="font-medium text-white">Nhấp để thay đổi video</p>
+              </div>
+            </div>
+          ) : (
+            <div
+              onClick={() => setVideoModalOpen(true)}
+              className="flex aspect-video cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/10 transition hover:border-muted-foreground/50 hover:bg-muted/30"
+            >
+              <Video className="h-8 w-8 text-muted-foreground/60" />
+              <p className="text-sm text-muted-foreground">Nhấp để chọn video từ thư viện</p>
+            </div>
           )}
+          <VideoLibraryModal
+            open={videoModalOpen}
+            onOpenChange={setVideoModalOpen}
+            onSelect={(url) => {
+              itemForm.setValue("youtubeUrl", url, { shouldDirty: true });
+              itemForm.setValue("videoUrl", "");
+            }}
+          />
         </div>
-        <FormField label="Title" htmlFor="reel-title">
-          <Input id="reel-title" {...form.register("title")} />
+
+        <FormField label="Tiêu đề" htmlFor="reel-title">
+          <Input id="reel-title" {...itemForm.register("title")} />
         </FormField>
-        <FormField label="Description" htmlFor="reel-desc">
+        <FormField label="Mô tả" htmlFor="reel-desc">
           <Textarea
             id="reel-desc"
             rows={3}
-            placeholder="One or two lines about this reel."
-            {...form.register("description")}
+            placeholder="Một hoặc hai dòng về reel này."
+            {...itemForm.register("description")}
           />
         </FormField>
         <div className="grid gap-4 sm:grid-cols-2">
-          <FormField label="Duration" htmlFor="reel-duration">
-            <Input id="reel-duration" placeholder="0:45" {...form.register("duration")} />
+          <FormField label="Thời lượng" htmlFor="reel-duration">
+            <Input id="reel-duration" placeholder="0:45" {...itemForm.register("duration")} />
           </FormField>
-          <FormField label="Location" htmlFor="reel-location">
-            <Input id="reel-location" placeholder="Đà Lạt" {...form.register("location")} />
+          <FormField label="Địa điểm" htmlFor="reel-location">
+            <Input id="reel-location" placeholder="Đà Lạt" {...itemForm.register("location")} />
           </FormField>
         </div>
       </EntityFormDialog>
 
+      {/* Delete confirm */}
       <ConfirmDialog
         open={pendingDelete !== null}
         onOpenChange={(open) => !open && setPendingDelete(null)}
-        title="Delete this reel?"
-        description={
-          pendingDelete
-            ? `"${pendingDelete.title}" will be removed from the reels scroller.`
-            : undefined
-        }
-        confirmLabel="Delete"
+        title="Xóa reel này?"
+        description={pendingDelete ? `"${pendingDelete.title}" sẽ bị xóa khỏi cuộn reels.` : undefined}
+        confirmLabel="Xóa"
         destructive
-        onConfirm={() => pendingDelete && remove(pendingDelete.id)}
+        onConfirm={confirmDelete}
+      />
+
+      {/* Single SaveBar for config + items */}
+      <SaveBar
+        isDirty={isDirty}
+        isSubmitting={isSaving}
+        onSave={save}
+        onReset={resetAll}
+        saveLabel="Lưu reels"
       />
     </PageContainer>
-  );
-}
-
-function YoutubePreview({ url }: { url: string }) {
-  if (!url?.trim()) return null;
-  const id = extractYoutubeId(url);
-  if (!id) {
-    return (
-      <p className="mt-2 inline-flex items-center gap-1.5 text-xs text-destructive">
-        <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
-        Couldn't read a video ID from that link.
-      </p>
-    );
-  }
-  return (
-    <div className="mt-2 flex items-center gap-3 rounded-md border border-border/60 bg-muted/40 p-2">
-      <img
-        src={`https://img.youtube.com/vi/${id}/mqdefault.jpg`}
-        alt="YouTube thumbnail preview"
-        className="h-12 w-20 shrink-0 rounded object-cover"
-      />
-      <div className="min-w-0">
-        <p className="text-xs font-medium">Detected video</p>
-        <p className="truncate font-mono text-[11px] text-muted-foreground">
-          {id}
-        </p>
-      </div>
-    </div>
   );
 }

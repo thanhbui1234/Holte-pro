@@ -18,6 +18,8 @@ import { SectionsHubPage } from "@/pages/sections-hub/SectionsHubPage";
 import { LoginPage } from "@/pages/auth/LoginPage";
 import { OAuthCallbackPage } from "@/pages/auth/OAuthCallbackPage";
 import { VideoLibraryPage } from "@/pages/videos/VideoLibraryPage";
+import { SectionCrudListPage } from "@/pages/section-crud/SectionCrudListPage";
+import { SectionCrudFormPage } from "@/pages/section-crud/SectionCrudFormPage";
 import { useAuth } from "@/features/auth";
 
 function PrivateRoute() {
@@ -34,18 +36,23 @@ export function App() {
         <Route element={<AdminLayout />}>
           <Route index element={<DashboardPage />} />
           <Route path="layout" element={<LayoutPage />} />
-          <Route path="sections" element={<SectionsHubPage />} />
-          <Route path="banner" element={<BannerPage />} />
-          <Route path="about" element={<AboutPage />} />
-          <Route path="wedding-highlights" element={<WeddingHighlightsPage />} />
-          <Route path="wedding-reels" element={<WeddingReelsPage />} />
-          <Route path="traditional-films" element={<TraditionalFilmsPage />} />
-          <Route path="contact-cta" element={<ContactCtaPage />} />
+          <Route path="sections">
+            <Route index element={<SectionsHubPage />} />
+            <Route path="banner" element={<BannerPage />} />
+            <Route path="about" element={<AboutPage />} />
+            <Route path="wedding-highlights" element={<WeddingHighlightsPage />} />
+            <Route path="wedding-reels" element={<WeddingReelsPage />} />
+            <Route path="traditional-films" element={<TraditionalFilmsPage />} />
+            <Route path="contact-cta" element={<ContactCtaPage />} />
+            <Route path="custom-sections" element={<CustomSectionsPage />} />
+            <Route path="custom-sections/:id" element={<CustomSectionEditorPage />} />
+          </Route>
           <Route path="header" element={<HeaderPage />} />
           <Route path="menu" element={<MenuConfigPage />} />
           <Route path="footer" element={<FooterConfigPage />} />
-          <Route path="custom-sections" element={<CustomSectionsPage />} />
-          <Route path="custom-sections/:id" element={<CustomSectionEditorPage />} />
+          <Route path="section-crud" element={<SectionCrudListPage />} />
+          <Route path="section-crud/new" element={<SectionCrudFormPage />} />
+          <Route path="section-crud/:id" element={<SectionCrudFormPage />} />
           <Route path="contact-inbox" element={<ContactInboxPage />} />
           <Route path="video-library" element={<VideoLibraryPage />} />
         </Route>

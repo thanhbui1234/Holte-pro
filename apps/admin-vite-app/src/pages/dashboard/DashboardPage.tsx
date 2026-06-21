@@ -38,8 +38,8 @@ export function DashboardPage() {
 
   if (isLoading) {
     return (
-      <PageContainer title="Welcome back" description="Loading dashboard metrics...">
-        <div className="flex h-64 items-center justify-center">Loading...</div>
+      <PageContainer title="Chào mừng trở lại" description="Đang tải số liệu...">
+        <div className="flex h-64 items-center justify-center">Đang tải...</div>
       </PageContainer>
     );
   }
@@ -48,30 +48,30 @@ export function DashboardPage() {
 
   const metrics = [
     {
-      label: "Wedding Highlights",
+      label: "Highlight Đám Cưới",
       value: highlights?.length ?? 0,
-      hint: "Cinematic highlight reels in rotation",
+      hint: "Highlight điện ảnh đang xoay vòng",
       icon: Film,
       tone: "from-amber-400/30 to-amber-500/0",
     },
     {
-      label: "Wedding Reels",
+      label: "Reels Đám Cưới",
       value: reels?.length ?? 0,
-      hint: "Short-form reels for social",
+      hint: "Reels ngắn cho mạng xã hội",
       icon: Clapperboard,
       tone: "from-rose-400/25 to-rose-500/0",
     },
     {
-      label: "Traditional Films",
+      label: "Phim Truyền Thống",
       value: films?.length ?? 0,
-      hint: "Long-form heritage films",
+      hint: "Phim dài di sản",
       icon: Video,
       tone: "from-emerald-400/25 to-emerald-500/0",
     },
     {
-      label: "Happy Couples",
+      label: "Cặp đôi hạnh phúc",
       value: happyCouples,
-      hint: "Sourced from About → Stats",
+      hint: "Lấy từ Giới thiệu → Số liệu",
       icon: Heart,
       tone: "from-sky-400/25 to-sky-500/0",
     },
@@ -79,36 +79,36 @@ export function DashboardPage() {
 
   const recent = [
     {
-      label: "Banner video updated",
-      to: "/banner",
-      preview: banner?.videoSrc ?? "No video",
+      label: "Video banner đã cập nhật",
+      to: "/sections/banner",
+      preview: banner?.videoSrc ?? "Không có video",
       icon: ImageIcon,
     },
     {
-      label: "About story",
-      to: "/about",
+      label: "Câu chuyện Giới thiệu",
+      to: "/sections/about",
       preview: `${about?.titlePrefix ?? ""} ${about?.titleHighlight ?? ""}`.trim(),
       icon: Sparkles,
     },
     {
-      label: "Footer contact",
+      label: "Liên hệ Footer",
       to: "/footer",
-      preview: footer?.phone ?? "No phone",
+      preview: footer?.phone ?? "Không có số điện thoại",
       icon: Mail,
     },
   ];
 
   const shortcuts = [
-    { label: "Update hero banner", to: "/banner", icon: ImageIcon },
-    { label: "Edit About story", to: "/about", icon: Sparkles },
-    { label: "Adjust contact CTA", to: "/contact-cta", icon: Mail },
-    { label: "Recolour a section", to: "/wedding-highlights", icon: Palette },
+    { label: "Cập nhật banner chính", to: "/sections/banner", icon: ImageIcon },
+    { label: "Chỉnh sửa câu chuyện Giới thiệu", to: "/sections/about", icon: Sparkles },
+    { label: "Điều chỉnh CTA liên hệ", to: "/sections/contact-cta", icon: Mail },
+    { label: "Đổi màu một phần", to: "/sections/wedding-highlights", icon: Palette },
   ];
 
   return (
     <PageContainer
-      title="Welcome back"
-      description="A snapshot of what's currently published across jowfilm.vn."
+      title="Chào mừng trở lại"
+      description="Tổng quan những gì đang được đăng trên jowfilm.vn."
       badge="Studio admin"
     >
       {/* Metric strip */}
@@ -152,14 +152,14 @@ export function DashboardPage() {
           <header className="flex items-center justify-between border-b border-border/40 px-5 py-4">
             <div>
               <p className="text-[15px] font-semibold tracking-tight">
-                Recently edited
+                Đã chỉnh sửa gần đây
               </p>
               <p className="text-xs text-muted-foreground">
-                The latest values per section.
+                Các giá trị mới nhất theo từng phần.
               </p>
             </div>
             <span className="rounded-full border border-border/60 bg-background px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
-              {recent.length} sections
+              {recent.length} phần
             </span>
           </header>
           <ul className="divide-y divide-border/40">
@@ -190,10 +190,10 @@ export function DashboardPage() {
           <header className="flex items-center justify-between border-b border-border/40 px-5 py-4">
             <div>
               <p className="text-[15px] font-semibold tracking-tight">
-                Quick actions
+                Thao tác nhanh
               </p>
               <p className="text-xs text-muted-foreground">
-                Common edits, one click away.
+                Chỉnh sửa thường gặp, chỉ một cú nhấp.
               </p>
             </div>
           </header>

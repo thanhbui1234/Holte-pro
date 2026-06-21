@@ -1,97 +1,192 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { Film, Plus } from "lucide-react";
-import { useHighlights, useHighlightsConfig, useUpdateHighlightsConfig, useCreateHighlight, useUpdateHighlight, useRemoveHighlight } from "@/features/highlights/hooks/use-highlights";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Controller, useForm } from "react-hook-form";
+import { Film, Palette, Plus, Video, X } from "lucide-react";
+import { useSection, useUpdateSectionData } from "@/features/layout/hooks/use-layout";
 import { PageContainer } from "@/components/composite/PageContainer";
 import { SectionCard } from "@/components/composite/SectionCard";
-import { SectionConfigForm } from "@/components/composite/SectionConfigForm";
 import { EntityList } from "@/components/composite/EntityList";
 import { EntityFormDialog } from "@/components/composite/EntityFormDialog";
 import { ConfirmDialog } from "@/components/composite/ConfirmDialog";
 import { EmptyState } from "@/components/composite/EmptyState";
 import { FormField } from "@/components/composite/FormField";
-import { FormMediaField } from "@/components/composite/FormMediaField";
-import { Input } from "shared-ui";
-import { Button } from "shared-ui";
+import { ColorField } from "@/components/composite/ColorField";
+import { RichTextEditor } from "@/components/composite/RichTextEditor";
+import { VideoLibraryModal } from "@/components/composite/VideoLibraryModal";
+import { SaveBar } from "@/components/composite/SaveBar";
+import { Input, Button } from "shared-ui";
 import type { HighlightVideo } from "@/features/highlights/types/highlights.types";
+import type { ThemedSection } from "@/shared/types";
 
 const BLANK: HighlightVideo = { id: "", videoUrl: "", title: "", subtitle: "" };
 
+function extractYoutubeId(input: string): string | null {
+  const value = input?.trim();
+  if (!value) return null;
+  if (/^[A-Za-z0-9_-]{11}$/.test(value)) return value;
+  const patterns = [
+    /(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/|v\/))([A-Za-z0-9_-]{11})/,
+    /youtu\.be\/([A-Za-z0-9_-]{11})/,
+  ];
+  for (const re of patterns) {
+    const match = value.match(re);
+    if (match) return match[1];
+  }
+  return null;
+}
+
 export function WeddingHighlightsPage() {
-  const { data: items = [], isLoading: loadingItems } = useHighlights();
-  const { data: config, isLoading: loadingConfig } = useHighlightsConfig();
-  const { mutate: saveConfig } = useUpdateHighlightsConfig();
-  const { mutate: add } = useCreateHighlight();
-  const { mutate: update } = useUpdateHighlight();
-  const { mutate: remove } = useRemoveHighlight();
+  const [searchParams] = useSearchParams();
+  const sectionId = Number(searchParams.get("id"));
 
-  const [dialog, setDialog] = useState<{
-    mode: "add" | "edit";
-    initial: HighlightVideo;
-  } | null>(null);
+  const { data: section, isLoading } = useSection(sectionId);
+  const { mutate: updateSection, isPending: isSaving } = useUpdateSectionData();
+
+  const map = section?.data?.map ?? {};
+  const rawConfig = map.config ?? {};
+  const serverConfig = (typeof rawConfig === "string" ? JSON.parse(rawConfig) : rawConfig) as ThemedSection;
+  const serverItems = (Array.isArray(map.items) ? map.items : []) as HighlightVideo[];
+
+  // ── Config form (no own SaveBar) ────────────────────────────────
+  const configForm = useForm<ThemedSection>({ defaultValues: serverConfig });
+  const { register: regCfg, control: ctrlCfg, formState: { isDirty: isConfigDirty } } = configForm;
+
+  useEffect(() => {
+    if (section) configForm.reset(serverConfig);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [section]);
+
+  // ── Items local state ────────────────────────────────────────────
+  // null = no unsaved changes; array = user has pending edits
+  const [localItems, setLocalItems] = useState<HighlightVideo[] | null>(null);
+  const displayItems = localItems ?? serverItems;
+  const isDirty = localItems !== null || isConfigDirty;
+
+  // ── Dialog / delete state ────────────────────────────────────────
+  const [dialog, setDialog] = useState<{ mode: "add" | "edit"; initial: HighlightVideo } | null>(null);
   const [pendingDelete, setPendingDelete] = useState<HighlightVideo | null>(null);
-  const [videoSourceType, setVideoSourceType] = useState<"upload" | "youtube">("upload");
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
 
-  const form = useForm<HighlightVideo>({ defaultValues: BLANK });
+  const itemForm = useForm<HighlightVideo>({ defaultValues: BLANK });
 
-  const openAdd = () => {
-    form.reset(BLANK);
-    setVideoSourceType("upload");
-    setDialog({ mode: "add", initial: BLANK });
-  };
+  const openAdd = () => { itemForm.reset(BLANK); setDialog({ mode: "add", initial: BLANK }); };
+  const openEdit = (item: HighlightVideo) => { itemForm.reset(item); setDialog({ mode: "edit", initial: item }); };
 
-  const openEdit = (item: HighlightVideo) => {
-    form.reset(item);
-    setVideoSourceType(item.id ? "youtube" : "upload");
-    setDialog({ mode: "edit", initial: item });
-  };
-
-  const submit = form.handleSubmit((values) => {
+  const submitDialog = itemForm.handleSubmit((values) => {
     if (!dialog) return;
-    if (dialog.mode === "add") {
-      add(values);
-    } else {
-      update(values);
-    }
+    setLocalItems(
+      dialog.mode === "add"
+        ? [...displayItems, values]
+        : displayItems.map((i) => (i.id === dialog.initial.id ? values : i)),
+    );
     setDialog(null);
   });
 
-  if (loadingItems || loadingConfig) {
-    return <PageContainer title="Wedding Highlights" description="Loading..."><div className="p-8">Loading...</div></PageContainer>;
+  const confirmDelete = () => {
+    if (!pendingDelete) return;
+    setLocalItems(displayItems.filter((i) => i.id !== pendingDelete.id));
+    setPendingDelete(null);
+  };
+
+  // ── Main save (config + items together) ─────────────────────────
+  const save = () => {
+    const config = configForm.getValues();
+    updateSection(
+      { id: sectionId, data: { config, items: localItems ?? serverItems } as unknown as Record<string, unknown> },
+      {
+        onSuccess: () => {
+          setLocalItems(null);
+          configForm.reset(config);
+        },
+      },
+    );
+  };
+
+  const reset = () => {
+    setLocalItems(null);
+    configForm.reset(serverConfig);
+  };
+
+  if (isLoading) {
+    return (
+      <PageContainer title="Highlight Đám Cưới" description="Đang tải...">
+        <div className="p-8">Đang tải...</div>
+      </PageContainer>
+    );
   }
 
   return (
     <PageContainer
-      title="Wedding Highlights"
-      description="Featured highlight videos. Card-stack carousel on desktop, grid on mobile."
+      title="Highlight Đám Cưới"
+      description="Video highlight nổi bật. Carousel dạng thẻ trên desktop, lưới trên mobile."
     >
-      {config && <SectionConfigForm value={config} onSave={saveConfig} />}
+      {/* Config fields — no own SaveBar */}
+      <SectionCard
+        icon={<Palette className="h-4 w-4" />}
+        title="Tiêu đề phần"
+        description="Kiểm soát cách phần này hiển thị trên trang công khai."
+      >
+        <div className="grid gap-4 md:grid-cols-2">
+          <FormField label="Eyebrow" htmlFor="cfg-eyebrow">
+            <Input id="cfg-eyebrow" placeholder="Featured Works" {...regCfg("eyebrow")} />
+          </FormField>
+          <FormField label="Màu nền" htmlFor="cfg-bg">
+            <Controller
+              control={ctrlCfg}
+              name="backgroundColor"
+              render={({ field }) => (
+                <ColorField id="cfg-bg" value={field.value} onChange={field.onChange} />
+              )}
+            />
+          </FormField>
+          <FormField label="Tiền tố tiêu đề" htmlFor="cfg-title">
+            <Input id="cfg-title" placeholder="Wedding" {...regCfg("titlePrefix")} />
+          </FormField>
+          <FormField label="Từ in nghiêng nổi bật" htmlFor="cfg-highlight">
+            <Input id="cfg-highlight" placeholder="Highlights" {...regCfg("titleHighlight")} />
+          </FormField>
+          <FormField label="Mô tả" className="md:col-span-2">
+            <Controller
+              control={ctrlCfg}
+              name="description"
+              render={({ field }) => (
+                <RichTextEditor
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                  placeholder="Mô tả ngắn cho phần này"
+                />
+              )}
+            />
+          </FormField>
+        </div>
+      </SectionCard>
 
+      {/* Video list */}
       <SectionCard
         icon={<Film className="h-4 w-4" />}
-        title="Videos"
-        description={`${items.length} videos in rotation`}
+        title="Video"
+        description={`${displayItems.length} video đang xoay vòng`}
         actions={
           <Button size="sm" onClick={openAdd}>
             <Plus className="h-4 w-4" />
-            Add video
+            Thêm video
           </Button>
         }
       >
         <EntityList
-          items={items}
+          items={displayItems}
           getKey={(item) => item.id}
           onEdit={openEdit}
           onDelete={(item) => setPendingDelete(item)}
           emptyState={
             <EmptyState
               icon={<Film className="h-4 w-4" />}
-              title="No highlights yet"
-              description="Add a YouTube video to populate the homepage carousel."
+              title="Chưa có highlight nào"
+              description="Thêm video YouTube để điền vào carousel trang chủ."
               action={
                 <Button size="sm" onClick={openAdd}>
                   <Plus className="h-4 w-4" />
-                  Add first video
+                  Thêm video đầu tiên
                 </Button>
               }
             />
@@ -106,10 +201,7 @@ export function WeddingHighlightsPage() {
                     className="h-full w-full object-cover"
                   />
                 ) : item.videoUrl ? (
-                  <video
-                    src={item.videoUrl}
-                    className="h-full w-full object-cover"
-                  />
+                  <video src={item.videoUrl} className="h-full w-full object-cover" />
                 ) : (
                   <Film className="h-4 w-4 text-muted-foreground" />
                 )}
@@ -123,75 +215,97 @@ export function WeddingHighlightsPage() {
         />
       </SectionCard>
 
+      {/* Add / edit dialog */}
       <EntityFormDialog
         open={dialog !== null}
         onOpenChange={(open) => !open && setDialog(null)}
         mode={dialog?.mode ?? "add"}
         entityLabel="Video"
-        description="YouTube ID, caption shown on the card."
-        onSubmit={submit}
+        description="Chọn video từ thư viện, sau đó điền tiêu đề và phụ đề."
+        onSubmit={submitDialog}
       >
-        <div className="space-y-4 rounded-lg border border-border/60 bg-muted/30 p-4">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">Video Source</p>
-            <div className="flex items-center rounded-md border border-border/60 bg-background p-1">
-              <button
-                type="button"
-                className={`rounded-sm px-3 py-1 text-xs font-medium transition-colors ${videoSourceType === "upload" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-                onClick={() => setVideoSourceType("upload")}
-              >
-                Upload File
-              </button>
-              <button
-                type="button"
-                className={`rounded-sm px-3 py-1 text-xs font-medium transition-colors ${videoSourceType === "youtube" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-                onClick={() => setVideoSourceType("youtube")}
-              >
-                YouTube Link
-              </button>
-            </div>
-          </div>
-
-          {videoSourceType === "upload" ? (
-            <FormField label="Upload Video" htmlFor="hl-video">
-              <FormMediaField
-                control={form.control}
-                name="videoUrl"
-                label=""
-                accept=".mp4,.mov,.avi,.mkv,.wmv,.flv,.webm,video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/x-ms-wmv,video/x-flv,video/webm"
-                placeholder="Drag & drop or click to upload video file"
-              />
-            </FormField>
-          ) : (
-            <FormField label="YouTube video ID" htmlFor="hl-id" hint="Only video ID (e.g. SlQR9iu09bQ)">
-              <Input id="hl-id" placeholder="SlQR9iu09bQ" {...form.register("id")} />
-            </FormField>
-          )}
-        </div>
-        <FormField label="Title" htmlFor="hl-title">
-          <Input id="hl-title" {...form.register("title")} />
+        <Controller
+          control={itemForm.control}
+          name="id"
+          render={({ field }) => {
+            const ytId = field.value;
+            return (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Video</label>
+                {ytId ? (
+                  <div className="relative overflow-hidden rounded-lg border border-border/60 bg-muted/30">
+                    <div className="aspect-video">
+                      <img
+                        src={`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`}
+                        alt="Thumbnail"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => { field.onChange(""); itemForm.setValue("videoUrl", ""); }}
+                      className="absolute right-2 top-2 z-20 rounded-full bg-black/60 p-1.5 text-white transition hover:bg-black/80"
+                      aria-label="Xóa video"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                    <div
+                      className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-black/50 opacity-0 transition-opacity hover:opacity-100"
+                      onClick={() => setVideoModalOpen(true)}
+                    >
+                      <p className="font-medium text-white">Nhấp để thay đổi video</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => setVideoModalOpen(true)}
+                    className="flex aspect-video cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/10 transition hover:border-muted-foreground/50 hover:bg-muted/30"
+                  >
+                    <Video className="h-8 w-8 text-muted-foreground/60" />
+                    <p className="text-sm text-muted-foreground">Nhấp để chọn video từ thư viện</p>
+                  </div>
+                )}
+                <VideoLibraryModal
+                  open={videoModalOpen}
+                  onOpenChange={setVideoModalOpen}
+                  onSelect={(url) => {
+                    const id = extractYoutubeId(url);
+                    if (id) {
+                      field.onChange(id);
+                      itemForm.setValue("videoUrl", url);
+                    }
+                  }}
+                />
+              </div>
+            );
+          }}
+        />
+        <FormField label="Tiêu đề" htmlFor="hl-title">
+          <Input id="hl-title" {...itemForm.register("title")} />
         </FormField>
-        <FormField label="Subtitle" htmlFor="hl-sub">
-          <Input
-            id="hl-sub"
-            placeholder="Đà Lạt · Spring 2024"
-            {...form.register("subtitle")}
-          />
+        <FormField label="Phụ đề" htmlFor="hl-sub">
+          <Input id="hl-sub" placeholder="Đà Lạt · Spring 2024" {...itemForm.register("subtitle")} />
         </FormField>
       </EntityFormDialog>
 
+      {/* Delete confirm */}
       <ConfirmDialog
         open={pendingDelete !== null}
         onOpenChange={(open) => !open && setPendingDelete(null)}
-        title="Delete this highlight?"
-        description={
-          pendingDelete
-            ? `"${pendingDelete.title}" will be removed from the homepage carousel.`
-            : undefined
-        }
-        confirmLabel="Delete"
+        title="Xóa highlight này?"
+        description={pendingDelete ? `"${pendingDelete.title}" sẽ bị xóa khỏi carousel trang chủ.` : undefined}
+        confirmLabel="Xóa"
         destructive
-        onConfirm={() => pendingDelete && remove(pendingDelete.id)}
+        onConfirm={confirmDelete}
+      />
+
+      {/* Single SaveBar for everything */}
+      <SaveBar
+        isDirty={isDirty}
+        isSubmitting={isSaving}
+        onSave={save}
+        onReset={reset}
+        saveLabel="Lưu highlight"
       />
     </PageContainer>
   );

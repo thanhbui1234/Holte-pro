@@ -1,7 +1,8 @@
 import { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Controller, useForm } from "react-hook-form";
 import { Mail, Palette, Type } from "lucide-react";
-import { useContactCta, useUpdateContactCta } from "@/features/contact/hooks/use-contact";
+import { useSection, useUpdateSectionData } from "@/features/layout/hooks/use-layout";
 import { PageContainer } from "@/components/composite/PageContainer";
 import { SectionCard } from "@/components/composite/SectionCard";
 import { FormField } from "@/components/composite/FormField";
@@ -11,53 +12,72 @@ import { Input } from "shared-ui";
 import { Textarea } from "shared-ui";
 import type { ContactCtaData } from "@/features/contact/types/contact.types";
 
+function mapToContactCtaData(map: Record<string, unknown>): ContactCtaData {
+  return {
+    eyebrow: (map.eyebrow as string) ?? "",
+    titlePrefix: (map.titlePrefix as string) ?? "",
+    titleHighlight: (map.titleHighlight as string) ?? "",
+    description: (map.description as string) ?? "",
+    ctaLabel: (map.ctaLabel as string) ?? "",
+    ctaHref: (map.ctaHref as string) ?? "",
+    backgroundColor: (map.backgroundColor as string) ?? "#0a0a0a",
+  };
+}
+
 export function ContactCtaPage() {
-  const { data, isLoading } = useContactCta();
-  const { mutate: save } = useUpdateContactCta();
-  
+  const [searchParams] = useSearchParams();
+  const sectionId = Number(searchParams.get("id"));
+
+  const { data: section, isLoading } = useSection(sectionId);
+  const { mutate: save } = useUpdateSectionData();
+
   const {
     register,
     control,
     handleSubmit,
     reset,
     formState: { isDirty },
-  } = useForm<ContactCtaData>({ defaultValues: data });
+  } = useForm<ContactCtaData>({ defaultValues: mapToContactCtaData({}) });
 
   useEffect(() => {
-    if (data) reset(data);
-  }, [data, reset]);
+    if (section) reset(mapToContactCtaData(section.data.map));
+  }, [section, reset]);
 
   const submit = handleSubmit((values) => {
-    save(values);
+    save({ id: sectionId, data: values as unknown as Record<string, unknown> });
     reset(values);
   });
 
   if (isLoading) {
-    return <PageContainer title="Contact CTA" description="Loading..."><div className="p-8">Loading...</div></PageContainer>;
+    return (
+      <PageContainer title="CTA Liên hệ" description="Đang tải...">
+        <div className="p-8">Đang tải...</div>
+      </PageContainer>
+    );
   }
 
   return (
     <form onSubmit={submit}>
       <PageContainer
-        title="Contact CTA"
-        description="The closing call-to-action block on the homepage with the gold button."
+        title="CTA Liên hệ"
+        description="Khối kêu gọi hành động cuối trang chủ với nút vàng."
       >
         <SectionCard
           icon={<Type className="h-4 w-4" />}
-          title="Heading"
-          description="Eyebrow, headline split into prefix + italic highlight, and the supporting copy."
+          title="Tiêu đề"
+          description="Eyebrow, tiêu đề chia thành tiền tố + in nghiêng nổi bật, và nội dung hỗ trợ."
         >
           <div className="grid gap-4 md:grid-cols-2">
             <FormField label="Eyebrow" htmlFor="cta-eyebrow" className="md:col-span-2">
               <Input id="cta-eyebrow" {...register("eyebrow")} />
             </FormField>
-            <FormField label="Title prefix" htmlFor="cta-prefix">
+            <FormField label="Tiền tố tiêu đề" htmlFor="cta-prefix">
               <Input id="cta-prefix" {...register("titlePrefix")} />
             </FormField>
-            <FormField label="Italic highlight word" htmlFor="cta-highlight">
+            <FormField label="Từ in nghiêng nổi bật" htmlFor="cta-highlight">
               <Input id="cta-highlight" {...register("titleHighlight")} />
             </FormField>
-            <FormField label="Description" htmlFor="cta-desc" className="md:col-span-2">
+            <FormField label="Mô tả" htmlFor="cta-desc" className="md:col-span-2">
               <Textarea id="cta-desc" rows={3} {...register("description")} />
             </FormField>
           </div>
@@ -65,14 +85,14 @@ export function ContactCtaPage() {
 
         <SectionCard
           icon={<Mail className="h-4 w-4" />}
-          title="Call to action"
-          description="Button label and target."
+          title="Kêu gọi hành động"
+          description="Nhãn nút và đích đến."
         >
           <div className="grid gap-4 md:grid-cols-2">
-            <FormField label="Button label" htmlFor="cta-label">
+            <FormField label="Nhãn nút" htmlFor="cta-label">
               <Input id="cta-label" {...register("ctaLabel")} />
             </FormField>
-            <FormField label="Target URL" htmlFor="cta-href">
+            <FormField label="URL đích" htmlFor="cta-href">
               <Input id="cta-href" placeholder="/contact" {...register("ctaHref")} />
             </FormField>
           </div>
@@ -80,19 +100,15 @@ export function ContactCtaPage() {
 
         <SectionCard
           icon={<Palette className="h-4 w-4" />}
-          title="Background"
-          description="The wash behind this closing block."
+          title="Nền"
+          description="Nền phía sau khối đóng này."
         >
-          <FormField label="Background colour" htmlFor="cta-bg">
+          <FormField label="Màu nền" htmlFor="cta-bg">
             <Controller
               control={control}
               name="backgroundColor"
               render={({ field }) => (
-                <ColorField
-                  id="cta-bg"
-                  value={field.value}
-                  onChange={field.onChange}
-                />
+                <ColorField id="cta-bg" value={field.value} onChange={field.onChange} />
               )}
             />
           </FormField>
@@ -101,8 +117,8 @@ export function ContactCtaPage() {
         <SaveBar
           isDirty={isDirty}
           onSave={submit}
-          onReset={() => reset(data)}
-          saveLabel="Save CTA"
+          onReset={() => reset(mapToContactCtaData(section?.data?.map ?? {}))}
+          saveLabel="Lưu CTA"
         />
       </PageContainer>
     </form>

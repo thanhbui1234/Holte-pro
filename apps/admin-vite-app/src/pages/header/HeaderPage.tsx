@@ -30,36 +30,36 @@ export function HeaderPage() {
   });
 
   if (isLoading) {
-    return <PageContainer title="Header" description="Loading..."><div className="p-8">Loading...</div></PageContainer>;
+    return <PageContainer title="Header" description="Đang tải..."><div className="p-8">Đang tải...</div></PageContainer>;
   }
 
   return (
     <form onSubmit={submit}>
       <PageContainer
         title="Header"
-        description="Three social links rendered top-right on every page."
+        description="Ba liên kết mạng xã hội hiển thị ở góc trên phải mỗi trang."
       >
         <SectionCard
           icon={<PanelsTopLeft className="h-4 w-4" />}
-          title="Social links"
-          description="Use full https:// URLs. Email uses a mailto: prefix."
+          title="Liên kết mạng xã hội"
+          description="Dùng URL https:// đầy đủ. Email dùng tiền tố mailto:."
         >
           <div className="grid gap-4 md:grid-cols-2">
-            <FormField label="Facebook URL" htmlFor="hdr-fb">
+            <FormField label="URL Facebook" htmlFor="hdr-fb">
               <Input
                 id="hdr-fb"
                 placeholder="https://facebook.com/..."
                 {...register("facebookUrl")}
               />
             </FormField>
-            <FormField label="Instagram URL" htmlFor="hdr-ig">
+            <FormField label="URL Instagram" htmlFor="hdr-ig">
               <Input
                 id="hdr-ig"
                 placeholder="https://instagram.com/..."
                 {...register("instagramUrl")}
               />
             </FormField>
-            <FormField label="Email link" htmlFor="hdr-email" className="md:col-span-2">
+            <FormField label="Liên kết email" htmlFor="hdr-email" className="md:col-span-2">
               <Input
                 id="hdr-email"
                 placeholder="mailto:hello@jowfilm.vn"
@@ -73,7 +73,7 @@ export function HeaderPage() {
           isDirty={isDirty}
           onSave={submit}
           onReset={() => reset(data)}
-          saveLabel="Save header"
+          saveLabel="Lưu header"
         />
       </PageContainer>
     </form>

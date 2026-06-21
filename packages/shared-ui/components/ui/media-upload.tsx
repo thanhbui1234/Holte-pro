@@ -12,6 +12,7 @@ export interface MediaUploadProps {
   id?: string;
   className?: string;
   disabled?: boolean;
+  urlOnly?: boolean;
 }
 
 function inferMediaType(url: string, accept: string): "image" | "video" | "youtube" {
@@ -33,6 +34,7 @@ export function MediaUpload({
   id,
   className,
   disabled = false,
+  urlOnly = false,
 }: MediaUploadProps) {
   const blobRef = React.useRef<string | null>(null);
   const onChangeRef = React.useRef(onChange);
@@ -176,6 +178,76 @@ export function MediaUpload({
           </div>
         )}
       </>
+    );
+  }
+
+  if (urlOnly) {
+    return (
+      <div className={cn("space-y-2", className)}>
+        <div className="flex gap-2">
+          <input
+            id={id}
+            type="url"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            disabled={disabled}
+            placeholder={placeholder ?? "https://..."}
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+          />
+          {value && !disabled && (
+            <button
+              type="button"
+              onClick={handleRemove}
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-input bg-transparent text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+              aria-label="Xóa URL"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+        {hasValue && !loadError && (
+          <div className="relative overflow-hidden rounded-lg border bg-muted/30">
+            <div className="aspect-video cursor-pointer" onClick={() => setLightbox(true)}>
+              <img
+                src={value}
+                alt="Xem trước"
+                className="h-full w-full object-cover"
+                onError={() => setLoadError(true)}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setLightbox(true)}
+              className="absolute bottom-2 right-2 rounded-full bg-black/60 p-1.5 text-white transition hover:bg-black/80"
+              aria-label="Xem toàn màn hình"
+            >
+              <Maximize2 className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+        {lightbox && hasValue && !loadError && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+            onClick={() => setLightbox(false)}
+          >
+            <button
+              type="button"
+              onClick={() => setLightbox(false)}
+              className="absolute top-4 right-4 rounded-full bg-white/10 p-2 text-white transition hover:bg-white/20"
+              aria-label="Đóng"
+            >
+              <X className="h-6 w-6" />
+            </button>
+            <div className="max-h-[90vh] max-w-[90vw]" onClick={(e) => e.stopPropagation()}>
+              <img
+                src={value}
+                alt="Xem đầy đủ"
+                className="max-h-[90vh] max-w-[90vw] rounded-lg object-contain"
+              />
+            </div>
+          </div>
+        )}
+      </div>
     );
   }
 

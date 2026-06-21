@@ -158,6 +158,32 @@ body {
   opacity: 1;
 }
 
+/* ── Tiptap / ProseMirror editor content styles ─────────────────── */
+.ProseMirror {
+  outline: none;
+  min-height: 120px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--foreground);
+}
+.ProseMirror p { margin: 0 0 0.5rem; }
+.ProseMirror p:last-child { margin-bottom: 0; }
+.ProseMirror strong { font-weight: 600; }
+.ProseMirror em { font-style: italic; }
+.ProseMirror ul,
+.ProseMirror ol { padding-left: 1.4rem; margin: 0 0 0.5rem; }
+.ProseMirror ul { list-style-type: disc; }
+.ProseMirror ol { list-style-type: decimal; }
+.ProseMirror li { margin-bottom: 0.15rem; }
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--muted-foreground);
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+
 /* Hide scrollbar utility */
 .scrollbar-thin::-webkit-scrollbar {
   width: 6px;

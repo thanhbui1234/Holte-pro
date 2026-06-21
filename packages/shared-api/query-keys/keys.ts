@@ -22,4 +22,10 @@ export const queryKeys = {
     about: () => [...queryKeys.content.all, "about"] as const,
     contact: () => [...queryKeys.content.all, "contact"] as const,
   },
+  sections: {
+    all: ["sections"] as const,
+    list: (filters?: Record<string, string>) =>
+      [...queryKeys.sections.all, "list", filters] as const,
+    detail: (id: number) => [...queryKeys.sections.all, "detail", id] as const,
+  },
 } as const;

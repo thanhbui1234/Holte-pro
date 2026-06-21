@@ -21,7 +21,9 @@ export function EntityList<T>({
   emptyState,
   className,
 }: EntityListProps<T>) {
-  if (items.length === 0 && emptyState) {
+  const safeItems = Array.isArray(items) ? items : [];
+
+  if (safeItems.length === 0 && emptyState) {
     return <>{emptyState}</>;
   }
 
@@ -32,31 +34,31 @@ export function EntityList<T>({
         className,
       )}
     >
-      {items.map((item) => (
-        <li
-          key={getKey(item)}
-          className="group/row flex items-center gap-4 px-3 py-3 transition-colors hover:bg-amber-500/5"
-        >
-          <div className="min-w-0 flex-1">{renderRow(item)}</div>
-          <div className="flex shrink-0 gap-1 opacity-0 transition-opacity group-hover/row:opacity-100">
-            <button
-              type="button"
-              onClick={() => onEdit(item)}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-amber-700 dark:hover:text-amber-300"
-              aria-label="Edit"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
-            <button
-              type="button"
-              onClick={() => onDelete(item)}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-              aria-label="Delete"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        </li>
+      {safeItems.map((item) => (
+          <li
+              key={getKey(item)}
+              className="group/row flex items-center gap-4 px-3 py-3 transition-colors hover:bg-amber-500/5"
+          >
+            <div className="min-w-0 flex-1">{renderRow(item)}</div>
+            <div className="flex shrink-0 gap-1 opacity-0 transition-opacity group-hover/row:opacity-100">
+              <button
+                  type="button"
+                  onClick={() => onEdit(item)}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-amber-700 dark:hover:text-amber-300"
+                  aria-label="Edit"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+              <button
+                  type="button"
+                  onClick={() => onDelete(item)}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                  aria-label="Delete"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </li>
       ))}
     </ul>
   );

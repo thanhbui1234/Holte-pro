@@ -1,22 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
-import { Link2, Plus, Trash2, Video, Youtube } from "lucide-react";
-import { useFilms, useFilmsConfig, useUpdateFilmsConfig, useCreateFilm, useUpdateFilm, useRemoveFilm } from "@/features/films/hooks/use-films";
+import { Palette, Plus, Trash2, Video, Youtube, X } from "lucide-react";
+import { useSection, useUpdateSectionData } from "@/features/layout/hooks/use-layout";
 import { PageContainer } from "@/components/composite/PageContainer";
 import { SectionCard } from "@/components/composite/SectionCard";
-import { SectionConfigForm } from "@/components/composite/SectionConfigForm";
 import { EntityList } from "@/components/composite/EntityList";
 import { EntityFormDialog } from "@/components/composite/EntityFormDialog";
 import { ConfirmDialog } from "@/components/composite/ConfirmDialog";
 import { EmptyState } from "@/components/composite/EmptyState";
 import { FormField } from "@/components/composite/FormField";
 import { FormMediaField } from "@/components/composite/FormMediaField";
+import { ColorField } from "@/components/composite/ColorField";
+import { VideoLibraryModal } from "@/components/composite/VideoLibraryModal";
+import { SaveBar } from "@/components/composite/SaveBar";
 import { TagInput } from "@/components/composite/TagInput";
-import { Badge } from "shared-ui";
-import { Input } from "shared-ui";
-import { Textarea } from "shared-ui";
-import { Button } from "shared-ui";
+import { Badge, Input, Textarea, Button } from "shared-ui";
 import type { FilmItem, FilmPreviewImage } from "@/features/films/types/films.types";
+import type { ThemedSection } from "@/shared/types";
 
 const blankPreviewImage = (): FilmPreviewImage => ({
   src: "",
@@ -38,77 +39,165 @@ const blankFilm = (): FilmItem => ({
   previewImages: [],
 });
 
+function extractYoutubeId(input: string): string | null {
+  const value = input?.trim();
+  if (!value) return null;
+  if (/^[A-Za-z0-9_-]{11}$/.test(value)) return value;
+  const patterns = [
+    /(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/|v\/))([A-Za-z0-9_-]{11})/,
+    /youtu\.be\/([A-Za-z0-9_-]{11})/,
+  ];
+  for (const re of patterns) {
+    const match = value.match(re);
+    if (match) return match[1];
+  }
+  return null;
+}
+
 export function TraditionalFilmsPage() {
-  const { data: items = [], isLoading: loadingItems } = useFilms();
-  const { data: config, isLoading: loadingConfig } = useFilmsConfig();
-  const { mutate: saveConfig } = useUpdateFilmsConfig();
-  const { mutate: add } = useCreateFilm();
-  const { mutate: update } = useUpdateFilm();
-  const { mutate: remove } = useRemoveFilm();
+  const [searchParams] = useSearchParams();
+  const sectionId = Number(searchParams.get("id"));
 
-  const [dialog, setDialog] = useState<{ mode: "add" | "edit" } | null>(null);
+  const { data: section, isLoading } = useSection(sectionId);
+  const { mutate: updateSection, isPending: isSaving } = useUpdateSectionData();
+
+  const map = section?.data?.map ?? {};
+  const rawConfig = map.config ?? {};
+  const serverConfig = (typeof rawConfig === "string" ? JSON.parse(rawConfig) : rawConfig) as ThemedSection;
+  const serverItems = (Array.isArray(map.items) ? map.items : []) as FilmItem[];
+
+  // ── Config form (no own SaveBar) ─────────────────────────────────
+  const configForm = useForm<ThemedSection>({ defaultValues: serverConfig });
+  const { register: regCfg, control: ctrlCfg, formState: { isDirty: isConfigDirty } } = configForm;
+
+  useEffect(() => {
+    if (section) configForm.reset(serverConfig);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [section]);
+
+  // ── Items local state ────────────────────────────────────────────
+  const [localItems, setLocalItems] = useState<FilmItem[] | null>(null);
+  const displayItems = localItems ?? serverItems;
+  const isDirty = localItems !== null || isConfigDirty;
+
+  // ── Dialog / delete / video modal ────────────────────────────────
+  const [dialog, setDialog] = useState<{ mode: "add" | "edit"; initial: FilmItem } | null>(null);
   const [pendingDelete, setPendingDelete] = useState<FilmItem | null>(null);
-  const [videoSourceType, setVideoSourceType] = useState<"upload" | "youtube">("upload");
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
 
-  const form = useForm<FilmItem>({ defaultValues: blankFilm() });
-  const previewImages = useFieldArray({ control: form.control, name: "previewImages" });
-  const watchedYoutubeUrl = form.watch("youtubeUrl");
+  const itemForm = useForm<FilmItem>({ defaultValues: blankFilm() });
+  const previewImages = useFieldArray({ control: itemForm.control, name: "previewImages" });
+  const watchedYoutubeUrl = itemForm.watch("youtubeUrl");
+  const ytIdPreview = extractYoutubeId(watchedYoutubeUrl);
 
-  const openAdd = () => {
-    form.reset(blankFilm());
-    setVideoSourceType("upload");
-    setDialog({ mode: "add" });
-  };
+  const openAdd = () => { itemForm.reset(blankFilm()); setDialog({ mode: "add", initial: blankFilm() }); };
+  const openEdit = (item: FilmItem) => { itemForm.reset(item); setDialog({ mode: "edit", initial: item }); };
 
-  const openEdit = (item: FilmItem) => {
-    form.reset(item);
-    setVideoSourceType(item.youtubeUrl ? "youtube" : "upload");
-    setDialog({ mode: "edit" });
-  };
-
-  const submit = form.handleSubmit((values) => {
+  const submitDialog = itemForm.handleSubmit((values) => {
     if (!dialog) return;
-    if (dialog.mode === "add") add(values);
-    else update(values);
+    setLocalItems(
+      dialog.mode === "add"
+        ? [...displayItems, values]
+        : displayItems.map((i) => (i.id === dialog.initial.id ? values : i)),
+    );
     setDialog(null);
   });
 
-  if (loadingItems || loadingConfig) {
-    return <PageContainer title="Traditional Films" description="Loading..."><div className="p-8">Loading...</div></PageContainer>;
+  const confirmDelete = () => {
+    if (!pendingDelete) return;
+    setLocalItems(displayItems.filter((i) => i.id !== pendingDelete.id));
+    setPendingDelete(null);
+  };
+
+  // ── Main save ────────────────────────────────────────────────────
+  const save = () => {
+    const config = configForm.getValues();
+    updateSection(
+      { id: sectionId, data: { config, items: localItems ?? serverItems } as unknown as Record<string, unknown> },
+      {
+        onSuccess: () => {
+          setLocalItems(null);
+          configForm.reset(config);
+        },
+      },
+    );
+  };
+
+  const resetAll = () => {
+    setLocalItems(null);
+    configForm.reset(serverConfig);
+  };
+
+  if (isLoading) {
+    return (
+      <PageContainer title="Phim Truyền Thống" description="Đang tải...">
+        <div className="p-8">Đang tải...</div>
+      </PageContainer>
+    );
   }
 
   return (
     <PageContainer
-      title="Traditional Films"
-      description="Long-form films featured in the heritage section."
+      title="Phim Truyền Thống"
+      description="Phim dài nổi bật trong phần di sản."
     >
-      {config && <SectionConfigForm value={config} onSave={saveConfig} />}
+      {/* Config fields */}
+      <SectionCard
+        icon={<Palette className="h-4 w-4" />}
+        title="Tiêu đề phần"
+        description="Kiểm soát cách phần này hiển thị trên trang công khai."
+      >
+        <div className="grid gap-4 md:grid-cols-2">
+          <FormField label="Eyebrow" htmlFor="cfg-eyebrow">
+            <Input id="cfg-eyebrow" placeholder="Featured Works" {...regCfg("eyebrow")} />
+          </FormField>
+          <FormField label="Màu nền" htmlFor="cfg-bg">
+            <Controller
+              control={ctrlCfg}
+              name="backgroundColor"
+              render={({ field }) => (
+                <ColorField id="cfg-bg" value={field.value} onChange={field.onChange} />
+              )}
+            />
+          </FormField>
+          <FormField label="Tiền tố tiêu đề" htmlFor="cfg-title">
+            <Input id="cfg-title" placeholder="Traditional" {...regCfg("titlePrefix")} />
+          </FormField>
+          <FormField label="Từ in nghiêng nổi bật" htmlFor="cfg-highlight">
+            <Input id="cfg-highlight" placeholder="Films" {...regCfg("titleHighlight")} />
+          </FormField>
+          <FormField label="Mô tả" htmlFor="cfg-desc" className="md:col-span-2">
+            <Textarea id="cfg-desc" rows={3} placeholder="Mô tả ngắn cho phần này" {...regCfg("description")} />
+          </FormField>
+        </div>
+      </SectionCard>
 
+      {/* Film list */}
       <SectionCard
         icon={<Video className="h-4 w-4" />}
-        title="Films"
-        description={`${items.length} films published`}
+        title="Phim"
+        description={`${displayItems.length} phim đã đăng`}
         actions={
           <Button size="sm" onClick={openAdd}>
             <Plus className="h-4 w-4" />
-            Add film
+            Thêm phim
           </Button>
         }
       >
         <EntityList
-          items={items}
+          items={displayItems}
           getKey={(item) => item.id}
           onEdit={openEdit}
           onDelete={(item) => setPendingDelete(item)}
           emptyState={
             <EmptyState
               icon={<Video className="h-4 w-4" />}
-              title="No films yet"
-              description="Publish your first traditional film to populate the homepage row."
+              title="Chưa có phim nào"
+              description="Đăng phim truyền thống đầu tiên để điền vào hàng trang chủ."
               action={
                 <Button size="sm" onClick={openAdd}>
                   <Plus className="h-4 w-4" />
-                  Add first film
+                  Thêm phim đầu tiên
                 </Button>
               }
             />
@@ -125,19 +214,12 @@ export function TraditionalFilmsPage() {
                       className="h-full w-full object-cover"
                     />
                   ) : item.videoUrl ? (
-                    <video
-                      src={item.videoUrl}
-                      className="h-full w-full object-cover"
-                    />
+                    <video src={item.videoUrl} className="h-full w-full object-cover" />
                   ) : item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="h-full w-full object-cover"
-                    />
+                    <img src={item.image} alt={item.title} className="h-full w-full object-cover" />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
-                      No media
+                      Không có phương tiện
                     </div>
                   )}
                 </div>
@@ -173,87 +255,75 @@ export function TraditionalFilmsPage() {
         />
       </SectionCard>
 
+      {/* Add / edit dialog */}
       <EntityFormDialog
         open={dialog !== null}
         onOpenChange={(open) => !open && setDialog(null)}
         mode={dialog?.mode ?? "add"}
-        entityLabel="Film"
-        onSubmit={submit}
+        entityLabel="Phim"
+        onSubmit={submitDialog}
       >
-        <div className="space-y-4 rounded-lg border border-border/60 bg-muted/30 p-4">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">Video Source</p>
-            <div className="flex items-center rounded-md border border-border/60 bg-background p-1">
-              <button
-                type="button"
-                className={`rounded-sm px-3 py-1 text-xs font-medium transition-colors ${videoSourceType === "upload" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-                onClick={() => setVideoSourceType("upload")}
-              >
-                Upload File
-              </button>
-              <button
-                type="button"
-                className={`rounded-sm px-3 py-1 text-xs font-medium transition-colors ${videoSourceType === "youtube" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-                onClick={() => setVideoSourceType("youtube")}
-              >
-                YouTube Link
-              </button>
-            </div>
-          </div>
-          
-          {videoSourceType === "upload" ? (
-            <FormField label="Upload Video" htmlFor="film-video">
-              <FormMediaField
-                control={form.control}
-                name="videoUrl"
-                label=""
-                accept=".mp4,.mov,.avi,.mkv,.wmv,.flv,.webm,video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/x-ms-wmv,video/x-flv,video/webm"
-                placeholder="Drag & drop or click to upload video file"
-              />
-            </FormField>
-          ) : (
-            <FormField
-              label="YouTube link"
-              htmlFor="film-youtube"
-              hint="Paste a full YouTube URL or the bare 11-character video ID."
-            >
-              <div className="relative">
-                <Link2 className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="film-youtube"
-                  className="pl-9"
-                  placeholder="https://www.youtube.com/watch?v=..."
-                  {...form.register("youtubeUrl")}
+        {/* Video picker */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Video</label>
+          {ytIdPreview ? (
+            <div className="relative overflow-hidden rounded-lg border border-border/60 bg-muted/30">
+              <div className="aspect-video">
+                <img
+                  src={`https://img.youtube.com/vi/${ytIdPreview}/mqdefault.jpg`}
+                  alt="Thumbnail"
+                  className="h-full w-full object-cover"
                 />
               </div>
-              <YoutubePreview url={watchedYoutubeUrl} />
-            </FormField>
+              <button
+                type="button"
+                onClick={() => { itemForm.setValue("youtubeUrl", ""); itemForm.setValue("videoUrl", ""); }}
+                className="absolute right-2 top-2 z-20 rounded-full bg-black/60 p-1.5 text-white transition hover:bg-black/80"
+                aria-label="Xóa video"
+              >
+                <X className="h-4 w-4" />
+              </button>
+              <div
+                className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-black/50 opacity-0 transition-opacity hover:opacity-100"
+                onClick={() => setVideoModalOpen(true)}
+              >
+                <p className="font-medium text-white">Nhấp để thay đổi video</p>
+              </div>
+            </div>
+          ) : (
+            <div
+              onClick={() => setVideoModalOpen(true)}
+              className="flex aspect-video cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/10 transition hover:border-muted-foreground/50 hover:bg-muted/30"
+            >
+              <Video className="h-8 w-8 text-muted-foreground/60" />
+              <p className="text-sm text-muted-foreground">Nhấp để chọn video từ thư viện</p>
+            </div>
           )}
+          <VideoLibraryModal
+            open={videoModalOpen}
+            onOpenChange={setVideoModalOpen}
+            onSelect={(url) => {
+              itemForm.setValue("youtubeUrl", url, { shouldDirty: true });
+              itemForm.setValue("videoUrl", "");
+            }}
+          />
         </div>
+
         <div className="grid gap-4 sm:grid-cols-2">
-          <FormField label="Title" htmlFor="film-title">
-            <Input id="film-title" {...form.register("title")} />
+          <FormField label="Tiêu đề" htmlFor="film-title">
+            <Input id="film-title" {...itemForm.register("title")} />
           </FormField>
-          <FormField label="Subtitle" htmlFor="film-sub">
-            <Input
-              id="film-sub"
-              placeholder="Hà Nội · 2024"
-              {...form.register("subtitle")}
-            />
+          <FormField label="Phụ đề" htmlFor="film-sub">
+            <Input id="film-sub" placeholder="Hà Nội · 2024" {...itemForm.register("subtitle")} />
           </FormField>
         </div>
-        <FormField label="Description" htmlFor="film-desc">
-          <Textarea id="film-desc" rows={3} {...form.register("description")} />
+        <FormField label="Mô tả" htmlFor="film-desc">
+          <Textarea id="film-desc" rows={3} {...itemForm.register("description")} />
         </FormField>
-        <FormMediaField
-          control={form.control}
-          name="image"
-          label="Image source"
-          accept="image/*"
-        />
-        <FormField label="Tags">
+        <FormMediaField control={itemForm.control} name="image" label="Nguồn ảnh" accept="image/*" urlOnly />
+        <FormField label="Thẻ">
           <Controller
-            control={form.control}
+            control={itemForm.control}
             name="tags"
             render={({ field }) => (
               <TagInput value={field.value} onChange={field.onChange} />
@@ -261,12 +331,13 @@ export function TraditionalFilmsPage() {
           />
         </FormField>
 
+        {/* Preview images */}
         <div className="space-y-3 rounded-lg border border-border/60 bg-muted/30 p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium">Preview images</p>
+              <p className="text-sm font-medium">Ảnh xem trước</p>
               <p className="text-xs text-muted-foreground">
-                Each image carries its own title, topic, description and attribute.
+                Mỗi ảnh có tiêu đề, chủ đề, mô tả và thuộc tính riêng.
               </p>
             </div>
             <Button
@@ -276,13 +347,13 @@ export function TraditionalFilmsPage() {
               onClick={() => previewImages.append(blankPreviewImage())}
             >
               <Plus className="h-4 w-4" />
-              Add image
+              Thêm ảnh
             </Button>
           </div>
 
           {previewImages.fields.length === 0 ? (
             <p className="rounded-md border border-dashed bg-background px-3 py-6 text-center text-xs text-muted-foreground">
-              No preview images yet.
+              Chưa có ảnh xem trước.
             </p>
           ) : (
             <div className="space-y-3">
@@ -293,45 +364,39 @@ export function TraditionalFilmsPage() {
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-                      Image {index + 1}
+                      Ảnh {index + 1}
                     </span>
                     <button
                       type="button"
                       onClick={() => previewImages.remove(index)}
                       className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                      aria-label="Remove image"
+                      aria-label="Xóa ảnh"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
                   <FormMediaField
-                    control={form.control}
+                    control={itemForm.control}
                     name={`previewImages.${index}.src` as const}
-                    label="Image source"
+                    label="Nguồn ảnh"
                     accept="image/*"
+                    urlOnly
                   />
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <FormField label="Image title">
-                      <Input
-                        {...form.register(`previewImages.${index}.title` as const)}
-                      />
+                    <FormField label="Tiêu đề ảnh">
+                      <Input {...itemForm.register(`previewImages.${index}.title` as const)} />
                     </FormField>
-                    <FormField label="Image topic">
-                      <Input
-                        {...form.register(`previewImages.${index}.topic` as const)}
-                      />
+                    <FormField label="Chủ đề ảnh">
+                      <Input {...itemForm.register(`previewImages.${index}.topic` as const)} />
                     </FormField>
                   </div>
-                  <FormField label="Image description">
-                    <Textarea
-                      rows={2}
-                      {...form.register(`previewImages.${index}.description` as const)}
-                    />
+                  <FormField label="Mô tả ảnh">
+                    <Textarea rows={2} {...itemForm.register(`previewImages.${index}.description` as const)} />
                   </FormField>
-                  <FormField label="Image attribute">
+                  <FormField label="Thuộc tính ảnh">
                     <Input
-                      placeholder="Location, year, etc."
-                      {...form.register(`previewImages.${index}.attribute` as const)}
+                      placeholder="Địa điểm, năm, v.v."
+                      {...itemForm.register(`previewImages.${index}.attribute` as const)}
                     />
                   </FormField>
                 </div>
@@ -341,62 +406,25 @@ export function TraditionalFilmsPage() {
         </div>
       </EntityFormDialog>
 
+      {/* Delete confirm */}
       <ConfirmDialog
         open={pendingDelete !== null}
         onOpenChange={(open) => !open && setPendingDelete(null)}
-        title="Delete this film?"
-        description={
-          pendingDelete
-            ? `"${pendingDelete.title}" will be removed from the heritage grid.`
-            : undefined
-        }
-        confirmLabel="Delete"
+        title="Xóa phim này?"
+        description={pendingDelete ? `"${pendingDelete.title}" sẽ bị xóa khỏi lưới di sản.` : undefined}
+        confirmLabel="Xóa"
         destructive
-        onConfirm={() => pendingDelete && remove(pendingDelete.id)}
+        onConfirm={confirmDelete}
+      />
+
+      {/* Single SaveBar for config + items */}
+      <SaveBar
+        isDirty={isDirty}
+        isSubmitting={isSaving}
+        onSave={save}
+        onReset={resetAll}
+        saveLabel="Lưu phim"
       />
     </PageContainer>
-  );
-}
-
-function extractYoutubeId(input: string): string | null {
-  const value = input?.trim();
-  if (!value) return null;
-  if (/^[A-Za-z0-9_-]{11}$/.test(value)) return value;
-  const patterns = [
-    /(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/|v\/))([A-Za-z0-9_-]{11})/,
-    /youtu\.be\/([A-Za-z0-9_-]{11})/,
-  ];
-  for (const re of patterns) {
-    const match = value.match(re);
-    if (match) return match[1];
-  }
-  return null;
-}
-
-function YoutubePreview({ url }: { url: string }) {
-  if (!url?.trim()) return null;
-  const id = extractYoutubeId(url);
-  if (!id) {
-    return (
-      <p className="mt-2 inline-flex items-center gap-1.5 text-xs text-destructive">
-        <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
-        Couldn't read a video ID from that link.
-      </p>
-    );
-  }
-  return (
-    <div className="mt-2 flex items-center gap-3 rounded-md border border-border/60 bg-muted/40 p-2">
-      <img
-        src={`https://img.youtube.com/vi/${id}/mqdefault.jpg`}
-        alt="YouTube thumbnail preview"
-        className="h-12 w-20 shrink-0 rounded object-cover"
-      />
-      <div className="min-w-0">
-        <p className="text-xs font-medium">Detected video</p>
-        <p className="truncate font-mono text-[11px] text-muted-foreground">
-          {id}
-        </p>
-      </div>
-    </div>
   );
 }

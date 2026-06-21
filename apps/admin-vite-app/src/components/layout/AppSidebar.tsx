@@ -33,28 +33,29 @@ type NavGroup = {
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    label: "Overview",
+    label: "Tổng quan",
     items: [
       { label: "Dashboard", path: "/", icon: LayoutDashboard },
-      { label: "Layout & order", path: "/layout", icon: LayoutGrid },
+      { label: "Bố cục & thứ tự", path: "/layout", icon: LayoutGrid },
     ],
   },
   {
-    label: "Site sections",
+    label: "Các phần trang web",
     items: [
-      { label: "Sections", path: "/sections", icon: Layers },
+      { label: "Trung tâm phần", path: "/sections", icon: Layers },
+      { label: "Phần động", path: "/section-crud", icon: PanelsTopLeft },
     ],
   },
   {
     label: "CRM",
     items: [
-      { label: "Contact Inbox", path: "/contact-inbox", icon: Inbox },
+      { label: "Hộp thư liên hệ", path: "/contact-inbox", icon: Inbox },
     ],
   },
   {
-    label: "Media",
+    label: "Phương tiện",
     items: [
-      { label: "Video Library", path: "/video-library", icon: Film },
+      { label: "Thư viện video", path: "/video-library", icon: Film },
     ],
   },
   {
@@ -107,7 +108,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
               JOW Film
             </p>
             <p className="truncate text-[11px] text-muted-foreground">
-              Studio admin · v1.0
+              Quản trị studio · v1.0
             </p>
           </div>
         )}
@@ -226,7 +227,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
           <button
             type="button"
             onClick={onToggle}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label={collapsed ? "Mở rộng thanh bên" : "Thu gọn thanh bên"}
             className={cn(
               "flex flex-1 items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent/40 hover:text-foreground",
               collapsed && "justify-center",
@@ -238,20 +239,20 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
                 collapsed && "rotate-180",
               )}
             />
-            {!collapsed && <span>Collapse</span>}
+            {!collapsed && <span>Thu gọn</span>}
           </button>
           
           <button
             type="button"
             onClick={logout}
-            aria-label="Logout"
+            aria-label="Đăng xuất"
             className={cn(
               "flex flex-1 items-center gap-2 rounded-md px-2.5 py-1.5 text-[11px] font-medium text-red-500 transition-colors hover:bg-red-500/10 hover:text-red-600 dark:text-red-400 dark:hover:bg-red-500/20 dark:hover:text-red-300",
               collapsed && "justify-center",
             )}
           >
             <LogOut className="h-3.5 w-3.5" />
-            {!collapsed && <span>Logout</span>}
+            {!collapsed && <span>Đăng xuất</span>}
           </button>
         </div>
       </div>

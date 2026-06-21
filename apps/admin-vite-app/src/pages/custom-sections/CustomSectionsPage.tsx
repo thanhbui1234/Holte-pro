@@ -10,7 +10,12 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { useCustomSections, useUpdateCustomSections } from "@/features/custom-sections/hooks/use-custom-sections";
+import {
+  useCustomSections,
+  useCreateCustomSection,
+  useToggleCustomSection,
+  useDeleteCustomSection,
+} from "@/features/custom-sections/hooks/use-custom-sections";
 import { PageContainer } from "@/components/composite/PageContainer";
 import { SectionCard } from "@/components/composite/SectionCard";
 import { ConfirmDialog } from "@/components/composite/ConfirmDialog";
@@ -24,76 +29,32 @@ import {
   DialogHeader,
   DialogTitle,
 } from "shared-ui";
-import type { CustomSection } from "shared-ui";
+import type { SectionRecord } from "@/shared/api/section.api";
 import { cn } from "@/shared/lib/utils";
 
-function slugify(name: string) {
-  return name
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-");
-}
-
-function makeSection(name: string): CustomSection {
-  const now = Date.now();
-  return {
-    id: `custom-${now}`,
-    name,
-    slug: slugify(name),
-    visible: true,
-    paddingY: "lg",
-    blocks: [],
-    layoutMode: "canvas",
-    canvasElements: [],
-    canvasHeight: 900,
-    backgroundColor: "#ffffff",
-    backgroundType: "solid",
-    bgGradientAngle: 135,
-    bgGradientFrom: "#ffffff",
-    bgGradientTo: "#f5f5f4",
-    bgImage: "",
-    bgImageOverlay: "#000000",
-    bgImageOverlayOpacity: 30,
-    createdAt: now,
-    updatedAt: now,
-  };
-}
-
 export function CustomSectionsPage() {
-  const { data: sections = [], isLoading } = useCustomSections();
-  const { mutate: updateSections } = useUpdateCustomSections();
+  const { data: sections = [] } = useCustomSections();
+  const { mutate: createSection, isPending: isCreating } = useCreateCustomSection();
+  const { mutate: toggleSection } = useToggleCustomSection();
+  const { mutate: deleteSection } = useDeleteCustomSection();
   const navigate = useNavigate();
 
   const [createOpen, setCreateOpen] = useState(false);
   const [newName, setNewName] = useState("");
-  const [deleteTarget, setDeleteTarget] = useState<CustomSection | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<SectionRecord | null>(null);
 
   function handleCreate() {
     const name = newName.trim();
     if (!name) return;
-    const section = makeSection(name);
-    updateSections([...sections, section]);
-    setNewName("");
-    setCreateOpen(false);
-    navigate(`/custom-sections/${section.id}`);
+    createSection(name, {
+      onSuccess: () => {
+        setNewName("");
+        setCreateOpen(false);
+      },
+    });
   }
 
-  function handleRemove(id: string) {
-    updateSections(sections.filter((s: CustomSection) => s.id !== id));
-  }
-
-  function handleReorder(newOrder: CustomSection[]) {
-    updateSections(newOrder);
-  }
-
-  function handleToggle(id: string) {
-    updateSections(
-      sections.map((s: CustomSection) =>
-        s.id === id ? { ...s, visible: !s.visible } : s
-      )
-    );
-  }
+  const activeCount = sections.filter((s) => s.status === "ACTIVE").length;
 
   return (
     <PageContainer
@@ -114,7 +75,7 @@ export function CustomSectionsPage() {
         description={
           sections.length === 0
             ? "No custom sections yet."
-            : `${sections.filter((s) => s.visible).length} of ${sections.length} visible.`
+            : `${activeCount} of ${sections.length} visible.`
         }
       >
         {sections.length === 0 ? (
@@ -133,16 +94,16 @@ export function CustomSectionsPage() {
           <Reorder.Group
             axis="y"
             values={sections}
-            onReorder={handleReorder}
+            onReorder={() => {}}
             className="space-y-2"
           >
-            {sections.map((section: CustomSection) => (
+            {sections.map((section) => (
               <SectionRow
                 key={section.id}
                 section={section}
-                onEdit={() => navigate(`/custom-sections/${section.id}`)}
+                onEdit={() => navigate(`/sections/custom-sections/${section.id}`)}
                 onDelete={() => setDeleteTarget(section)}
-                onToggle={() => handleToggle(section.id)}
+                onToggle={() => toggleSection(section)}
               />
             ))}
           </Reorder.Group>
@@ -179,8 +140,8 @@ export function CustomSectionsPage() {
               <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={!newName.trim()}>
-                Create & edit
+              <Button type="submit" disabled={!newName.trim() || isCreating}>
+                {isCreating ? "Creating…" : "Create & edit"}
               </Button>
             </DialogFooter>
           </form>
@@ -195,7 +156,7 @@ export function CustomSectionsPage() {
         description="This will permanently remove the section and all its blocks."
         confirmLabel="Delete section"
         onConfirm={() => {
-          if (deleteTarget) handleRemove(deleteTarget.id);
+          if (deleteTarget) deleteSection(deleteTarget.id);
           setDeleteTarget(null);
         }}
       />
@@ -204,7 +165,7 @@ export function CustomSectionsPage() {
 }
 
 interface SectionRowProps {
-  section: CustomSection;
+  section: SectionRecord;
   onEdit: () => void;
   onDelete: () => void;
   onToggle: () => void;
@@ -212,6 +173,7 @@ interface SectionRowProps {
 
 function SectionRow({ section, onEdit, onDelete, onToggle }: SectionRowProps) {
   const controls = useDragControls();
+  const isActive = section.status === "ACTIVE";
 
   return (
     <Reorder.Item
@@ -220,7 +182,7 @@ function SectionRow({ section, onEdit, onDelete, onToggle }: SectionRowProps) {
       dragControls={controls}
       className={cn(
         "group/row flex items-center gap-3 rounded-xl border border-border/60 bg-background p-3 shadow-sm transition-colors",
-        !section.visible && "bg-muted/40 opacity-70",
+        !isActive && "bg-muted/40 opacity-70",
       )}
       whileDrag={{ scale: 1.01, boxShadow: "0 24px 48px -20px oklch(0 0 0 / 0.25)" }}
     >
@@ -234,26 +196,19 @@ function SectionRow({ section, onEdit, onDelete, onToggle }: SectionRowProps) {
         <GripVertical className="h-4 w-4" />
       </button>
 
-      {/* Color swatch */}
-      <span
-        className="h-9 w-9 shrink-0 rounded-md border border-border/60 shadow-sm"
-        style={{ backgroundColor: section.backgroundColor }}
-        title="Background color"
-      />
-
       {/* Info */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <p className="truncate text-sm font-medium">{section.name}</p>
-          {section.visible ? (
+          {isActive ? (
             <Eye className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
           ) : (
             <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />
           )}
         </div>
-        <p className="truncate font-mono text-[11px] text-muted-foreground/70">
-          {section.blocks.length} block{section.blocks.length !== 1 ? "s" : ""} · /{section.slug}
-        </p>
+        {section.description && (
+          <p className="truncate text-[11px] text-muted-foreground/70">{section.description}</p>
+        )}
       </div>
 
       {/* Actions */}
@@ -277,7 +232,7 @@ function SectionRow({ section, onEdit, onDelete, onToggle }: SectionRowProps) {
           </button>
         </div>
         <Switch
-          checked={section.visible}
+          checked={isActive}
           onCheckedChange={onToggle}
           aria-label={`Toggle ${section.name}`}
         />

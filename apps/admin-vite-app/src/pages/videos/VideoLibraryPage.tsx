@@ -39,7 +39,7 @@ function AddVideoModal({ open, onOpenChange, onSuccess }: { open: boolean, onOpe
     try {
       const match = youtubeLink.match(/(?:v=|\/)([0-9A-Za-z_-]{11}).*/);
       if (!match) {
-        alert("Invalid YouTube URL");
+        alert("URL YouTube không hợp lệ");
         return;
       }
       setIsCreatingFromUrl(true);
@@ -57,7 +57,7 @@ function AddVideoModal({ open, onOpenChange, onSuccess }: { open: boolean, onOpe
       setUrlDescription("");
     } catch (error) {
       console.error(error);
-      alert("Failed to import video. Please try again.");
+      alert("Nhập video thất bại. Vui lòng thử lại.");
     } finally {
       setIsCreatingFromUrl(false);
     }
@@ -67,9 +67,9 @@ function AddVideoModal({ open, onOpenChange, onSuccess }: { open: boolean, onOpe
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add New Video</DialogTitle>
+          <DialogTitle>Thêm video mới</DialogTitle>
           <DialogDescription>
-            Upload a video file to YouTube or import an existing YouTube URL.
+            Tải lên file video lên YouTube hoặc nhập URL YouTube có sẵn.
           </DialogDescription>
         </DialogHeader>
 
@@ -82,7 +82,7 @@ function AddVideoModal({ open, onOpenChange, onSuccess }: { open: boolean, onOpe
               activeTab === "upload" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
             )}
           >
-            <UploadIcon className="h-4 w-4" /> Upload
+            <UploadIcon className="h-4 w-4" /> Tải lên
           </button>
           <button
             type="button"
@@ -92,7 +92,7 @@ function AddVideoModal({ open, onOpenChange, onSuccess }: { open: boolean, onOpe
               activeTab === "url" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
             )}
           >
-            <LinkIcon className="h-4 w-4" /> From URL
+            <LinkIcon className="h-4 w-4" /> Từ URL
           </button>
         </div>
 
@@ -103,45 +103,45 @@ function AddVideoModal({ open, onOpenChange, onSuccess }: { open: boolean, onOpe
                 <div className="space-y-4 rounded-lg border p-4">
                   <div className="flex items-center gap-2 text-sm font-medium text-amber-600 dark:text-amber-500 mb-2">
                     <Video className="h-4 w-4" />
-                    <span className="truncate" title={selectedFile.name}>Selected: {selectedFile.name}</span>
+                    <span className="truncate" title={selectedFile.name}>Đã chọn: {selectedFile.name}</span>
                   </div>
                   
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Video Title</label>
-                    <Input 
-                      placeholder="Enter a descriptive title" 
+                    <label className="text-sm font-medium">Tiêu đề video</label>
+                    <Input
+                      placeholder="Nhập tiêu đề mô tả"
                       value={youtubeTitle}
                       onChange={(e) => setYoutubeTitle(e.target.value)}
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Description (Optional)</label>
-                    <Textarea 
-                      placeholder="Enter video description (optional)" 
+                    <label className="text-sm font-medium">Mô tả (Tùy chọn)</label>
+                    <Textarea
+                      placeholder="Nhập mô tả video (tùy chọn)"
                       value={youtubeDescription}
                       onChange={(e) => setYoutubeDescription(e.target.value)}
                       rows={3}
                     />
                   </div>
-                  
+
                   <div className="flex justify-end gap-2 pt-2">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       onClick={() => {
                         setSelectedFile(null);
                         setYoutubeTitle("");
                         setYoutubeDescription("");
                       }}
                     >
-                      Cancel
+                      Hủy
                     </Button>
-                    <Button 
-                      onClick={() => upload(selectedFile, { youtubeTitle, youtubeDescription })} 
+                    <Button
+                      onClick={() => upload(selectedFile, { youtubeTitle, youtubeDescription })}
                       disabled={!youtubeTitle}
                     >
                       <UploadIcon className="mr-2 h-4 w-4" />
-                      Upload Video
+                      Tải video lên
                     </Button>
                   </div>
                 </div>
@@ -150,7 +150,7 @@ function AddVideoModal({ open, onOpenChange, onSuccess }: { open: boolean, onOpe
                   id="modal-video-upload"
                   value=""
                   accept=".mp4,.mov,.avi,.mkv,.wmv,.flv,.webm,video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/x-ms-wmv,video/x-flv,video/webm"
-                  placeholder="Drag & drop a video or click to upload"
+                  placeholder="Kéo thả video hoặc nhấp để tải lên"
                   onChange={(_, file) => {
                     if (file) {
                       setSelectedFile(file);
@@ -166,7 +166,7 @@ function AddVideoModal({ open, onOpenChange, onSuccess }: { open: boolean, onOpe
           {activeTab === "url" && (
             <div className="flex flex-col justify-center space-y-4 rounded-lg border p-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">YouTube Video URL</label>
+                <label className="text-sm font-medium">URL video YouTube</label>
                 <Input
                   placeholder="https://www.youtube.com/watch?v=..."
                   value={youtubeLink}
@@ -174,11 +174,11 @@ function AddVideoModal({ open, onOpenChange, onSuccess }: { open: boolean, onOpe
                   disabled={isCreatingFromUrl}
                 />
               </div>
-              
+
               <div className="space-y-2">
-                <label className="text-sm font-medium">Video Title</label>
+                <label className="text-sm font-medium">Tiêu đề video</label>
                 <Input
-                  placeholder="Enter video title"
+                  placeholder="Nhập tiêu đề video"
                   value={urlTitle}
                   onChange={(e) => setUrlTitle(e.target.value)}
                   disabled={isCreatingFromUrl}
@@ -186,9 +186,9 @@ function AddVideoModal({ open, onOpenChange, onSuccess }: { open: boolean, onOpe
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Description (Optional)</label>
+                <label className="text-sm font-medium">Mô tả (Tùy chọn)</label>
                 <Textarea
-                  placeholder="Enter video description"
+                  placeholder="Nhập mô tả video"
                   value={urlDescription}
                   onChange={(e) => setUrlDescription(e.target.value)}
                   disabled={isCreatingFromUrl}
@@ -197,13 +197,13 @@ function AddVideoModal({ open, onOpenChange, onSuccess }: { open: boolean, onOpe
               </div>
 
               <div className="flex justify-end pt-2">
-                <Button 
+                <Button
                   onClick={handleCreateFromUrl}
                   disabled={!youtubeLink || !urlTitle || isCreatingFromUrl}
                   className="shrink-0"
                 >
                   {isCreatingFromUrl ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LinkIcon className="mr-2 h-4 w-4" />}
-                  {isCreatingFromUrl ? "Importing..." : "Import Video"}
+                  {isCreatingFromUrl ? "Đang nhập..." : "Nhập video"}
                 </Button>
               </div>
             </div>
@@ -234,7 +234,7 @@ export function VideoLibraryPage() {
       setVideoToRemove(null);
     } catch (error) {
       console.error(error);
-      alert("Failed to remove video.");
+      alert("Xóa video thất bại.");
     } finally {
       setIsRemoving(false);
     }
@@ -242,11 +242,11 @@ export function VideoLibraryPage() {
 
   return (
     <PageContainer
-      title="Video Library"
-      description="Manage all videos uploaded or imported into your CMS."
+      title="Thư viện video"
+      description="Quản lý tất cả video đã tải lên hoặc nhập vào CMS."
       actions={
         <Button onClick={() => setIsAddModalOpen(true)} className="gap-2">
-          <Plus className="h-4 w-4" /> Add Video
+          <Plus className="h-4 w-4" /> Thêm video
         </Button>
       }
     >
@@ -254,13 +254,13 @@ export function VideoLibraryPage() {
         {isLoading ? (
           <div className="col-span-full flex h-40 flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-muted-foreground">
             <Loader2 className="h-6 w-6 animate-spin" />
-            <p className="text-sm">Loading library...</p>
+            <p className="text-sm">Đang tải thư viện...</p>
           </div>
         ) : !videos || videos.length === 0 ? (
           <div className="col-span-full flex h-40 flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-muted-foreground bg-muted/20">
             <Film className="h-8 w-8 opacity-20" />
-            <p className="text-sm font-medium">No videos found</p>
-            <p className="text-xs">Click 'Add Video' to upload or import from YouTube.</p>
+            <p className="text-sm font-medium">Không tìm thấy video</p>
+            <p className="text-xs">Nhấp 'Thêm video' để tải lên hoặc nhập từ YouTube.</p>
           </div>
         ) : (
           videos.map((video) => (
@@ -286,7 +286,7 @@ export function VideoLibraryPage() {
               <div className="p-3">
                 <div className="flex items-start justify-between gap-2">
                   <p className="line-clamp-1 text-sm font-medium" title={video.title}>
-                    {video.title || "Untitled Video"}
+                    {video.title || "Video không có tiêu đề"}
                   </p>
                   <button
                     type="button"
@@ -294,7 +294,7 @@ export function VideoLibraryPage() {
                       e.stopPropagation();
                       setVideoToRemove(video.id);
                     }}
-                    title="Remove Video"
+                    title="Xóa video"
                     className="shrink-0 rounded text-muted-foreground hover:bg-red-500/10 hover:text-red-500 p-1 transition-colors"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -322,10 +322,10 @@ export function VideoLibraryPage() {
       <Dialog open={videoToRemove !== null} onOpenChange={(open) => !open && setVideoToRemove(null)}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle className="text-red-600 dark:text-red-400">Remove Video</DialogTitle>
+            <DialogTitle className="text-red-600 dark:text-red-400">Xóa video</DialogTitle>
             <DialogDescription>
-              Are you sure you want to remove this video? This action cannot be undone. 
-              The video will be permanently deleted from the database and YouTube.
+              Bạn có chắc muốn xóa video này không? Thao tác này không thể hoàn tác.
+              Video sẽ bị xóa vĩnh viễn khỏi cơ sở dữ liệu và YouTube.
             </DialogDescription>
           </DialogHeader>
           <div className="mt-6 flex justify-end gap-3">
@@ -334,7 +334,7 @@ export function VideoLibraryPage() {
               onClick={() => setVideoToRemove(null)}
               disabled={isRemoving}
             >
-              Cancel
+              Hủy
             </Button>
             <Button
               variant="destructive"
@@ -343,7 +343,7 @@ export function VideoLibraryPage() {
               className="bg-red-600 hover:bg-red-700 text-white"
             >
               {isRemoving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trash2 className="h-4 w-4 mr-2" />}
-              {isRemoving ? "Removing..." : "Remove"}
+              {isRemoving ? "Đang xóa..." : "Xóa"}
             </Button>
           </div>
         </DialogContent>

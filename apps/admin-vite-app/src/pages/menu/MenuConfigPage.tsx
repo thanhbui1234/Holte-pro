@@ -34,7 +34,7 @@ export function MenuConfigPage() {
   const { mutate: updateMenu } = useUpdateMenuConfig();
 
   if (isLoading) {
-    return <PageContainer title="Navigation menu" description="Loading..."><div className="p-8">Loading...</div></PageContainer>;
+    return <PageContainer title="Menu điều hướng" description="Đang tải..."><div className="p-8">Đang tải...</div></PageContainer>;
   }
 
   const visibleCount = menuConfig.filter((m: NavMenuItem) => m.visible).length;
@@ -59,14 +59,14 @@ export function MenuConfigPage() {
 
   return (
     <PageContainer
-      title="Navigation menu"
-      description="Drag to reorder. Toggle to show or hide a page. Click the pencil icon to rename a label."
+      title="Menu điều hướng"
+      description="Kéo để sắp xếp. Bật tắt để hiện hoặc ẩn trang. Nhấp icon bút chì để đổi tên nhãn."
       badge="Menu"
     >
       <SectionCard
         icon={<Navigation className="h-4 w-4" />}
-        title="Menu items"
-        description={`${visibleCount} of ${menuConfig.length} pages visible in the site navigation.`}
+        title="Mục menu"
+        description={`${visibleCount} trong số ${menuConfig.length} trang hiển thị trong điều hướng.`}
       >
         <Reorder.Group
           axis="y"
@@ -86,7 +86,7 @@ export function MenuConfigPage() {
         </Reorder.Group>
 
         <p className="mt-3 text-[11px] text-muted-foreground/60">
-          Index numbers (01, 02…) are recalculated based on visible items in order.
+          Số thứ tự (01, 02…) được tính lại dựa trên các mục hiển thị theo thứ tự.
         </p>
       </SectionCard>
     </PageContainer>
@@ -140,7 +140,7 @@ function MenuRow({ item, displayIndex, onToggle, onLabelSave }: MenuRowProps) {
         type="button"
         onPointerDown={(e) => controls.start(e)}
         className="flex h-9 w-9 shrink-0 cursor-grab items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground active:cursor-grabbing"
-        aria-label="Drag to reorder"
+        aria-label="Kéo để sắp xếp"
       >
         <GripVertical className="h-4 w-4" />
       </button>
@@ -191,7 +191,7 @@ function MenuRow({ item, displayIndex, onToggle, onLabelSave }: MenuRowProps) {
               type="button"
               onClick={startEdit}
               className="ml-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded text-muted-foreground/40 opacity-0 transition-opacity hover:text-foreground group-hover/row:opacity-100"
-              aria-label={`Rename ${item.label}`}
+              aria-label={`Đổi tên ${item.label}`}
             >
               <Pencil className="h-3 w-3" />
             </button>
@@ -208,7 +208,7 @@ function MenuRow({ item, displayIndex, onToggle, onLabelSave }: MenuRowProps) {
           htmlFor={switchId}
           className="hidden cursor-pointer text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground sm:inline"
         >
-          {item.visible ? "Visible" : "Hidden"}
+          {item.visible ? "Hiển thị" : "Ẩn"}
         </label>
         <Switch
           id={switchId}

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import { Reorder, useDragControls } from "motion/react";
 import {
   Clapperboard,
@@ -6,22 +6,25 @@ import {
   EyeOff,
   Film,
   GripVertical,
+  Loader2,
   Lock,
   Mail,
   PanelsTopLeft,
+  Save,
   Settings2,
   Sparkles,
   Image as ImageIcon,
   Video,
 } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
-import { useLayout, useUpdateLayout } from "@/features/layout/hooks/use-layout";
-import { useAbout } from "@/features/about";
+import { useSections, useUpdateSection, useUpdateSectionOrder } from "@/features/layout/hooks/use-layout";
 import { PageContainer } from "@/components/composite/PageContainer";
 import { SectionCard } from "@/components/composite/SectionCard";
-import { Switch } from "shared-ui";
-import type { LayoutSection, LayoutSectionKey } from "@/features/layout/types/layout.types";
+import { Button, Switch, useBeforeUnload } from "shared-ui";
+import type { SectionRecord } from "@/features/layout/types/layout.types";
 import { cn } from "@/shared/lib/utils";
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement> & { className?: string }>;
 
@@ -31,110 +34,183 @@ interface SectionMeta {
   icon: IconComponent;
 }
 
-const ORDERABLE_META: Record<LayoutSectionKey, SectionMeta> = {
+// ─── Section registry ─────────────────────────────────────────────────────────
+
+const SECTION_META: Record<string, SectionMeta> = {
+  banner: {
+    label: "Banner Chính",
+    icon: ImageIcon,
+    description: "Video toàn màn hình và logo overlay.",
+  },
   about: {
-    label: "About JOW Film",
-    description: "Studio intro, story copy and credibility stats.",
+    label: "Về JOW Film",
     icon: Sparkles,
+    description: "Giới thiệu studio, câu chuyện và số liệu uy tín.",
   },
-  highlights: {
-    label: "Wedding Highlights",
-    description: "Featured highlight reel carousel.",
+  "wedding-highlights": {
+    label: "Highlight Đám Cưới",
     icon: Film,
+    description: "Carousel highlight nổi bật.",
   },
-  reels: {
-    label: "Wedding Reels",
-    description: "Short-form vertical reels scroller.",
+  "wedding-reels": {
+    label: "Reels Đám Cưới",
     icon: Clapperboard,
+    description: "Cuộn video ngắn dọc.",
   },
-  films: {
-    label: "Traditional Films",
-    description: "Long-form heritage film grid.",
+  "traditional-films": {
+    label: "Phim Truyền Thống",
     icon: Video,
+    description: "Lưới phim dài di sản.",
+  },
+  "contact-cta": {
+    label: "CTA Liên Hệ",
+    icon: Mail,
+    description: "Khối kêu gọi hành động cuối trang.",
   },
 };
 
+const FALLBACK_META: SectionMeta = {
+  label: "Phần tùy chỉnh",
+  icon: Settings2,
+  description: "Phần do người dùng định nghĩa.",
+};
+
 const FIXED_SECTIONS: { label: string; description: string; icon: IconComponent }[] = [
-  {
-    label: "Banner",
-    description: "Always first. Hero video and logo.",
-    icon: ImageIcon,
-  },
-  {
-    label: "Header",
-    description: "Floating navigation chrome.",
-    icon: PanelsTopLeft,
-  },
-  {
-    label: "Contact CTA",
-    description: "Always closes the homepage.",
-    icon: Mail,
-  },
-  {
-    label: "Footer",
-    description: "Always last. Contact info and credits.",
-    icon: Settings2,
-  },
+  { label: "Header", description: "Chrome điều hướng nổi.", icon: PanelsTopLeft },
+  { label: "Footer", description: "Luôn cuối cùng. Thông tin liên hệ và tín dụng.", icon: Settings2 },
 ];
 
-export function LayoutPage() {
-  const { data: layout = [], isLoading } = useLayout();
-  const { data: about } = useAbout();
-  const { mutate: updateLayout } = useUpdateLayout();
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-  const visibleCount = useMemo(
-    () => layout.filter((s: LayoutSection) => s.visible).length,
-    [layout],
-  );
+function resolveMeta(name: string): SectionMeta {
+  return SECTION_META[name] ?? FALLBACK_META;
+}
 
-  const previewName = (key: LayoutSectionKey) => {
-    if (key === "about") {
-      return `${about?.titlePrefix ?? ""} ${about?.titleHighlight ?? ""}`;
+function getSectionPreview(section: SectionRecord): string {
+  const map = section.data?.map ?? {};
+
+  switch (section.name) {
+    case "banner":
+      return (map.logoAlt as string) || (map.videoSrc as string) || "—";
+
+    case "about": {
+      const prefix = map.titlePrefix as string | undefined;
+      const highlight = map.titleHighlight as string | undefined;
+      return [prefix, highlight].filter(Boolean).join(" ") || (map.eyebrow as string) || "—";
     }
-    return `Content for ${ORDERABLE_META[key]?.label}`;
-  };
 
-  function handleToggle(key: string) {
-    updateLayout(
-      layout.map((s: LayoutSection) =>
-        s.key === key ? { ...s, visible: !s.visible } : s
-      )
-    );
+    case "wedding-highlights":
+    case "wedding-reels":
+    case "traditional-films": {
+      const cfg = map.config as Record<string, string> | undefined;
+      const items = map.items as unknown[] | undefined;
+      const title = cfg
+        ? [cfg.titlePrefix, cfg.titleHighlight].filter(Boolean).join(" ")
+        : "";
+      const count = items?.length ? `${items.length} items` : "";
+      return [title, count].filter(Boolean).join(" · ") || "—";
+    }
+
+    case "contact-cta":
+      return (map.ctaLabel as string) || (map.eyebrow as string) || "—";
+
+    default:
+      return section.description || "—";
+  }
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
+export function LayoutPage() {
+  const { data: sections = [], isLoading } = useSections();
+  const { mutate: updateSection, isPending: isToggling } = useUpdateSection();
+  const { mutate: saveOrder, isPending: isSaving } = useUpdateSectionOrder();
+
+  const [localOrder, setLocalOrder] = useState<SectionRecord[]>([]);
+
+  useBeforeUnload(isSaving);
+
+  const orderedSections = localOrder.length > 0 ? localOrder : sections;
+
+  const isOrderDirty = useMemo(() => {
+    if (localOrder.length === 0) return false;
+    return localOrder.some((s, i) => s.id !== sections[i]?.id);
+  }, [localOrder, sections]);
+
+  const visibleCount = orderedSections.filter((s) => s.status === "ACTIVE").length;
+
+  function handleReorder(next: SectionRecord[]) {
+    setLocalOrder(next);
   }
 
-  function handleReorder(newOrder: LayoutSection[]) {
-    updateLayout(newOrder);
+  function handleToggle(section: SectionRecord) {
+    const nextStatus = section.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+    updateSection({ id: section.id, status: nextStatus });
+  }
+
+  function handleSaveOrder() {
+    // Clear local state synchronously before calling saveOrder so that React 18
+    // batches this setState together with the cache update from onMutate into a
+    // single re-render — the list never flashes back to the old order.
+    setLocalOrder([]);
+    saveOrder(localOrder);
   }
 
   if (isLoading) {
-    return <PageContainer title="Homepage Layout" description="Loading..."><div className="p-8">Loading...</div></PageContainer>;
+    return (
+      <PageContainer title="Bố cục Trang chủ" description="Đang tải...">
+        <div className="p-8">Đang tải...</div>
+      </PageContainer>
+    );
   }
 
   return (
     <PageContainer
-      title="Homepage Layout"
-      description="Manage the order and visibility of sections on the main page."
+      title="Bố cục Trang chủ"
+      description="Quản lý thứ tự và khả năng hiển thị của các phần trang chủ."
       badge="Structure"
     >
+      {isSaving && (
+        <div className="flex items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
+          <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+          <div className="min-w-0">
+            <p className="font-medium">Đang lưu thứ tự phần...</p>
+            <p className="text-xs opacity-70">
+              Vui lòng không đóng hoặc điều hướng đến nơi khác cho đến khi hoàn tất.
+            </p>
+          </div>
+        </div>
+      )}
+
       <SectionCard
         icon={<GripVertical className="h-4 w-4" />}
-        title="Active Sections"
-        description={`${visibleCount} of ${layout.length} sections currently visible.`}
+        title="Các phần"
+        description={`${visibleCount} trong số ${orderedSections.length} phần đang hiển thị.`}
+        actions={
+          isOrderDirty ? (
+            <Button size="sm" onClick={handleSaveOrder} disabled={isSaving}>
+              <Save className="h-4 w-4" />
+              {isSaving ? "Đang lưu..." : "Lưu thứ tự"}
+            </Button>
+          ) : null
+        }
       >
         <Reorder.Group
           axis="y"
-          values={layout}
+          values={orderedSections}
           onReorder={handleReorder}
           className="space-y-2"
         >
-          {layout.map((section: LayoutSection, index: number) => (
-            <LayoutRow
-              key={section.key}
+          {orderedSections.map((section, index) => (
+            <SectionRow
+              key={section.id}
               section={section}
               index={index}
-              meta={ORDERABLE_META[section.key]}
-              preview={previewName(section.key)}
-              onToggle={() => handleToggle(section.key)}
+              meta={resolveMeta(section.name)}
+              preview={getSectionPreview(section)}
+              isDragDisabled={isSaving}
+              isToggling={isToggling}
+              onToggle={() => handleToggle(section)}
             />
           ))}
         </Reorder.Group>
@@ -142,8 +218,8 @@ export function LayoutPage() {
 
       <SectionCard
         icon={<Lock className="h-4 w-4" />}
-        title="Fixed sections"
-        description="These always stay in place and can't be reordered or hidden."
+        title="Phần cố định"
+        description="Những phần này luôn ở vị trí cố định và không thể sắp xếp lại hoặc ẩn."
       >
         <ul className="grid gap-2 sm:grid-cols-2">
           {FIXED_SECTIONS.map((item) => (
@@ -156,9 +232,7 @@ export function LayoutPage() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{item.label}</p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {item.description}
-                </p>
+                <p className="truncate text-xs text-muted-foreground">{item.description}</p>
               </div>
               <Lock className="h-3.5 w-3.5 text-muted-foreground/60" />
             </li>
@@ -169,17 +243,22 @@ export function LayoutPage() {
   );
 }
 
-interface LayoutRowProps {
-  section: LayoutSection;
+// ─── Row ──────────────────────────────────────────────────────────────────────
+
+interface SectionRowProps {
+  section: SectionRecord;
   index: number;
   meta: SectionMeta;
   preview: string;
+  isDragDisabled: boolean;
+  isToggling: boolean;
   onToggle: () => void;
 }
 
-function LayoutRow({ section, index, meta, preview, onToggle }: LayoutRowProps) {
+function SectionRow({ section, index, meta, preview, isDragDisabled, isToggling, onToggle }: SectionRowProps) {
   const controls = useDragControls();
-  const switchId = `layout-${section.key}`;
+  const isActive = section.status === "ACTIVE";
+  const switchId = `layout-${section.id}`;
 
   return (
     <Reorder.Item
@@ -188,7 +267,8 @@ function LayoutRow({ section, index, meta, preview, onToggle }: LayoutRowProps) 
       dragControls={controls}
       className={cn(
         "group/row flex items-center gap-3 rounded-xl border border-border/60 bg-background p-3 shadow-sm transition-colors",
-        !section.visible && "bg-muted/40 opacity-70",
+        !isActive && "bg-muted/40 opacity-70",
+        isDragDisabled && "pointer-events-none opacity-60",
       )}
       whileDrag={{
         scale: 1.01,
@@ -197,9 +277,13 @@ function LayoutRow({ section, index, meta, preview, onToggle }: LayoutRowProps) 
     >
       <button
         type="button"
-        onPointerDown={(e) => controls.start(e)}
-        className="flex h-9 w-9 shrink-0 cursor-grab items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground active:cursor-grabbing"
-        aria-label="Drag to reorder"
+        onPointerDown={(e) => !isDragDisabled && controls.start(e)}
+        className={cn(
+          "flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground",
+          isDragDisabled ? "cursor-not-allowed opacity-40" : "cursor-grab active:cursor-grabbing",
+        )}
+        aria-label="Kéo để sắp xếp"
+        disabled={isDragDisabled}
       >
         <GripVertical className="h-4 w-4" />
       </button>
@@ -215,7 +299,7 @@ function LayoutRow({ section, index, meta, preview, onToggle }: LayoutRowProps) 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <p className="truncate text-sm font-medium">{meta.label}</p>
-          {section.visible ? (
+          {isActive ? (
             <Eye className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
           ) : (
             <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />
@@ -232,12 +316,13 @@ function LayoutRow({ section, index, meta, preview, onToggle }: LayoutRowProps) 
           htmlFor={switchId}
           className="hidden text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground sm:inline"
         >
-          {section.visible ? "Visible" : "Hidden"}
+          {isActive ? "Hiển thị" : "Ẩn"}
         </label>
         <Switch
           id={switchId}
-          checked={section.visible}
+          checked={isActive}
           onCheckedChange={onToggle}
+          disabled={isToggling}
           aria-label={`Toggle ${meta.label}`}
         />
       </div>

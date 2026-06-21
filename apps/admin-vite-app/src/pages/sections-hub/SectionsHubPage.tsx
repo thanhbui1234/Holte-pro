@@ -18,9 +18,8 @@ import { useCustomSections } from "@/features/custom-sections/hooks/use-custom-s
 import { useHighlights } from "@/features/highlights";
 import { useReels } from "@/features/reels";
 import { useFilms } from "@/features/films";
-import { useLayout } from "@/features/layout/hooks/use-layout";
+import { useSections } from "@/features/layout/hooks/use-layout";
 import { PageContainer } from "@/components/composite/PageContainer";
-import type { LayoutSectionKey, LayoutSection } from "@/shared/types";
 import { cn } from "@/shared/lib/utils";
 
 type IconComp = ComponentType<SVGProps<SVGSVGElement> & { className?: string }>;
@@ -31,7 +30,7 @@ interface SectionCard {
   description: string;
   path: string;
   icon: IconComp;
-  layoutKey?: LayoutSectionKey;
+  sectionName?: string;
   fixed?: boolean;
   isCustom?: boolean;
 }
@@ -40,56 +39,58 @@ const SECTIONS: SectionCard[] = [
   {
     key: "banner",
     label: "Banner",
-    description: "Hero video and logo shown at the very top of the homepage.",
-    path: "/banner",
+    description: "Video hero và logo hiển thị trên cùng trang chủ.",
+    path: "/sections/banner",
     icon: ImageIcon,
+    sectionName: "banner",
     fixed: true,
   },
   {
     key: "about",
-    label: "About",
-    description: "Studio intro, origin story and credibility stats.",
-    path: "/about",
+    label: "Giới thiệu",
+    description: "Giới thiệu studio, câu chuyện nguồn gốc và số liệu uy tín.",
+    path: "/sections/about",
     icon: Sparkles,
-    layoutKey: "about",
+    sectionName: "about",
   },
   {
     key: "highlights",
-    label: "Wedding Highlights",
-    description: "Featured highlight reel carousel.",
-    path: "/wedding-highlights",
+    label: "Highlight Đám Cưới",
+    description: "Carousel highlight nổi bật.",
+    path: "/sections/wedding-highlights",
     icon: Film,
-    layoutKey: "highlights",
+    sectionName: "wedding-highlights",
   },
   {
     key: "reels",
-    label: "Wedding Reels",
-    description: "Short-form vertical reels scroller.",
-    path: "/wedding-reels",
+    label: "Reels Đám Cưới",
+    description: "Cuộn video ngắn dọc.",
+    path: "/sections/wedding-reels",
     icon: Clapperboard,
-    layoutKey: "reels",
+    sectionName: "wedding-reels",
   },
   {
     key: "films",
-    label: "Traditional Films",
-    description: "Long-form heritage film grid.",
-    path: "/traditional-films",
+    label: "Phim Truyền Thống",
+    description: "Lưới phim dài di sản.",
+    path: "/sections/traditional-films",
     icon: Video,
-    layoutKey: "films",
+    sectionName: "traditional-films",
   },
   {
     key: "contact-cta",
-    label: "Contact CTA",
-    description: "Call-to-action block that closes the homepage.",
-    path: "/contact-cta",
+    label: "CTA Liên Hệ",
+    description: "Khối kêu gọi hành động cuối trang chủ.",
+    path: "/sections/contact-cta",
     icon: Mail,
+    sectionName: "contact-cta",
     fixed: true,
   },
   {
     key: "custom",
-    label: "Custom Sections",
-    description: "Free-form canvas sections you build from scratch.",
-    path: "/custom-sections",
+    label: "Phần tùy chỉnh",
+    description: "Các phần canvas tự do bạn tạo từ đầu.",
+    path: "/sections/custom-sections",
     icon: LayoutTemplate,
     isCustom: true,
   },
@@ -97,43 +98,42 @@ const SECTIONS: SectionCard[] = [
 
 export function SectionsHubPage() {
   const navigate = useNavigate();
-  const { data: layout = [] } = useLayout();
+  const { data: sections = [] } = useSections();
   const { data: customSections = [] } = useCustomSections();
   const { data: highlights = [] } = useHighlights();
   const { data: reels = [] } = useReels();
   const { data: films = [] } = useFilms();
 
-  const getVisibility = (layoutKey?: LayoutSectionKey) => {
-    if (!layoutKey) return null;
-    return layout.find((l: LayoutSection) => l.key === layoutKey)?.visible ?? true;
+  const getVisibility = (sectionName?: string): boolean | null => {
+    if (!sectionName) return null;
+    const found = sections.find((s) => s.name === sectionName);
+    if (!found) return null;
+    return found.status === "ACTIVE";
   };
+
+  const getSectionId = (sectionName?: string): number | undefined =>
+    sectionName ? sections.find((s) => s.name === sectionName)?.id : undefined;
 
   const getMeta = (card: SectionCard): string | null => {
     if (card.isCustom) {
       const count = customSections.length;
-      return count === 0 ? "No sections yet" : `${count} section${count > 1 ? "s" : ""}`;
+      return count === 0 ? "Chưa có phần nào" : `${count} phần`;
     }
-    if (card.layoutKey === "highlights") {
-      return `${highlights.length} videos`;
-    }
-    if (card.layoutKey === "reels") {
-      return `${reels.length} reels`;
-    }
-    if (card.layoutKey === "films") {
-      return `${films.length} films`;
-    }
+    if (card.sectionName === "wedding-highlights") return `${highlights.length} video`;
+    if (card.sectionName === "wedding-reels") return `${reels.length} reels`;
+    if (card.sectionName === "traditional-films") return `${films.length} phim`;
     return null;
   };
 
   return (
     <PageContainer
-      title="Site sections"
-      description="All configurable sections of the public website. Click a card to edit content, toggle visibility, or reorder items."
+      title="Các phần trang web"
+      description="Tất cả các phần có thể cấu hình của trang web. Nhấp vào thẻ để chỉnh sửa nội dung, bật tắt hiển thị hoặc sắp xếp lại."
       badge="Sections"
     >
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {SECTIONS.map((card, i) => {
-          const visible = getVisibility(card.layoutKey);
+          const visible = getVisibility(card.sectionName);
           const meta = getMeta(card);
           const isHidden = visible === false;
 
@@ -144,7 +144,10 @@ export function SectionsHubPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.22, delay: i * 0.04 }}
               whileHover={{ y: -2 }}
-              onClick={() => navigate(card.path)}
+              onClick={() => {
+                const id = getSectionId(card.sectionName);
+                navigate(id ? `${card.path}?id=${id}` : card.path);
+              }}
               className={cn(
                 "group relative flex cursor-pointer flex-col gap-4 rounded-2xl border bg-background p-5 shadow-sm transition-all duration-200",
                 "hover:border-amber-500/50 hover:shadow-[0_8px_32px_-8px_rgba(217,119,6,0.18)]",
@@ -158,7 +161,7 @@ export function SectionsHubPage() {
                 {card.fixed ? (
                   <span className="flex items-center gap-1 rounded-full border border-border/60 bg-muted/60 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                     <Lock className="h-2.5 w-2.5" />
-                    Fixed
+                    Cố định
                   </span>
                 ) : visible != null ? (
                   <span
@@ -174,7 +177,7 @@ export function SectionsHubPage() {
                     ) : (
                       <EyeOff className="h-2.5 w-2.5" />
                     )}
-                    {visible ? "Visible" : "Hidden"}
+                    {visible ? "Hiển thị" : "Ẩn"}
                   </span>
                 ) : null}
               </div>
@@ -202,7 +205,7 @@ export function SectionsHubPage() {
                   <span />
                 )}
                 <span className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground transition-colors group-hover:text-amber-600 dark:group-hover:text-amber-400">
-                  Configure
+                  Cấu hình
                   <ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </span>
               </div>

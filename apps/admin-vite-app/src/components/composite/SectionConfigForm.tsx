@@ -38,8 +38,8 @@ export function SectionConfigForm({ value, onSave }: SectionConfigFormProps) {
     <form onSubmit={submit} className="space-y-4">
       <SectionCard
         icon={<Palette className="h-4 w-4" />}
-        title="Section Heading"
-        description="Controls how this section appears on the public site."
+        title="Tiêu đề phần"
+        description="Kiểm soát cách phần này hiển thị trên trang công khai."
       >
         <div className="grid gap-4 md:grid-cols-2">
           <FormField label="Eyebrow" htmlFor="cfg-eyebrow">
@@ -49,7 +49,7 @@ export function SectionConfigForm({ value, onSave }: SectionConfigFormProps) {
               {...register("eyebrow")}
             />
           </FormField>
-          <FormField label="Background colour" htmlFor="cfg-bg">
+          <FormField label="Màu nền" htmlFor="cfg-bg">
             <Controller
               control={control}
               name="backgroundColor"
@@ -62,25 +62,25 @@ export function SectionConfigForm({ value, onSave }: SectionConfigFormProps) {
               )}
             />
           </FormField>
-          <FormField label="Title prefix" htmlFor="cfg-title">
+          <FormField label="Tiền tố tiêu đề" htmlFor="cfg-title">
             <Input
               id="cfg-title"
               placeholder="Wedding"
               {...register("titlePrefix")}
             />
           </FormField>
-          <FormField label="Italic highlight word" htmlFor="cfg-highlight">
+          <FormField label="Từ in nghiêng nổi bật" htmlFor="cfg-highlight">
             <Input
               id="cfg-highlight"
               placeholder="Highlights"
               {...register("titleHighlight")}
             />
           </FormField>
-          <FormField label="Description" htmlFor="cfg-desc" className="md:col-span-2">
+          <FormField label="Mô tả" htmlFor="cfg-desc" className="md:col-span-2">
             <Textarea
               id="cfg-desc"
               rows={3}
-              placeholder="Short description for this section"
+              placeholder="Mô tả ngắn cho phần này"
               {...register("description")}
             />
           </FormField>
@@ -91,7 +91,7 @@ export function SectionConfigForm({ value, onSave }: SectionConfigFormProps) {
         isDirty={isDirty}
         onSave={submit}
         onReset={() => reset(value)}
-        saveLabel="Save heading"
+        saveLabel="Lưu tiêu đề"
       />
     </form>
   );

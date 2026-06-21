@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { Film, Loader2 } from "lucide-react";
-import { useBanner, useUpdateBanner } from "@/features/banner/hooks/use-banner";
+import { Film } from "lucide-react";
+import { useSection, useUpdateSectionData } from "@/features/layout/hooks/use-layout";
 import { PageContainer } from "@/components/composite/PageContainer";
 import { SectionCard } from "@/components/composite/SectionCard";
 import { FormField } from "@/components/composite/FormField";
@@ -10,88 +11,87 @@ import { FormVideoPicker } from "@/components/composite/FormVideoPicker";
 import { SaveBar } from "@/components/composite/SaveBar";
 import { Input } from "shared-ui";
 import type { BannerData } from "@/features/banner/types/banner.types";
-import { videoApi } from "@/shared/api";
+
+function mapToBannerData(map: Record<string, unknown>): BannerData {
+  return {
+    videoSrc: (map.videoSrc as string) ?? "",
+    logoSrc: (map.logoSrc as string) ?? "",
+    logoAlt: (map.logoAlt as string) ?? "",
+    scrollLabel: (map.scrollLabel as string) ?? "",
+  };
+}
 
 export function BannerPage() {
-  const { data, isLoading } = useBanner();
-  const { mutate: save } = useUpdateBanner();
+  const [searchParams] = useSearchParams();
+  const sectionId = Number(searchParams.get("id"));
+
+  const { data: section, isLoading } = useSection(sectionId);
+  const { mutate: save } = useUpdateSectionData();
 
   const {
     register,
     handleSubmit,
     reset,
     control,
-    setValue,
     formState: { isDirty },
-  } = useForm<BannerData>({ defaultValues: data });
+  } = useForm<BannerData>({
+    defaultValues: mapToBannerData({}),
+  });
 
   useEffect(() => {
-    if (data) reset(data);
-  }, [data, reset]);
+    if (section) reset(mapToBannerData(section.data.map));
+  }, [section, reset]);
 
   const submit = handleSubmit((values) => {
-    save(values);
+    save({ id: sectionId, data: values as unknown as Record<string, unknown> });
     reset(values);
   });
 
   if (isLoading) {
-    return <PageContainer title="Hero Banner" description="Loading..."><div className="p-8">Loading...</div></PageContainer>;
+    return (
+      <PageContainer title="Banner Chính" description="Đang tải...">
+        <div className="p-8">Đang tải...</div>
+      </PageContainer>
+    );
   }
 
   return (
     <form onSubmit={submit}>
       <PageContainer
-        title="Hero Banner"
-        description="The fullscreen video on the homepage, plus the centred logo overlay."
+        title="Banner Chính"
+        description="Video toàn màn hình trên trang chủ, cùng với logo ở giữa."
       >
         <SectionCard
           icon={<Film className="h-4 w-4" />}
-          title="Media"
-          description="Upload or drag & drop video and logo files."
+          title="Phương tiện"
+          description="Tải lên hoặc kéo thả file video."
         >
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="relative">
-              <FormVideoPicker
-                control={control}
-                name="videoSrc"
-                label="Video source"
-                onChange={(youtubeEmbedUrl) => {
-                  if (youtubeEmbedUrl) {
-                    // Auto save banner config immediately
-                    handleSubmit((values) => {
-                      const newValues = { ...values, videoSrc: youtubeEmbedUrl };
-                      save(newValues);
-                      reset(newValues);
-                    })();
-                  }
-                }}
-              />
-            </div>
-            <FormMediaField
+          <div className="space-y-4">
+            <FormVideoPicker
               control={control}
-              name="logoSrc"
-              label="Logo source"
-              accept="image/*"
-              placeholder="Drop a logo image or click to select"
+              name="videoSrc"
+              label="Nguồn video"
             />
-            <FormField label="Logo alt text" htmlFor="banner-alt">
-              <Input id="banner-alt" {...register("logoAlt")} />
-            </FormField>
-            <FormField
-              label="Scroll button label"
-              htmlFor="banner-scroll"
-              hint="Used as an aria-label for the chevron at the bottom of the hero."
-            >
-              <Input id="banner-scroll" {...register("scrollLabel")} />
-            </FormField>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField label="Văn bản alt logo" htmlFor="banner-alt">
+                <Input id="banner-alt" {...register("logoAlt")} />
+              </FormField>
+              <FormField
+                label="Nhãn nút cuộn"
+                htmlFor="banner-scroll"
+                hint="Dùng làm aria-label cho mũi tên xuống ở cuối banner."
+              >
+                <Input id="banner-scroll" {...register("scrollLabel")} />
+              </FormField>
+            </div>
           </div>
         </SectionCard>
 
         <SaveBar
           isDirty={isDirty}
           onSave={submit}
-          onReset={() => reset(data)}
-          saveLabel="Save banner"
+          onReset={() => reset(mapToBannerData(section?.data?.map ?? {}))}
+          saveLabel="Lưu banner"
         />
       </PageContainer>
     </form>

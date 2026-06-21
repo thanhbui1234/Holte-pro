@@ -19,7 +19,7 @@ export function SaveBar({
   onSave,
   onReset,
   className,
-  saveLabel = "Save changes",
+  saveLabel = "Lưu thay đổi",
 }: SaveBarProps) {
   const [justSaved, setJustSaved] = useState(false);
 
@@ -71,9 +71,9 @@ export function SaveBar({
               )}
             </span>
             <span className="text-muted-foreground">
-              {status === "dirty" && "Unsaved changes"}
-              {status === "saved" && "All changes saved"}
-              {status === "clean" && "Up to date"}
+              {status === "dirty" && "Chưa lưu"}
+              {status === "saved" && "Đã lưu tất cả"}
+              {status === "clean" && "Đã cập nhật"}
             </span>
           </motion.span>
         </AnimatePresence>
@@ -89,7 +89,7 @@ export function SaveBar({
             disabled={!isDirty || isSubmitting}
             className="text-muted-foreground"
           >
-            Discard
+            Hủy bỏ
           </Button>
         )}
         <Button

@@ -9,6 +9,7 @@ interface FormMediaFieldProps<T extends FieldValues>
   label: string;
   hint?: string;
   onChange?: (url: string, file?: File) => void;
+  urlOnly?: boolean;
 }
 
 export function FormMediaField<T extends FieldValues>({

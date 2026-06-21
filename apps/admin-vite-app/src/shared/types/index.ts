@@ -12,7 +12,7 @@ export type { ReelItem } from "@/features/reels/types/reels.types";
 export type { FilmItem, FilmPreviewImage } from "@/features/films/types/films.types";
 export type { ContactCtaData, ContactStatus, ContactSubmission } from "@/features/contact/types/contact.types";
 export type { FooterData } from "@/features/footer/types/footer.types";
-export type { LayoutSection, LayoutSectionKey } from "@/features/layout/types/layout.types";
+export type { SectionRecord } from "@/features/layout/types/layout.types";
 export type { NavMenuItem } from "@/features/menu/types/menu.types";
 
 // Shared/composed types

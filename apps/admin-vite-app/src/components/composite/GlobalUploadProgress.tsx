@@ -36,10 +36,10 @@ export function GlobalUploadProgress() {
                   {job.youtubeTitle || job.file.name}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
-                  {job.status === "uploading" ? "Uploading to YouTube..." :
-                   job.status === "processing" ? "Saving to database..." :
-                   job.status === "success" ? "Upload complete!" :
-                   "Upload failed"}
+                  {job.status === "uploading" ? "Đang tải lên YouTube..." :
+                   job.status === "processing" ? "Đang lưu vào cơ sở dữ liệu..." :
+                   job.status === "success" ? "Tải lên hoàn tất!" :
+                   "Tải lên thất bại"}
                 </p>
               </div>
             </div>
@@ -62,7 +62,7 @@ export function GlobalUploadProgress() {
             <div className="mt-3 space-y-1.5">
               <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
                 <span>{job.progress}%</span>
-                <span>{job.status === "processing" ? "Please wait..." : "Uploading..."}</span>
+                <span>{job.status === "processing" ? "Vui lòng chờ..." : "Đang tải lên..."}</span>
               </div>
               <div className="h-1.5 w-full bg-muted overflow-hidden rounded-full">
                 <div 
@@ -87,17 +87,17 @@ export function GlobalUploadProgress() {
       <Dialog open={!!jobToCancel} onOpenChange={(open) => !open && setJobToCancel(null)}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Cancel Upload</DialogTitle>
+            <DialogTitle>Hủy tải lên</DialogTitle>
             <DialogDescription>
-              Are you sure you want to cancel the video upload? This action cannot be undone.
+              Bạn có chắc muốn hủy tải lên video không? Thao tác này không thể hoàn tác.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setJobToCancel(null)}>
-              No, keep uploading
+              Không, tiếp tục tải lên
             </Button>
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               onClick={() => {
                 if (jobToCancel) {
                   cancelJob(jobToCancel);
@@ -105,7 +105,7 @@ export function GlobalUploadProgress() {
                 }
               }}
             >
-              Yes, cancel
+              Có, hủy
             </Button>
           </DialogFooter>
         </DialogContent>

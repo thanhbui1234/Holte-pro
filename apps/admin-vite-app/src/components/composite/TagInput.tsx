@@ -13,7 +13,7 @@ interface TagInputProps {
 }
 
 export function TagInput({
-  value,
+  value = [],
   onChange,
   placeholder = "Type and press Enter",
   id,

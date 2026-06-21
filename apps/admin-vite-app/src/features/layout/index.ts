@@ -1,3 +1,2 @@
-
-export { useLayout, useUpdateLayout } from "./hooks/use-layout";
-export type { LayoutSection, LayoutSectionKey } from "./types/layout.types";
+export { useSections, useSection, useUpdateSection, useUpdateSectionData, useUpdateSectionOrder } from "./hooks/use-layout";
+export type { SectionRecord } from "./types/layout.types";

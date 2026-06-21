@@ -38,10 +38,10 @@ export function VideoLibraryModal({ open, onOpenChange, onSelect }: VideoLibrary
         <DialogHeader className="px-6 py-5 border-b border-muted/30 bg-muted/10">
           <DialogTitle className="text-xl font-semibold flex items-center gap-2">
             <Video className="w-5 h-5 text-amber-500" />
-            Select Video from Library
+            Chọn video từ thư viện
           </DialogTitle>
           <DialogDescription className="text-muted-foreground mt-1">
-            Browse and select a video to add to your section. Need new videos? Upload them in the Video Library.
+            Duyệt và chọn video để thêm vào section. Cần video mới? Tải lên trong Thư viện video.
           </DialogDescription>
         </DialogHeader>
 
@@ -52,7 +52,7 @@ export function VideoLibraryModal({ open, onOpenChange, onSelect }: VideoLibrary
                 <div className="p-4 rounded-full bg-muted/50 animate-pulse">
                   <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
                 </div>
-                <p className="text-sm font-medium text-muted-foreground">Loading your library...</p>
+                <p className="text-sm font-medium text-muted-foreground">Đang tải thư viện...</p>
               </div>
             ) : !videos || videos.length === 0 ? (
               <div className="flex h-64 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-muted bg-card/30">
@@ -60,8 +60,8 @@ export function VideoLibraryModal({ open, onOpenChange, onSelect }: VideoLibrary
                   <Video className="h-8 w-8 text-muted-foreground/50" />
                 </div>
                 <div className="text-center">
-                  <p className="text-base font-medium text-foreground">No videos found</p>
-                  <p className="text-sm text-muted-foreground mt-1">Upload your first video in the Video Library.</p>
+                  <p className="text-base font-medium text-foreground">Không tìm thấy video</p>
+                  <p className="text-sm text-muted-foreground mt-1">Tải lên video đầu tiên trong Thư viện video.</p>
                 </div>
               </div>
             ) : (
@@ -92,7 +92,7 @@ export function VideoLibraryModal({ open, onOpenChange, onSelect }: VideoLibrary
                     
                     <div className="flex flex-col flex-1 p-4">
                       <h3 className="line-clamp-2 text-sm font-semibold leading-snug tracking-tight mb-3 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors" title={video.title}>
-                        {video.title || "Untitled Video"}
+                        {video.title || "Video không có tiêu đề"}
                       </h3>
                       
                       <div className="mt-auto flex items-center justify-between text-xs text-muted-foreground mb-4 font-medium">
@@ -116,7 +116,7 @@ export function VideoLibraryModal({ open, onOpenChange, onSelect }: VideoLibrary
                       >
                         <span className="relative z-10 flex items-center justify-center gap-2">
                           <Plus className="h-4 w-4" />
-                          Select to Add
+                          Chọn để thêm
                         </span>
                       </button>
                     </div>
