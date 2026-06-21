@@ -151,7 +151,7 @@ export function WeddingHighlightsPage() {
               name="description"
               render={({ field }) => (
                 <RichTextEditor
-                  value={field.value}
+                  value={field.value ?? ""}
                   onChange={field.onChange}
                   placeholder="Mô tả ngắn cho phần này"
                 />
