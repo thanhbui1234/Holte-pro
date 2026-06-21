@@ -38,46 +38,46 @@ interface SectionMeta {
 
 const SECTION_META: Record<string, SectionMeta> = {
   banner: {
-    label: "Hero Banner",
+    label: "Banner Chính",
     icon: ImageIcon,
-    description: "Fullscreen video and logo overlay.",
+    description: "Video toàn màn hình và logo overlay.",
   },
   about: {
-    label: "About JOW Film",
+    label: "Về JOW Film",
     icon: Sparkles,
-    description: "Studio intro, story copy and credibility stats.",
+    description: "Giới thiệu studio, câu chuyện và số liệu uy tín.",
   },
   "wedding-highlights": {
-    label: "Wedding Highlights",
+    label: "Highlight Đám Cưới",
     icon: Film,
-    description: "Featured highlight reel carousel.",
+    description: "Carousel highlight nổi bật.",
   },
   "wedding-reels": {
-    label: "Wedding Reels",
+    label: "Reels Đám Cưới",
     icon: Clapperboard,
-    description: "Short-form vertical reels scroller.",
+    description: "Cuộn video ngắn dọc.",
   },
   "traditional-films": {
-    label: "Traditional Films",
+    label: "Phim Truyền Thống",
     icon: Video,
-    description: "Long-form heritage film grid.",
+    description: "Lưới phim dài di sản.",
   },
   "contact-cta": {
-    label: "Contact CTA",
+    label: "CTA Liên Hệ",
     icon: Mail,
-    description: "Closing call-to-action block.",
+    description: "Khối kêu gọi hành động cuối trang.",
   },
 };
 
 const FALLBACK_META: SectionMeta = {
-  label: "Custom section",
+  label: "Phần tùy chỉnh",
   icon: Settings2,
-  description: "User-defined section.",
+  description: "Phần do người dùng định nghĩa.",
 };
 
 const FIXED_SECTIONS: { label: string; description: string; icon: IconComponent }[] = [
-  { label: "Header", description: "Floating navigation chrome.", icon: PanelsTopLeft },
-  { label: "Footer", description: "Always last. Contact info and credits.", icon: Settings2 },
+  { label: "Header", description: "Chrome điều hướng nổi.", icon: PanelsTopLeft },
+  { label: "Footer", description: "Luôn cuối cùng. Thông tin liên hệ và tín dụng.", icon: Settings2 },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -158,25 +158,25 @@ export function LayoutPage() {
 
   if (isLoading) {
     return (
-      <PageContainer title="Homepage Layout" description="Loading...">
-        <div className="p-8">Loading...</div>
+      <PageContainer title="Bố cục Trang chủ" description="Đang tải...">
+        <div className="p-8">Đang tải...</div>
       </PageContainer>
     );
   }
 
   return (
     <PageContainer
-      title="Homepage Layout"
-      description="Manage the order and visibility of homepage sections."
+      title="Bố cục Trang chủ"
+      description="Quản lý thứ tự và khả năng hiển thị của các phần trang chủ."
       badge="Structure"
     >
       {isSaving && (
         <div className="flex items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
           <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
           <div className="min-w-0">
-            <p className="font-medium">Saving section order…</p>
+            <p className="font-medium">Đang lưu thứ tự phần...</p>
             <p className="text-xs opacity-70">
-              Please don't close or navigate away until this completes.
+              Vui lòng không đóng hoặc điều hướng đến nơi khác cho đến khi hoàn tất.
             </p>
           </div>
         </div>
@@ -184,13 +184,13 @@ export function LayoutPage() {
 
       <SectionCard
         icon={<GripVertical className="h-4 w-4" />}
-        title="Sections"
-        description={`${visibleCount} of ${orderedSections.length} sections currently visible.`}
+        title="Các phần"
+        description={`${visibleCount} trong số ${orderedSections.length} phần đang hiển thị.`}
         actions={
           isOrderDirty ? (
             <Button size="sm" onClick={handleSaveOrder} disabled={isSaving}>
               <Save className="h-4 w-4" />
-              {isSaving ? "Saving…" : "Save order"}
+              {isSaving ? "Đang lưu..." : "Lưu thứ tự"}
             </Button>
           ) : null
         }
@@ -218,8 +218,8 @@ export function LayoutPage() {
 
       <SectionCard
         icon={<Lock className="h-4 w-4" />}
-        title="Fixed sections"
-        description="These always stay in place and can't be reordered or hidden."
+        title="Phần cố định"
+        description="Những phần này luôn ở vị trí cố định và không thể sắp xếp lại hoặc ẩn."
       >
         <ul className="grid gap-2 sm:grid-cols-2">
           {FIXED_SECTIONS.map((item) => (
@@ -282,7 +282,7 @@ function SectionRow({ section, index, meta, preview, isDragDisabled, isToggling,
           "flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground",
           isDragDisabled ? "cursor-not-allowed opacity-40" : "cursor-grab active:cursor-grabbing",
         )}
-        aria-label="Drag to reorder"
+        aria-label="Kéo để sắp xếp"
         disabled={isDragDisabled}
       >
         <GripVertical className="h-4 w-4" />
@@ -316,7 +316,7 @@ function SectionRow({ section, index, meta, preview, isDragDisabled, isToggling,
           htmlFor={switchId}
           className="hidden text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground sm:inline"
         >
-          {isActive ? "Visible" : "Hidden"}
+          {isActive ? "Hiển thị" : "Ẩn"}
         </label>
         <Switch
           id={switchId}

@@ -31,19 +31,19 @@ export function FooterConfigPage() {
   });
 
   if (isLoading) {
-    return <PageContainer title="Footer" description="Loading..."><div className="p-8">Loading...</div></PageContainer>;
+    return <PageContainer title="Footer" description="Đang tải..."><div className="p-8">Đang tải...</div></PageContainer>;
   }
 
   return (
     <form onSubmit={submit}>
       <PageContainer
         title="Footer"
-        description="Tagline, contact details, social links and the bottom credit row."
+        description="Tagline, thông tin liên hệ, liên kết mạng xã hội và dòng bản quyền."
       >
         <SectionCard
           icon={<Globe className="h-4 w-4" />}
-          title="Identity"
-          description="Tagline below the logo and the bottom-bar credit text."
+          title="Thương hiệu"
+          description="Tagline bên dưới logo và văn bản tín dụng ở thanh dưới."
         >
           <div className="space-y-4">
             <FormField label="Tagline" htmlFor="ft-tagline">
@@ -55,13 +55,13 @@ export function FooterConfigPage() {
             </FormField>
             <div className="grid gap-4 md:grid-cols-2">
               <FormField
-                label="Copyright"
+                label="Bản quyền"
                 htmlFor="ft-copy"
-                hint="Use {year} as a placeholder for the current year."
+                hint="Dùng {year} như placeholder cho năm hiện tại."
               >
                 <Input id="ft-copy" {...register("copyright")} />
               </FormField>
-              <FormField label="Credit line" htmlFor="ft-credit">
+              <FormField label="Dòng tín dụng" htmlFor="ft-credit">
                 <Input id="ft-credit" {...register("credit")} />
               </FormField>
             </div>
@@ -70,21 +70,21 @@ export function FooterConfigPage() {
 
         <SectionCard
           icon={<Phone className="h-4 w-4" />}
-          title="Get in touch"
-          description="Contact column on the left side of the footer."
+          title="Liên hệ"
+          description="Cột liên hệ ở bên trái footer."
         >
           <div className="space-y-4">
-            <FormField label="Heading" htmlFor="ft-contact-heading">
+            <FormField label="Tiêu đề" htmlFor="ft-contact-heading">
               <Input id="ft-contact-heading" {...register("contactHeading")} />
             </FormField>
             <div className="grid gap-4 md:grid-cols-2">
-              <FormField label="Phone" htmlFor="ft-phone">
+              <FormField label="Điện thoại" htmlFor="ft-phone">
                 <Input id="ft-phone" {...register("phone")} />
               </FormField>
               <FormField label="Email" htmlFor="ft-email">
                 <Input id="ft-email" type="email" {...register("email")} />
               </FormField>
-              <FormField label="Address" htmlFor="ft-address" className="md:col-span-2">
+              <FormField label="Địa chỉ" htmlFor="ft-address" className="md:col-span-2">
                 <Input id="ft-address" {...register("address")} />
               </FormField>
             </div>
@@ -93,11 +93,11 @@ export function FooterConfigPage() {
 
         <SectionCard
           icon={<Share2 className="h-4 w-4" />}
-          title="Follow us"
-          description="Social column on the right side of the footer."
+          title="Theo dõi chúng tôi"
+          description="Cột mạng xã hội ở bên phải footer."
         >
           <div className="space-y-4">
-            <FormField label="Heading" htmlFor="ft-social-heading">
+            <FormField label="Tiêu đề" htmlFor="ft-social-heading">
               <Input id="ft-social-heading" {...register("socialHeading")} />
             </FormField>
             <div className="grid gap-4 md:grid-cols-3">
@@ -118,7 +118,7 @@ export function FooterConfigPage() {
           isDirty={isDirty}
           onSave={submit}
           onReset={() => reset(data)}
-          saveLabel="Save footer"
+          saveLabel="Lưu footer"
         />
       </PageContainer>
     </form>

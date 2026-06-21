@@ -39,7 +39,7 @@ const SECTIONS: SectionCard[] = [
   {
     key: "banner",
     label: "Banner",
-    description: "Hero video and logo shown at the very top of the homepage.",
+    description: "Video hero và logo hiển thị trên cùng trang chủ.",
     path: "/sections/banner",
     icon: ImageIcon,
     sectionName: "banner",
@@ -47,40 +47,40 @@ const SECTIONS: SectionCard[] = [
   },
   {
     key: "about",
-    label: "About",
-    description: "Studio intro, origin story and credibility stats.",
+    label: "Giới thiệu",
+    description: "Giới thiệu studio, câu chuyện nguồn gốc và số liệu uy tín.",
     path: "/sections/about",
     icon: Sparkles,
     sectionName: "about",
   },
   {
     key: "highlights",
-    label: "Wedding Highlights",
-    description: "Featured highlight reel carousel.",
+    label: "Highlight Đám Cưới",
+    description: "Carousel highlight nổi bật.",
     path: "/sections/wedding-highlights",
     icon: Film,
     sectionName: "wedding-highlights",
   },
   {
     key: "reels",
-    label: "Wedding Reels",
-    description: "Short-form vertical reels scroller.",
+    label: "Reels Đám Cưới",
+    description: "Cuộn video ngắn dọc.",
     path: "/sections/wedding-reels",
     icon: Clapperboard,
     sectionName: "wedding-reels",
   },
   {
     key: "films",
-    label: "Traditional Films",
-    description: "Long-form heritage film grid.",
+    label: "Phim Truyền Thống",
+    description: "Lưới phim dài di sản.",
     path: "/sections/traditional-films",
     icon: Video,
     sectionName: "traditional-films",
   },
   {
     key: "contact-cta",
-    label: "Contact CTA",
-    description: "Call-to-action block that closes the homepage.",
+    label: "CTA Liên Hệ",
+    description: "Khối kêu gọi hành động cuối trang chủ.",
     path: "/sections/contact-cta",
     icon: Mail,
     sectionName: "contact-cta",
@@ -88,8 +88,8 @@ const SECTIONS: SectionCard[] = [
   },
   {
     key: "custom",
-    label: "Custom Sections",
-    description: "Free-form canvas sections you build from scratch.",
+    label: "Phần tùy chỉnh",
+    description: "Các phần canvas tự do bạn tạo từ đầu.",
     path: "/sections/custom-sections",
     icon: LayoutTemplate,
     isCustom: true,
@@ -117,18 +117,18 @@ export function SectionsHubPage() {
   const getMeta = (card: SectionCard): string | null => {
     if (card.isCustom) {
       const count = customSections.length;
-      return count === 0 ? "No sections yet" : `${count} section${count > 1 ? "s" : ""}`;
+      return count === 0 ? "Chưa có phần nào" : `${count} phần`;
     }
-    if (card.sectionName === "wedding-highlights") return `${highlights.length} videos`;
+    if (card.sectionName === "wedding-highlights") return `${highlights.length} video`;
     if (card.sectionName === "wedding-reels") return `${reels.length} reels`;
-    if (card.sectionName === "traditional-films") return `${films.length} films`;
+    if (card.sectionName === "traditional-films") return `${films.length} phim`;
     return null;
   };
 
   return (
     <PageContainer
-      title="Site sections"
-      description="All configurable sections of the public website. Click a card to edit content, toggle visibility, or reorder items."
+      title="Các phần trang web"
+      description="Tất cả các phần có thể cấu hình của trang web. Nhấp vào thẻ để chỉnh sửa nội dung, bật tắt hiển thị hoặc sắp xếp lại."
       badge="Sections"
     >
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -161,7 +161,7 @@ export function SectionsHubPage() {
                 {card.fixed ? (
                   <span className="flex items-center gap-1 rounded-full border border-border/60 bg-muted/60 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                     <Lock className="h-2.5 w-2.5" />
-                    Fixed
+                    Cố định
                   </span>
                 ) : visible != null ? (
                   <span
@@ -177,7 +177,7 @@ export function SectionsHubPage() {
                     ) : (
                       <EyeOff className="h-2.5 w-2.5" />
                     )}
-                    {visible ? "Visible" : "Hidden"}
+                    {visible ? "Hiển thị" : "Ẩn"}
                   </span>
                 ) : null}
               </div>
@@ -205,7 +205,7 @@ export function SectionsHubPage() {
                   <span />
                 )}
                 <span className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground transition-colors group-hover:text-amber-600 dark:group-hover:text-amber-400">
-                  Configure
+                  Cấu hình
                   <ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </span>
               </div>

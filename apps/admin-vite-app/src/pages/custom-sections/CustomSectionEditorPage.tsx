@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Reorder, useDragControls } from "motion/react";
 import {
@@ -13,12 +13,13 @@ import {
   LayoutTemplate,
   MousePointerClick,
   Plus,
+  Save,
   Text,
   Trash2,
   Video,
   X,
 } from "lucide-react";
-import { useCustomSections, useUpdateCustomSections } from "@/features/custom-sections/hooks/use-custom-sections";
+import { useSection, useUpdateSectionData } from "@/features/layout/hooks/use-layout";
 import { PageContainer } from "@/components/composite/PageContainer";
 import { SectionCard } from "@/components/composite/SectionCard";
 import { ColorField } from "@/components/composite/ColorField";
@@ -45,7 +46,33 @@ import type {
   TextBlock,
   VideoBlock,
 } from "shared-ui";
+import type { SectionRecord } from "@/shared/api/section.api";
 import { cn } from "@/shared/lib/utils";
+
+function recordToDraft(r: SectionRecord): CustomSection {
+  const map = (r.data?.map ?? {}) as Record<string, any>;
+  return {
+    id: String(r.id),
+    name: r.name,
+    slug: map.slug ?? r.name,
+    visible: r.status === "ACTIVE",
+    paddingY: map.paddingY ?? "lg",
+    blocks: map.blocks ?? [],
+    layoutMode: map.layoutMode ?? "canvas",
+    canvasElements: map.canvasElements ?? [],
+    canvasHeight: map.canvasHeight ?? 900,
+    backgroundColor: map.backgroundColor ?? "#ffffff",
+    backgroundType: map.backgroundType ?? "solid",
+    bgGradientAngle: map.bgGradientAngle ?? 135,
+    bgGradientFrom: map.bgGradientFrom ?? "#ffffff",
+    bgGradientTo: map.bgGradientTo ?? "#f5f5f4",
+    bgImage: map.bgImage ?? "",
+    bgImageOverlay: map.bgImageOverlay ?? "#000000",
+    bgImageOverlayOpacity: map.bgImageOverlayOpacity ?? 30,
+    createdAt: r.createdTime,
+    updatedAt: r.updatedTime,
+  };
+}
 
 /* ─── Block helpers ──────────────────────────────────────────────────────── */
 
@@ -93,47 +120,46 @@ function blockPreview(block: ContentBlock): string {
 export function CustomSectionEditorPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { data: sections = [], isLoading } = useCustomSections();
-  const { mutate: updateSections } = useUpdateCustomSections();
+  const sectionId = Number(id);
 
-  const section = sections.find((s: CustomSection) => s.id === id);
+  const { data: record, isLoading } = useSection(sectionId);
+  const { mutate: saveSection, isPending: isSaving } = useUpdateSectionData();
 
+  const [draft, setDraft] = useState<CustomSection | null>(null);
+  const [isDirty, setIsDirty] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [editingBlock, setEditingBlock] = useState<ContentBlock | null>(null);
   const [deleteBlockId, setDeleteBlockId] = useState<string | null>(null);
 
-  if (isLoading) {
+  useEffect(() => {
+    if (!record) return;
+    setDraft((prev) => (prev ? prev : recordToDraft(record)));
+  }, [record]);
+
+  if (isLoading || !draft) {
     return <PageContainer title="Loading..." badge="Custom"><div className="p-8">Loading...</div></PageContainer>;
   }
 
-  if (!section) {
-    return (
-      <PageContainer title="Section not found" badge="Custom">
-        <EmptyState
-          icon={<LayoutTemplate className="h-6 w-6" />}
-          title="Section not found"
-          description="This section may have been deleted."
-          action={
-            <Button variant="outline" onClick={() => navigate("/sections/custom-sections")}>
-              Back to sections
-            </Button>
-          }
-        />
-      </PageContainer>
-    );
-  }
+  const section = draft;
 
   function handleUpdateSection(updatedSection: CustomSection) {
-    updateSections(sections.map((s: CustomSection) => s.id === updatedSection.id ? updatedSection : s));
+    setDraft(updatedSection);
+    setIsDirty(true);
   }
 
   function handleMetaChange(updates: Partial<CustomSection>) {
-    if (!section) return;
     handleUpdateSection({ ...section, ...updates, updatedAt: Date.now() });
   }
 
+  function handleSave() {
+    const { id: _sid, slug, visible, createdAt, updatedAt, ...canvasData } = section;
+    saveSection(
+      { id: sectionId, name: section.name, data: canvasData as Record<string, unknown> },
+      { onSuccess: () => setIsDirty(false) },
+    );
+  }
+
   function handleAddBlock(type: BlockType) {
-    if (!section) return;
     const block = makeBlock(type);
     handleUpdateSection({ ...section, blocks: [...section.blocks, block] });
     setAddOpen(false);
@@ -141,29 +167,25 @@ export function CustomSectionEditorPage() {
   }
 
   function handleSaveBlock(block: ContentBlock) {
-    if (!section) return;
     handleUpdateSection({ ...section, blocks: section.blocks.map(b => b.id === block.id ? block : b) });
     setEditingBlock(null);
   }
 
   function handleDeleteBlock() {
-    if (!section || !deleteBlockId) return;
+    if (!deleteBlockId) return;
     handleUpdateSection({ ...section, blocks: section.blocks.filter(b => b.id !== deleteBlockId) });
     setDeleteBlockId(null);
   }
 
   function handleReorderBlocks(blocks: ContentBlock[]) {
-    if (!section) return;
     handleUpdateSection({ ...section, blocks });
   }
 
   function handleSetCanvasElements(elements: CanvasElement[]) {
-    if (!section) return;
     handleUpdateSection({ ...section, canvasElements: elements });
   }
 
   function handleSetCanvasHeight(height: number) {
-    if (!section) return;
     handleUpdateSection({ ...section, canvasHeight: height });
   }
 
@@ -180,15 +202,21 @@ export function CustomSectionEditorPage() {
       badge="Custom section"
       className="max-w-full"
     >
-      {/* Back */}
-      <button
-        type="button"
-        onClick={() => navigate("/sections/custom-sections")}
-        className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        All custom sections
-      </button>
+      {/* Back + Save */}
+      <div className="flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => navigate("/sections/custom-sections")}
+          className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          All custom sections
+        </button>
+        <Button onClick={handleSave} disabled={!isDirty || isSaving} className="gap-2">
+          <Save className="h-4 w-4" />
+          {isSaving ? "Saving…" : "Save"}
+        </Button>
+      </div>
 
       {/* Section settings */}
       <SectionCard icon={<LayoutTemplate className="h-4 w-4" />} title="Section settings">

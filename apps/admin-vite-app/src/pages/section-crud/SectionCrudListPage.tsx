@@ -24,19 +24,19 @@ export function SectionCrudListPage() {
 
   return (
     <PageContainer
-      title="Sections CRUD"
-      description="Manage dynamic sections and their custom data fields."
+      title="Quản lý Sections"
+      description="Quản lý các section động và các trường dữ liệu tùy chỉnh."
       badge="CMS"
       actions={
         <Button onClick={() => navigate("/section-crud/new")} className="gap-2">
           <Plus className="h-4 w-4" />
-          Create section
+          Tạo section
         </Button>
       }
     >
       {isLoading ? (
         <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
-          Loading sections...
+          Đang tải sections...
         </div>
       ) : (
         <EntityList<SectionRecord>
@@ -47,11 +47,11 @@ export function SectionCrudListPage() {
           emptyState={
             <EmptyState
               icon={<SectionIcon className="h-6 w-6" />}
-              title="No sections found"
-              description="Create a new section to start building dynamic content."
+              title="Không tìm thấy section nào"
+              description="Tạo section mới để bắt đầu xây dựng nội dung động."
               action={
                 <Button variant="outline" onClick={() => navigate("/section-crud/new")}>
-                  Create section
+                  Tạo section
                 </Button>
               }
             />
@@ -60,7 +60,7 @@ export function SectionCrudListPage() {
             <div>
               <p className="text-sm font-medium">{item.name}</p>
               <p className="text-xs text-muted-foreground">
-                Status: {item.status} · Order: {item.displayOrder} · Fields: {Object.keys(item.data || {}).length}
+                Trạng thái: {item.status} · Thứ tự: {item.displayOrder} · Trường: {Object.keys(item.data || {}).length}
               </p>
             </div>
           )}
@@ -70,9 +70,9 @@ export function SectionCrudListPage() {
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Delete section?"
-        description={`Are you sure you want to delete "${deleteTarget?.name}"? This action cannot be undone.`}
-        confirmLabel="Delete"
+        title="Xóa section?"
+        description={`Bạn có chắc muốn xóa "${deleteTarget?.name}" không? Thao tác này không thể hoàn tác.`}
+        confirmLabel="Xóa"
         onConfirm={handleDelete}
       />
     </PageContainer>

@@ -63,16 +63,16 @@ export function FormVideoPicker<TFieldValues extends Record<string, any>>({
             <button
               type="button"
               onClick={handleRemove}
-              className="absolute right-2 top-2 rounded-full bg-black/60 p-1.5 text-white transition hover:bg-black/80"
-              aria-label="Remove video"
+              className="absolute right-2 top-2 z-20 rounded-full bg-black/60 p-1.5 text-white transition hover:bg-black/80"
+              aria-label="Xóa video"
             >
               <X className="h-4 w-4" />
             </button>
-            <div 
+            <div
               className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-black/50 opacity-0 transition-opacity hover:opacity-100"
               onClick={() => setModalOpen(true)}
             >
-              <p className="font-medium text-white">Click to change video</p>
+              <p className="font-medium text-white">Nhấp để thay đổi video</p>
             </div>
           </div>
         ) : (
@@ -81,7 +81,7 @@ export function FormVideoPicker<TFieldValues extends Record<string, any>>({
             className="flex aspect-video cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/10 transition hover:border-muted-foreground/50 hover:bg-muted/30"
           >
             <Video className="h-8 w-8 text-muted-foreground/60" />
-            <p className="text-sm text-muted-foreground">Click to select or upload a video</p>
+            <p className="text-sm text-muted-foreground">Nhấp để chọn hoặc tải lên video</p>
           </div>
         )}
       </div>

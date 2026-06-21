@@ -50,8 +50,8 @@ export function ContactCtaPage() {
 
   if (isLoading) {
     return (
-      <PageContainer title="Contact CTA" description="Loading...">
-        <div className="p-8">Loading...</div>
+      <PageContainer title="CTA Liên hệ" description="Đang tải...">
+        <div className="p-8">Đang tải...</div>
       </PageContainer>
     );
   }
@@ -59,25 +59,25 @@ export function ContactCtaPage() {
   return (
     <form onSubmit={submit}>
       <PageContainer
-        title="Contact CTA"
-        description="The closing call-to-action block on the homepage with the gold button."
+        title="CTA Liên hệ"
+        description="Khối kêu gọi hành động cuối trang chủ với nút vàng."
       >
         <SectionCard
           icon={<Type className="h-4 w-4" />}
-          title="Heading"
-          description="Eyebrow, headline split into prefix + italic highlight, and the supporting copy."
+          title="Tiêu đề"
+          description="Eyebrow, tiêu đề chia thành tiền tố + in nghiêng nổi bật, và nội dung hỗ trợ."
         >
           <div className="grid gap-4 md:grid-cols-2">
             <FormField label="Eyebrow" htmlFor="cta-eyebrow" className="md:col-span-2">
               <Input id="cta-eyebrow" {...register("eyebrow")} />
             </FormField>
-            <FormField label="Title prefix" htmlFor="cta-prefix">
+            <FormField label="Tiền tố tiêu đề" htmlFor="cta-prefix">
               <Input id="cta-prefix" {...register("titlePrefix")} />
             </FormField>
-            <FormField label="Italic highlight word" htmlFor="cta-highlight">
+            <FormField label="Từ in nghiêng nổi bật" htmlFor="cta-highlight">
               <Input id="cta-highlight" {...register("titleHighlight")} />
             </FormField>
-            <FormField label="Description" htmlFor="cta-desc" className="md:col-span-2">
+            <FormField label="Mô tả" htmlFor="cta-desc" className="md:col-span-2">
               <Textarea id="cta-desc" rows={3} {...register("description")} />
             </FormField>
           </div>
@@ -85,14 +85,14 @@ export function ContactCtaPage() {
 
         <SectionCard
           icon={<Mail className="h-4 w-4" />}
-          title="Call to action"
-          description="Button label and target."
+          title="Kêu gọi hành động"
+          description="Nhãn nút và đích đến."
         >
           <div className="grid gap-4 md:grid-cols-2">
-            <FormField label="Button label" htmlFor="cta-label">
+            <FormField label="Nhãn nút" htmlFor="cta-label">
               <Input id="cta-label" {...register("ctaLabel")} />
             </FormField>
-            <FormField label="Target URL" htmlFor="cta-href">
+            <FormField label="URL đích" htmlFor="cta-href">
               <Input id="cta-href" placeholder="/contact" {...register("ctaHref")} />
             </FormField>
           </div>
@@ -100,10 +100,10 @@ export function ContactCtaPage() {
 
         <SectionCard
           icon={<Palette className="h-4 w-4" />}
-          title="Background"
-          description="The wash behind this closing block."
+          title="Nền"
+          description="Nền phía sau khối đóng này."
         >
-          <FormField label="Background colour" htmlFor="cta-bg">
+          <FormField label="Màu nền" htmlFor="cta-bg">
             <Controller
               control={control}
               name="backgroundColor"
@@ -118,7 +118,7 @@ export function ContactCtaPage() {
           isDirty={isDirty}
           onSave={submit}
           onReset={() => reset(mapToContactCtaData(section?.data?.map ?? {}))}
-          saveLabel="Save CTA"
+          saveLabel="Lưu CTA"
         />
       </PageContainer>
     </form>

@@ -119,31 +119,31 @@ export function SectionCrudFormPage() {
 
   if (isEditing && isLoading) {
     return (
-      <PageContainer title="Loading...">
-        <div className="flex h-32 items-center justify-center">Loading section...</div>
+      <PageContainer title="Đang tải...">
+        <div className="flex h-32 items-center justify-center">Đang tải section...</div>
       </PageContainer>
     );
   }
 
   return (
     <PageContainer
-      title={isEditing ? "Edit section" : "Create new section"}
-      description="Define standard fields and custom dynamic fields for this section."
+      title={isEditing ? "Chỉnh sửa section" : "Tạo section mới"}
+      description="Xác định các trường chuẩn và trường động tùy chỉnh cho section này."
       badge="CMS"
     >
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 pb-24">
         {/* Basic Fields */}
         <div className="space-y-6 rounded-xl border border-border/60 bg-background p-6 shadow-sm">
           <div className="mb-4">
-            <h3 className="text-lg font-medium">Basic Configuration</h3>
-            <p className="text-sm text-muted-foreground">Standard settings for the section</p>
+            <h3 className="text-lg font-medium">Cấu hình cơ bản</h3>
+            <p className="text-sm text-muted-foreground">Cài đặt chuẩn cho section</p>
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2">
-            <FormField label="Section Name" htmlFor="name">
+            <FormField label="Tên section" htmlFor="name">
               <Input
                 id="name"
-                placeholder="e.g. Hero Banner"
+                placeholder="vd: Hero Banner"
                 {...form.register("name")}
               />
               {form.formState.errors.name && (
@@ -151,7 +151,7 @@ export function SectionCrudFormPage() {
               )}
             </FormField>
 
-            <FormField label="Display Order" htmlFor="displayOrder">
+            <FormField label="Thứ tự hiển thị" htmlFor="displayOrder">
               <Input
                 id="displayOrder"
                 type="number"
@@ -160,10 +160,10 @@ export function SectionCrudFormPage() {
             </FormField>
           </div>
 
-          <FormField label="Description" htmlFor="description">
+          <FormField label="Mô tả" htmlFor="description">
             <Textarea
               id="description"
-              placeholder="Internal notes about this section"
+              placeholder="Ghi chú nội bộ về section này"
               className="h-20 resize-none"
               {...form.register("description")}
             />
@@ -171,9 +171,9 @@ export function SectionCrudFormPage() {
 
           <div className="flex items-center justify-between rounded-lg border border-border/60 p-4">
             <div className="space-y-0.5">
-              <Label className="text-base">Active Status</Label>
+              <Label className="text-base">Trạng thái kích hoạt</Label>
               <p className="text-sm text-muted-foreground">
-                Determine if this section should be rendered on the client site.
+                Xác định section này có hiển thị trên trang khách hàng không.
               </p>
             </div>
             <Switch
@@ -187,8 +187,8 @@ export function SectionCrudFormPage() {
         <div className="space-y-6 rounded-xl border border-border/60 bg-background p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-lg font-medium">Custom Data Fields</h3>
-              <p className="text-sm text-muted-foreground">Dynamic properties available in the UI</p>
+              <h3 className="text-lg font-medium">Trường dữ liệu tùy chỉnh</h3>
+              <p className="text-sm text-muted-foreground">Thuộc tính động có sẵn trong giao diện</p>
             </div>
             <Button
               type="button"
@@ -198,22 +198,22 @@ export function SectionCrudFormPage() {
               className="gap-2"
             >
               <Plus className="h-4 w-4" />
-              Add field
+              Thêm trường
             </Button>
           </div>
 
           {fields.length === 0 ? (
             <div className="rounded-lg border border-dashed border-border/60 bg-muted/20 p-8 text-center text-sm text-muted-foreground">
-              No custom fields defined. Click "Add field" to create one.
+              Chưa có trường tùy chỉnh. Nhấp "Thêm trường" để tạo.
             </div>
           ) : (
             <div className="space-y-4">
               {fields.map((field, index) => (
                 <div key={field.id} className="flex items-start gap-4">
                   <div className="flex-1 space-y-2">
-                    <Label className="text-xs text-muted-foreground">Key Name</Label>
+                    <Label className="text-xs text-muted-foreground">Tên khóa</Label>
                     <Input
-                      placeholder="e.g. title, layout, imageUrl"
+                      placeholder="vd: title, layout, imageUrl"
                       {...form.register(`dynamicFields.${index}.key` as const)}
                     />
                     {form.formState.errors.dynamicFields?.[index]?.key && (
@@ -223,19 +223,19 @@ export function SectionCrudFormPage() {
                     )}
 
                     <div className="pt-2">
-                      <Label className="text-xs text-muted-foreground">Field Type</Label>
+                      <Label className="text-xs text-muted-foreground">Loại trường</Label>
                       <select
                         className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                         {...form.register(`dynamicFields.${index}.fieldType` as const)}
                       >
-                        <option value="text">Text / Generic</option>
-                        <option value="video">Video (Single)</option>
-                        <option value="video_list">Video List (Multiple)</option>
+                        <option value="text">Văn bản / Tổng quát</option>
+                        <option value="video">Video (Đơn)</option>
+                        <option value="video_list">Danh sách video (Nhiều)</option>
                       </select>
                     </div>
                   </div>
                   <div className="flex-[2] space-y-2">
-                    <Label className="text-xs text-muted-foreground">Value</Label>
+                    <Label className="text-xs text-muted-foreground">Giá trị</Label>
                     {form.watch(`dynamicFields.${index}.fieldType`) === "video" ? (
                       <FormVideoPicker
                         name={`dynamicFields.${index}.value`}
@@ -250,7 +250,7 @@ export function SectionCrudFormPage() {
                       />
                     ) : (
                       <Textarea
-                        placeholder="Enter value..."
+                        placeholder="Nhập giá trị..."
                         className="min-h-[108px] resize-y"
                         {...form.register(`dynamicFields.${index}.value` as const)}
                       />

@@ -9,8 +9,8 @@ import { FormField } from "@/components/composite/FormField";
 import { SaveBar } from "@/components/composite/SaveBar";
 import { TagInput } from "@/components/composite/TagInput";
 import { ColorField } from "@/components/composite/ColorField";
+import { RichTextEditor } from "@/components/composite/RichTextEditor";
 import { Input } from "shared-ui";
-import { Textarea } from "shared-ui";
 import type { AboutData } from "@/features/about/types/about.types";
 
 function mapToAboutData(map: Record<string, unknown>): AboutData {
@@ -57,8 +57,8 @@ export function AboutPage() {
 
   if (isLoading) {
     return (
-      <PageContainer title="About section" description="Loading...">
-        <div className="p-8">Loading...</div>
+      <PageContainer title="Phần Giới thiệu" description="Đang tải...">
+        <div className="p-8">Đang tải...</div>
       </PageContainer>
     );
   }
@@ -66,22 +66,22 @@ export function AboutPage() {
   return (
     <form onSubmit={submit}>
       <PageContainer
-        title="About section"
-        description="The dark intro block on the homepage: heading, story, brand pillars and credibility stats."
+        title="Phần Giới thiệu"
+        description="Khối giới thiệu tối trên trang chủ: tiêu đề, câu chuyện, trụ cột thương hiệu và số liệu uy tín."
       >
         <SectionCard
           icon={<Type className="h-4 w-4" />}
-          title="Heading"
-          description="Eyebrow, the long title split into prefix + italic highlight word."
+          title="Tiêu đề"
+          description="Eyebrow, tiêu đề dài chia thành tiền tố + từ in nghiêng nổi bật."
         >
           <div className="grid gap-4 md:grid-cols-2">
             <FormField label="Eyebrow" htmlFor="about-eyebrow" className="md:col-span-2">
               <Input id="about-eyebrow" {...register("eyebrow")} />
             </FormField>
-            <FormField label="Title prefix" htmlFor="about-prefix">
+            <FormField label="Tiền tố tiêu đề" htmlFor="about-prefix">
               <Input id="about-prefix" {...register("titlePrefix")} />
             </FormField>
-            <FormField label="Italic highlight word" htmlFor="about-highlight">
+            <FormField label="Từ in nghiêng nổi bật" htmlFor="about-highlight">
               <Input id="about-highlight" {...register("titleHighlight")} />
             </FormField>
           </div>
@@ -89,10 +89,10 @@ export function AboutPage() {
 
         <SectionCard
           icon={<Palette className="h-4 w-4" />}
-          title="Background"
-          description="The dark wash behind this section."
+          title="Nền"
+          description="Nền tối phía sau phần này."
         >
-          <FormField label="Background colour" htmlFor="about-bg">
+          <FormField label="Màu nền" htmlFor="about-bg">
             <Controller
               control={control}
               name="backgroundColor"
@@ -105,18 +105,38 @@ export function AboutPage() {
 
         <SectionCard
           icon={<Sparkles className="h-4 w-4" />}
-          title="Story"
-          description="English copy is the primary body. Vietnamese copy is shown italicised below."
+          title="Câu chuyện"
+          description="Nội dung tiếng Anh là chính. Nội dung tiếng Việt hiển thị in nghiêng bên dưới."
         >
           <div className="space-y-4">
-            <FormField label="English description" htmlFor="about-desc-en">
-              <Textarea id="about-desc-en" rows={4} {...register("descriptionEn")} />
+            <FormField label="Mô tả tiếng Anh">
+              <Controller
+                control={control}
+                name="descriptionEn"
+                render={({ field }) => (
+                  <RichTextEditor
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Nhập mô tả tiếng Anh..."
+                  />
+                )}
+              />
             </FormField>
-            <FormField label="Vietnamese description" htmlFor="about-desc-vi">
-              <Textarea id="about-desc-vi" rows={4} {...register("descriptionVi")} />
+            <FormField label="Mô tả tiếng Việt">
+              <Controller
+                control={control}
+                name="descriptionVi"
+                render={({ field }) => (
+                  <RichTextEditor
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Nhập mô tả tiếng Việt..."
+                  />
+                )}
+              />
             </FormField>
             <div className="grid gap-4 md:grid-cols-2">
-              <FormField label="Core pillars" hint="Shown inline inside the description.">
+              <FormField label="Trụ cột cốt lõi" hint="Hiển thị ngay trong mô tả.">
                 <Controller
                   control={control}
                   name="pillars"
@@ -125,7 +145,7 @@ export function AboutPage() {
                   )}
                 />
               </FormField>
-              <FormField label="Legacy label" htmlFor="about-legacy">
+              <FormField label="Nhãn di sản" htmlFor="about-legacy">
                 <Input id="about-legacy" {...register("legacyLabel")} />
               </FormField>
             </div>
@@ -134,8 +154,8 @@ export function AboutPage() {
 
         <SectionCard
           icon={<BarChart3 className="h-4 w-4" />}
-          title="Stats"
-          description="Three numeric pills under the description."
+          title="Số liệu"
+          description="Ba thẻ số liệu bên dưới mô tả."
         >
           <div className="space-y-3">
             {stats.fields.map((field, index) => (
@@ -143,10 +163,10 @@ export function AboutPage() {
                 key={field.id}
                 className="grid gap-3 rounded-lg border border-border/60 bg-muted/30 p-3 sm:grid-cols-2"
               >
-                <FormField label={`Value ${index + 1}`}>
+                <FormField label={`Giá trị ${index + 1}`}>
                   <Input {...register(`stats.${index}.value` as const)} />
                 </FormField>
-                <FormField label="Label">
+                <FormField label="Nhãn">
                   <Input {...register(`stats.${index}.label` as const)} />
                 </FormField>
               </div>
@@ -156,8 +176,8 @@ export function AboutPage() {
 
         <SectionCard
           icon={<ImageIcon className="h-4 w-4" />}
-          title="Images"
-          description="First image renders large; the rest as the two small tiles."
+          title="Hình ảnh"
+          description="Ảnh đầu tiên hiển thị lớn; các ảnh còn lại là hai ô nhỏ."
         >
           <div className="space-y-3">
             {images.fields.map((field, index) => (
@@ -165,13 +185,13 @@ export function AboutPage() {
                 key={field.id}
                 className="grid gap-3 rounded-lg border border-border/60 bg-muted/30 p-3 sm:grid-cols-[1fr_1fr_auto]"
               >
-                <FormField label={`Source ${index + 1}`}>
+                <FormField label={`Nguồn ${index + 1}`}>
                   <Input
                     placeholder="/images/demo/a1.jpg"
                     {...register(`images.${index}.src` as const)}
                   />
                 </FormField>
-                <FormField label="Caption">
+                <FormField label="Chú thích">
                   <Input {...register(`images.${index}.description` as const)} />
                 </FormField>
                 <div className="hidden h-9 w-16 self-end overflow-hidden rounded-md border bg-background sm:block">
@@ -190,7 +210,7 @@ export function AboutPage() {
           isDirty={isDirty}
           onSave={submit}
           onReset={() => reset(mapToAboutData(section?.data?.map ?? {}))}
-          saveLabel="Save About"
+          saveLabel="Lưu Giới thiệu"
         />
       </PageContainer>
     </form>

@@ -31,8 +31,8 @@ export function EntityFormDialog({
   contentClassName,
   children,
 }: EntityFormDialogProps) {
-  const heading = `${mode === "add" ? "Add" : "Edit"} ${entityLabel}`;
-  const action = mode === "add" ? `Add ${entityLabel.toLowerCase()}` : "Save";
+  const heading = `${mode === "add" ? "Thêm" : "Chỉnh sửa"} ${entityLabel}`;
+  const action = mode === "add" ? `Thêm ${entityLabel.toLowerCase()}` : "Lưu";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -53,7 +53,7 @@ export function EntityFormDialog({
           {children}
           <DialogFooter className="gap-2 sm:gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              Hủy
             </Button>
             <Button type="submit">{action}</Button>
           </DialogFooter>
