@@ -42,6 +42,7 @@ export interface ReelItem {
   title: string;
   duration: string;
   location: string;
+  youtubeUrl?: string;
 }
 
 export interface FilmItem {
@@ -51,6 +52,7 @@ export interface FilmItem {
   description: string;
   tags: string[];
   image: string;
+  youtubeEmbedUrl?: string;
 }
 
 export interface ContactConfig {

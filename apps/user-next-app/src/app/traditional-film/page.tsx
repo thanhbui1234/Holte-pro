@@ -1,8 +1,11 @@
 import { generateMetadata } from "@/app/metadata";
 import { TraditionalFilmPage } from "./TraditionalFilmPage";
-import { getAppVideoList } from "@/lib/video.api";
-import { mapToFilmItem } from "@/lib/video.mapper";
-import { VideoCategory } from "@/types/video.types";
+import { getAppSections } from "@/lib/video.api";
+import {
+  findSection,
+  mapTraditionalFilmSectionToFilms,
+} from "@/lib/video.mapper";
+import type { TraditionalFilmsSectionData } from "@/types/video.types";
 
 export const metadata = generateMetadata({
   title: "Traditional Films",
@@ -19,12 +22,15 @@ export const metadata = generateMetadata({
 });
 
 export default async function Page() {
-  const videos = await getAppVideoList({
-    categoryIds: [VideoCategory.FUNERAL],
-    statuses: ["UPLOADED"],
-  });
+  const sections = await getAppSections();
 
-  const films = videos.length > 0 ? videos.map(mapToFilmItem) : undefined;
+  const filmData = findSection<TraditionalFilmsSectionData>(
+    sections,
+    "traditional-films",
+  );
+  const films = filmData
+    ? mapTraditionalFilmSectionToFilms(filmData)
+    : undefined;
 
   return <TraditionalFilmPage films={films} />;
 }

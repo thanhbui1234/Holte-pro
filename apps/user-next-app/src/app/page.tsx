@@ -3,17 +3,32 @@ import { AboutSection } from "@/components/sections/AboutSection";
 import { generateMetadata } from "./metadata";
 import { VideoBanner } from "@/components/ui/VideoBanner";
 import { ContactPreview } from "@/components/sections/ContactPreview";
-import { getAppVideoList } from "@/lib/video.api";
-import { mapToHighlightVideo, mapToReelItem } from "@/lib/video.mapper";
-import { VideoCategory } from "@/types/video.types";
+import { getAppSections } from "@/lib/video.api";
+import {
+  findSection,
+  mapHighlightSectionToVideos,
+  mapReelSectionToReels,
+} from "@/lib/video.mapper";
+import type {
+  BannerSectionData,
+  AboutSectionData,
+  WeddingHighlightsSectionData,
+  WeddingReelsSectionData,
+} from "@/types/video.types";
 
 const WeddingHighlightSection = dynamic(
-  () => import("@/components/sections/WeddingHighlightSection").then((m) => m.WeddingHighlightSection),
-  { ssr: true }
+  () =>
+    import("@/components/sections/WeddingHighlightSection").then(
+      (m) => m.WeddingHighlightSection,
+    ),
+  { ssr: true },
 );
 const WeddingReelsSection = dynamic(
-  () => import("@/components/sections/WeddingReelsSection").then((m) => m.WeddingReelsSection),
-  { ssr: true }
+  () =>
+    import("@/components/sections/WeddingReelsSection").then(
+      (m) => m.WeddingReelsSection,
+    ),
+  { ssr: true },
 );
 
 export const metadata = generateMetadata({
@@ -24,24 +39,47 @@ export const metadata = generateMetadata({
 });
 
 export default async function Home() {
-  const videos = await getAppVideoList({
-    statuses: ["UPLOADED"],
-  });
-  console.log("``videos``", videos);
+  const sections = await getAppSections();
+  console.log("sections", sections);
+  // ── Banner ──────────────────────────────────────────────────────────────────
+  const bannerData = findSection<BannerSectionData>(sections, "banner");
 
-  const highlightVideos = videos.filter(v => v.categoryId === VideoCategory.WEDDING);
-  const reelVideos = videos.filter(v => v.categoryId === VideoCategory.ENGAGEMENT);
+  // ── About ────────────────────────────────────────────────────────────────────
+  const aboutData = findSection<AboutSectionData>(sections, "about");
 
-  const highlights = highlightVideos.length > 0 ? highlightVideos.map(mapToHighlightVideo) : undefined;
-  const reels = reelVideos.length > 0 ? reelVideos.map(mapToReelItem) : undefined;
+  // ── Wedding Highlights ───────────────────────────────────────────────────────
+  const highlightData = findSection<WeddingHighlightsSectionData>(
+    sections,
+    "wedding-highlights",
+  );
+  const highlights = highlightData
+    ? mapHighlightSectionToVideos(highlightData)
+    : undefined;
+  console.log('highlights', highlights)
+  // ── Wedding Reels ────────────────────────────────────────────────────────────
+  const reelsData = findSection<WeddingReelsSectionData>(
+    sections,
+    "wedding-reels",
+  );
+  const reels = reelsData ? mapReelSectionToReels(reelsData) : undefined;
 
-  console.log("highlights", highlights);
-  console.log("reels", reels);
-  console.log('videos', videos);
   return (
     <main>
-      <VideoBanner />
-      <AboutSection />
+      <VideoBanner
+        videoSrc={bannerData?.videoSrc}
+        logoSrc={bannerData?.logoSrc}
+      />
+      <AboutSection
+        eyebrow={aboutData?.eyebrow}
+        titlePrefix={aboutData?.titlePrefix}
+        titleHighlight={aboutData?.titleHighlight}
+        descriptionEn={aboutData?.descriptionEn}
+        descriptionVi={aboutData?.descriptionVi}
+        pillars={aboutData?.pillars}
+        legacyLabel={aboutData?.legacyLabel}
+        stats={aboutData?.stats}
+        images={aboutData?.images?.map((img) => ({ src: img.src, label: img.description }))}
+      />
       <WeddingHighlightSection videos={highlights} />
       <WeddingReelsSection reels={reels} />
       <ContactPreview />

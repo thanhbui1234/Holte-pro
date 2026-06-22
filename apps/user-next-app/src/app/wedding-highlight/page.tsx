@@ -1,8 +1,8 @@
 import { generateMetadata } from "@/app/metadata";
 import { WeddingHighlightPage } from "./WeddingHighlightPage";
-import { getAppVideoList } from "@/lib/video.api";
-import { mapToHighlightVideo } from "@/lib/video.mapper";
-import { VideoCategory } from "@/types/video.types";
+import { getAppSections } from "@/lib/video.api";
+import { findSection, mapHighlightSectionToVideos } from "@/lib/video.mapper";
+import type { WeddingHighlightsSectionData } from "@/types/video.types";
 
 export const metadata = generateMetadata({
   title: "Wedding Highlights",
@@ -19,12 +19,15 @@ export const metadata = generateMetadata({
 });
 
 export default async function Page() {
-  const videos = await getAppVideoList({
-    categoryIds: [VideoCategory.WEDDING],
-    statuses: ["UPLOADED"],
-  });
+  const sections = await getAppSections();
 
-  const highlights = videos.length > 0 ? videos.map(mapToHighlightVideo) : undefined;
+  const highlightData = findSection<WeddingHighlightsSectionData>(
+    sections,
+    "wedding-highlights",
+  );
+  const highlights = highlightData
+    ? mapHighlightSectionToVideos(highlightData)
+    : undefined;
 
   return <WeddingHighlightPage videos={highlights} />;
 }

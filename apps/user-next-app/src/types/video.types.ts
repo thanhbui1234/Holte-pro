@@ -46,3 +46,121 @@ export const VideoCategory = {
 } as const;
 
 export type VideoCategoryId = (typeof VideoCategory)[keyof typeof VideoCategory];
+
+// ---------------------------------------------------------------------------
+// Section API types (GET_LIST_SECTION)
+// ---------------------------------------------------------------------------
+
+/** A single item inside the wedding-highlights section */
+export interface HighlightSectionItem {
+  id: string;
+  videoUrl: string;
+  title: string;
+  subtitle: string;
+}
+
+/** Config block shared by most sections */
+export interface SectionConfig {
+  eyebrow?: string;
+  titlePrefix?: string;
+  titleHighlight?: string;
+  description?: string;
+  backgroundColor?: string;
+}
+
+/** Shape of `data.map` for the `banner` section */
+export interface BannerSectionData {
+  videoSrc: string;
+  logoSrc?: string;
+  logoAlt?: string;
+  scrollLabel?: string;
+}
+
+/** A single image item inside the about section */
+export interface AboutSectionImage {
+  src: string;
+  description: string;
+}
+
+/** A single stat item inside the about section */
+export interface AboutSectionStat {
+  value: string;
+  label: string;
+}
+
+/** Shape of `data.map` for the `about` section */
+export interface AboutSectionData {
+  eyebrow?: string;
+  titlePrefix?: string;
+  titleHighlight?: string;
+  descriptionEn?: string;
+  descriptionVi?: string;
+  pillars?: string[];
+  legacyLabel?: string;
+  backgroundColor?: string;
+  stats?: AboutSectionStat[];
+  images?: AboutSectionImage[];
+}
+
+/** Shape of `data.map` for the `wedding-highlights` section */
+export interface WeddingHighlightsSectionData {
+  config: SectionConfig;
+  items: HighlightSectionItem[];
+}
+
+/** A single item inside the wedding-reels section */
+export interface ReelSectionItem {
+  id: string;
+  youtubeUrl: string;
+  videoUrl: string;
+  title: string;
+  description: string;
+  duration: string;
+  location: string;
+}
+
+/** Shape of `data.map` for the `wedding-reels` section */
+export interface WeddingReelsSectionData {
+  config: SectionConfig;
+  items: ReelSectionItem[];
+}
+
+/** A single item inside the traditional-films section */
+export interface TraditionalFilmSectionItem {
+  id: string;
+  youtubeUrl: string;
+  videoUrl: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  tags: string[];
+  image?: string;
+}
+
+/** Shape of `data.map` for the `traditional-films` section */
+export interface TraditionalFilmsSectionData {
+  config: SectionConfig;
+  items: TraditionalFilmSectionItem[];
+}
+
+/** Generic section record returned by GET_LIST_SECTION */
+export interface SectionRecord {
+  id: number;
+  name: string;
+  description: string | null;
+  displayOrder: number;
+  status: string;
+  type: string | null;
+  data: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    map: Record<string, any>;
+    empty: boolean;
+  };
+  createdTime: number;
+  updatedTime: number;
+}
+
+/** Response shape of GET_LIST_SECTION */
+export interface SectionListResponse {
+  sections: SectionRecord[];
+}

@@ -1,5 +1,119 @@
 import type { VideoRecord } from "@/types/video.types";
+import type {
+  HighlightSectionItem,
+  ReelSectionItem,
+  WeddingHighlightsSectionData,
+  WeddingReelsSectionData,
+  TraditionalFilmSectionItem,
+  TraditionalFilmsSectionData,
+  SectionRecord,
+} from "@/types/video.types";
 import type { HighlightVideo, ReelItem, FilmItem } from "@/types/content";
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Extract a bare YouTube video ID from any YouTube URL format:
+ *   https://www.youtube.com/embed/<id>
+ *   https://www.youtube.com/watch?v=<id>
+ *   https://youtu.be/<id>
+ */
+function extractYouTubeId(url: string): string {
+  if (!url) return "";
+  const embedMatch = url.match(/youtube\.com\/embed\/([^?&/]+)/);
+  if (embedMatch) return embedMatch[1];
+  const watchMatch = url.match(/[?&]v=([^&]+)/);
+  if (watchMatch) return watchMatch[1];
+  const shortMatch = url.match(/youtu\.be\/([^?&/]+)/);
+  if (shortMatch) return shortMatch[1];
+  return url; // fallback — assume raw ID was passed
+}
+
+/**
+ * Build a proper YouTube embed URL (with autoplay) from any YouTube URL or bare ID.
+ */
+export function toYouTubeEmbedUrl(urlOrId: string): string {
+  const id = extractYouTubeId(urlOrId);
+  return `https://www.youtube.com/embed/${id}?autoplay=1`;
+}
+
+// ---------------------------------------------------------------------------
+// Section-based mappers (primary — reads from GET_LIST_SECTION response)
+// ---------------------------------------------------------------------------
+
+/** Find a section by its `name` field and cast its data.map to the expected type. */
+export function findSection<T>(
+  sections: SectionRecord[],
+  name: string,
+): T | null {
+  const section = sections.find((s) => s.name === name && !s.data.empty);
+  if (!section) return null;
+  return section.data.map as T;
+}
+
+/** Map `wedding-highlights` section item → HighlightVideo (uses YouTube embed URL) */
+export function mapHighlightItemToVideo(
+  item: HighlightSectionItem,
+): HighlightVideo {
+  return {
+    id: extractYouTubeId(item.videoUrl),
+    title: item.title,
+    subtitle: item.subtitle ?? "",
+  };
+}
+
+/** Map the full `wedding-highlights` section data → HighlightVideo[] */
+export function mapHighlightSectionToVideos(
+  data: WeddingHighlightsSectionData,
+): HighlightVideo[] {
+  return (data.items ?? []).map(mapHighlightItemToVideo);
+}
+
+/** Map `wedding-reels` section item → ReelItem (uses YouTube embed URL) */
+export function mapReelItemToReel(item: ReelSectionItem): ReelItem {
+  return {
+    title: item.title,
+    duration: item.duration ?? "",
+    location: item.location ?? "",
+    youtubeUrl: item.youtubeUrl || item.videoUrl || undefined,
+  };
+}
+
+/** Map the full `wedding-reels` section data → ReelItem[] */
+export function mapReelSectionToReels(
+  data: WeddingReelsSectionData,
+): ReelItem[] {
+  return (data.items ?? []).map(mapReelItemToReel);
+}
+
+/** Map `traditional-films` section item → FilmItem */
+export function mapTraditionalFilmItemToFilm(
+  item: TraditionalFilmSectionItem,
+): FilmItem {
+  const embedUrl = item.youtubeUrl || item.videoUrl || "";
+  return {
+    id: extractYouTubeId(embedUrl),
+    title: item.title,
+    subtitle: item.subtitle ?? "",
+    description: item.description ?? "",
+    tags: item.tags ?? [],
+    image: item.image ?? "",
+    youtubeEmbedUrl: embedUrl ? toYouTubeEmbedUrl(embedUrl) : "",
+  };
+}
+
+/** Map the full `traditional-films` section data → FilmItem[] */
+export function mapTraditionalFilmSectionToFilms(
+  data: TraditionalFilmsSectionData,
+): FilmItem[] {
+  return (data.items ?? []).map(mapTraditionalFilmItemToFilm);
+}
+
+// ---------------------------------------------------------------------------
+// Legacy VideoRecord mappers (kept for /wedding-highlight etc. pages)
+// ---------------------------------------------------------------------------
 
 /** Map VideoRecord → HighlightVideo (used by WeddingHighlightSection) */
 export function mapToHighlightVideo(video: VideoRecord): HighlightVideo {
@@ -28,5 +142,6 @@ export function mapToFilmItem(video: VideoRecord): FilmItem {
     description: video.description || "",
     tags: video.tags ?? [],
     image: video.youtubeHighThumbnailUrl || video.youtubeMediumThumbnailUrl || "",
+    youtubeEmbedUrl: video.youtubeEmbedUrl || toYouTubeEmbedUrl(video.youtubeVideoId),
   };
 }
