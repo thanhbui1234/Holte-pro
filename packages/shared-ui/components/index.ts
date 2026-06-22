@@ -8,6 +8,8 @@ export * from "./ui/label";
 export * from "./ui/separator";
 export * from "./ui/switch";
 export * from "./ui/textarea";
+export * from "./ui/calendar";
+export * from "./ui/popover";
 
 // utility + motion
 export * from "./ui/spinner";

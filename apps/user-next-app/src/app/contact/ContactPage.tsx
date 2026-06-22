@@ -1,19 +1,21 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 import { PageTitleBar } from "@/components/ui/PageTitleBar";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
-import { BlurFade } from "shared-ui";
+import { BlurFade, Calendar, Popover, PopoverContent, PopoverTrigger, cn } from "shared-ui";
 import { createSupportFormAction } from "@/actions/support";
 
 interface FormState {
   name: string;
   phone: string;
-  date: string;
+  date: Date | undefined;
   message: string;
 }
 
-const INITIAL_FORM: FormState = { name: "", phone: "", date: "", message: "" };
+const INITIAL_FORM: FormState = { name: "", phone: "", date: undefined, message: "" };
 
 export function ContactPage() {
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
@@ -28,6 +30,10 @@ export function ContactPage() {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const handleDateChange = (date: Date | undefined) => {
+    setForm((prev) => ({ ...prev, date }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
@@ -35,7 +41,7 @@ export function ContactPage() {
       const res = await createSupportFormAction({
         phone: form.phone,
         fullName: form.name,
-        availableTime: form.date,
+        availableTime: form.date ? format(form.date, "yyyy-MM-dd") : "",
         reason: form.message,
       });
 
@@ -125,16 +131,35 @@ export function ContactPage() {
                   </div>
 
                   <div className="mb-4">
-                    <FormField
-                      label="Wedding Date"
-                      id="contact-date"
-                      name="date"
-                      type="date"
-                      placeholder=""
-                      value={form.date}
-                      onChange={handleChange}
-                      disabled={isPending}
-                    />
+                    <label
+                      htmlFor="contact-date"
+                      className="mb-2 block text-xs font-medium uppercase tracking-widest text-stone-500 dark:text-stone-400"
+                    >
+                      Wedding Date
+                    </label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          id="contact-date"
+                          type="button"
+                          disabled={isPending}
+                          className={cn(
+                            "flex w-full items-center rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm transition-all duration-200 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 disabled:opacity-60 dark:border-stone-600 dark:bg-stone-700/50",
+                            form.date ? "text-stone-900 dark:text-white" : "text-stone-400 dark:text-stone-500"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {form.date ? format(form.date, "PPP") : <span>Pick a date</span>}
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={form.date}
+                          onSelect={handleDateChange}
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
 
                   <div className="mb-6">

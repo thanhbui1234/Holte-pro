@@ -27,7 +27,7 @@ export default async function Home() {
   const videos = await getAppVideoList({
     statuses: ["UPLOADED"],
   });
-  console.log("videos", videos);
+  console.log("``videos``", videos);
 
   const highlightVideos = videos.filter(v => v.categoryId === VideoCategory.WEDDING);
   const reelVideos = videos.filter(v => v.categoryId === VideoCategory.ENGAGEMENT);

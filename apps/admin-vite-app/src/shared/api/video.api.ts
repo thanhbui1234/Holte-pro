@@ -87,6 +87,6 @@ export const videoApi = {
   remove: (videoId: number) =>
     apiClient.post<CmsApiResponse<{ videoId: number; result: boolean }>>(
       API_ENDPOINTS.REMOVE_VIDEO,
-      { data: { videoId } },
+      { videoId },
     ),
 } as const;
