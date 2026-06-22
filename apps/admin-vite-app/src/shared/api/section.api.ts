@@ -33,5 +33,5 @@ export const sectionApi = {
     apiClient.post<CmsStatusResponse>(API_ENDPOINTS.UPDATE_SECTION, payload),
 
   remove: (id: number) =>
-    apiClient.delete<CmsStatusResponse>(API_ENDPOINTS.REMOVE_SECTION, { data: { id } }),
+    apiClient.post<CmsStatusResponse>(API_ENDPOINTS.REMOVE_SECTION, { id }),
 } as const;

@@ -6,9 +6,11 @@ import { ContactPreview } from "@/components/sections/ContactPreview";
 import { getAppSections } from "@/lib/video.api";
 import {
   findSection,
+  findCustomSections,
   mapHighlightSectionToVideos,
   mapReelSectionToReels,
 } from "@/lib/video.mapper";
+import { CustomSectionRenderer } from "@/components/sections/custom/CustomSectionRenderer";
 import type {
   BannerSectionData,
   AboutSectionData,
@@ -63,6 +65,9 @@ export default async function Home() {
   );
   const reels = reelsData ? mapReelSectionToReels(reelsData) : undefined;
 
+  // ── Custom Sections ──────────────────────────────────────────────────────────
+  const customSections = findCustomSections(sections);
+
   return (
     <main>
       <VideoBanner
@@ -82,6 +87,9 @@ export default async function Home() {
       />
       <WeddingHighlightSection videos={highlights} />
       <WeddingReelsSection reels={reels} />
+      {customSections.map((section) => (
+        <CustomSectionRenderer key={section.id} section={section} />
+      ))}
       <ContactPreview />
     </main>
   );

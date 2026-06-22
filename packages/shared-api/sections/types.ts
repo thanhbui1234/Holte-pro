@@ -4,6 +4,7 @@ export interface SectionRecord {
   description: string;
   displayOrder: number;
   status: "ACTIVE" | "INACTIVE" | string;
+  type?: "FIXED" | "CUSTOM" | string;
   data: {
     map: Record<string, unknown>;
     empty: boolean;

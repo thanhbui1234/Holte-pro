@@ -20,7 +20,7 @@ export async function getAppSections(): Promise<SectionRecord[]> {
         method: "POST",
         body: JSON.stringify({}),
         next: {
-          revalidate: 3600,
+          revalidate: process.env.NODE_ENV === "development" ? 0 : 3600,
           tags: ["sections"],
         },
       },
@@ -52,7 +52,7 @@ export async function getAppVideoList(
       method: "POST",
       body: JSON.stringify(params),
       next: {
-        revalidate: 3600,
+        revalidate: process.env.NODE_ENV === "development" ? 0 : 3600,
         tags: ["videos"],
       },
     });

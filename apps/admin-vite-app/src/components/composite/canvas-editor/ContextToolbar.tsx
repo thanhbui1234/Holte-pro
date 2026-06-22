@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { AlignCenter, AlignLeft, AlignRight, ChevronDown } from "lucide-react";
+import { AlignCenter, AlignLeft, AlignRight, ChevronDown, Library } from "lucide-react";
 import type { CanvasElement } from "@/shared/types";
 import { cn } from "@/shared/lib/utils";
 import { BLOCK_META } from "./constants";
 import { CATEGORY_LABELS, FONT_OPTIONS, ensureGoogleFontsLoaded } from "./fonts";
+import { VideoLibraryModal } from "@/components/composite/VideoLibraryModal";
 
 /* ─── Shared toolbar primitives ─────────────────────────────────────────── */
 
@@ -312,8 +313,19 @@ function VideoContextBar({
   el: CanvasElement;
   onChange: (u: Partial<CanvasElement>) => void;
 }) {
+  const [libraryOpen, setLibraryOpen] = useState(false);
+
   return (
     <>
+      <button
+        type="button"
+        onClick={() => setLibraryOpen(true)}
+        className="flex h-7 items-center gap-1.5 rounded-md border border-amber-500/40 bg-amber-50 px-2.5 text-[11px] font-semibold text-amber-700 transition-colors hover:bg-amber-100 dark:bg-amber-500/10 dark:text-amber-300 dark:hover:bg-amber-500/20"
+      >
+        <Library className="h-3.5 w-3.5" />
+        Thư viện video
+      </button>
+      <Sep />
       <TbInput
         className="w-72"
         placeholder="YouTube URL or .mp4…"
@@ -332,6 +344,11 @@ function VideoContextBar({
         placeholder="Caption…"
         value={el.videoCaption ?? ""}
         onChange={(e) => onChange({ videoCaption: e.target.value })}
+      />
+      <VideoLibraryModal
+        open={libraryOpen}
+        onOpenChange={setLibraryOpen}
+        onSelect={(url) => onChange({ videoUrl: url })}
       />
     </>
   );

@@ -48,6 +48,34 @@ export function CanvasEditor({
   const [userZoom, setUserZoom] = useState(1.0);
   const containerRef = useRef<HTMLDivElement>(null);
   const [baseScale, setBaseScale] = useState(1);
+  const [guides, setGuides] = useState<{ x: number[]; y: number[] }>({ x: [], y: [] });
+
+  const GUIDE_THRESHOLD = 6;
+
+  function computeGuides(draggingId: string, dragX: number, dragY: number) {
+    const dragging = elements.find((e) => e.id === draggingId);
+    if (!dragging) return;
+
+    const dL = dragX, dCX = dragX + dragging.w / 2, dR = dragX + dragging.w;
+    const dT = dragY, dCY = dragY + dragging.h / 2, dB = dragY + dragging.h;
+    const xG: number[] = [], yG: number[] = [];
+
+    const cCX = CANVAS_W / 2, cCY = canvasHeight / 2;
+    if ([dL, dCX, dR].some((v) => Math.abs(v - cCX) < GUIDE_THRESHOLD)) xG.push(cCX);
+    if ([dT, dCY, dB].some((v) => Math.abs(v - cCY) < GUIDE_THRESHOLD)) yG.push(cCY);
+    if ([dL, dR].some((v) => Math.abs(v) < GUIDE_THRESHOLD)) xG.push(0);
+    if ([dL, dR].some((v) => Math.abs(v - CANVAS_W) < GUIDE_THRESHOLD)) xG.push(CANVAS_W);
+
+    elements.forEach((o) => {
+      if (o.id === draggingId) return;
+      const oXs = [o.x, o.x + o.w / 2, o.x + o.w];
+      const oYs = [o.y, o.y + o.h / 2, o.y + o.h];
+      oXs.forEach((ox) => { if ([dL, dCX, dR].some((v) => Math.abs(v - ox) < GUIDE_THRESHOLD)) xG.push(ox); });
+      oYs.forEach((oy) => { if ([dT, dCY, dB].some((v) => Math.abs(v - oy) < GUIDE_THRESHOLD)) yG.push(oy); });
+    });
+
+    setGuides({ x: [...new Set(xG)], y: [...new Set(yG)] });
+  }
 
   /* Auto-fit scale from container width */
   useEffect(() => {
@@ -377,7 +405,8 @@ export function CanvasEditor({
                   bounds="parent"
                   style={{ zIndex: el.zIndex }}
                   onMouseDown={() => setSelectedId(el.id)}
-                  onDragStop={(_, d) => updateElement(el.id, { x: d.x, y: d.y })}
+                  onDrag={(_, d) => computeGuides(el.id, d.x, d.y)}
+                  onDragStop={(_, d) => { updateElement(el.id, { x: d.x, y: d.y }); setGuides({ x: [], y: [] }); }}
                   onResizeStop={(_, __, ref, ___, pos) =>
                     updateElement(el.id, {
                       w: parseInt(ref.style.width),
@@ -420,6 +449,22 @@ export function CanvasEditor({
                   </div>
                 </div>
               )}
+
+              {/* Smart alignment guides */}
+              {guides.x.map((x, i) => (
+                <div
+                  key={`gx-${i}`}
+                  className="pointer-events-none absolute inset-y-0"
+                  style={{ left: x - 0.5, width: 1, background: "#06b6d4", zIndex: 10000, opacity: 0.85 }}
+                />
+              ))}
+              {guides.y.map((y, i) => (
+                <div
+                  key={`gy-${i}`}
+                  className="pointer-events-none absolute inset-x-0"
+                  style={{ top: y - 0.5, height: 1, background: "#06b6d4", zIndex: 10000, opacity: 0.85 }}
+                />
+              ))}
 
               {/* Height boundary indicator */}
               <div

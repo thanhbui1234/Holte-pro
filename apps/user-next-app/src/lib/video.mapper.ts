@@ -9,6 +9,7 @@ import type {
   SectionRecord,
 } from "@/types/video.types";
 import type { HighlightVideo, ReelItem, FilmItem } from "@/types/content";
+import type { CustomSection } from "shared-ui/canvas";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -109,6 +110,43 @@ export function mapTraditionalFilmSectionToFilms(
   data: TraditionalFilmsSectionData,
 ): FilmItem[] {
   return (data.items ?? []).map(mapTraditionalFilmItemToFilm);
+}
+
+// ---------------------------------------------------------------------------
+// Custom section mappers (type === "CUSTOM" from GET_LIST_SECTION)
+// ---------------------------------------------------------------------------
+
+function mapCustomSection(record: SectionRecord): CustomSection {
+  const map = (record.data?.map ?? {}) as Record<string, unknown>;
+  return {
+    id: String(record.id),
+    name: record.name,
+    slug: (map.slug as string) ?? record.name,
+    visible: record.status === "ACTIVE",
+    paddingY: (map.paddingY as CustomSection["paddingY"]) ?? "lg",
+    blocks: (map.blocks as CustomSection["blocks"]) ?? [],
+    layoutMode: "canvas",
+    canvasElements: (map.canvasElements as CustomSection["canvasElements"]) ?? [],
+    canvasHeight: (map.canvasHeight as number) ?? 900,
+    backgroundColor: (map.backgroundColor as string) ?? "#ffffff",
+    backgroundType: (map.backgroundType as CustomSection["backgroundType"]) ?? "solid",
+    bgGradientAngle: (map.bgGradientAngle as number) ?? 135,
+    bgGradientFrom: (map.bgGradientFrom as string) ?? "#ffffff",
+    bgGradientTo: (map.bgGradientTo as string) ?? "#f5f5f4",
+    bgImage: (map.bgImage as string) ?? "",
+    bgImageOverlay: (map.bgImageOverlay as string) ?? "#000000",
+    bgImageOverlayOpacity: (map.bgImageOverlayOpacity as number) ?? 30,
+    createdAt: record.createdTime,
+    updatedAt: record.updatedTime,
+  };
+}
+
+/** Filter and map all active CUSTOM sections, sorted by displayOrder. */
+export function findCustomSections(sections: SectionRecord[]): CustomSection[] {
+  return sections
+    .filter((s) => s.type === "CUSTOM" && s.status === "ACTIVE" && !s.data.empty)
+    .sort((a, b) => a.displayOrder - b.displayOrder)
+    .map(mapCustomSection);
 }
 
 // ---------------------------------------------------------------------------

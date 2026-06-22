@@ -33,7 +33,8 @@ import type { SectionRecord } from "@/shared/api/section.api";
 import { cn } from "@/shared/lib/utils";
 
 export function CustomSectionsPage() {
-  const { data: sections = [] } = useCustomSections();
+  const { data: allSections = [] } = useCustomSections();
+  const sections = allSections.filter((s) => s.type === "CUSTOM");
   const { mutate: createSection, isPending: isCreating } = useCreateCustomSection();
   const { mutate: toggleSection } = useToggleCustomSection();
   const { mutate: deleteSection } = useDeleteCustomSection();
