@@ -14,18 +14,9 @@ import { useContactSubmissions, useUpdateContactStatus, useRemoveContactSubmissi
 import { PageContainer } from "@/components/composite/PageContainer";
 import { ConfirmDialog } from "@/components/composite/ConfirmDialog";
 import { cn } from "@/shared/lib/utils";
-import type { ContactStatus, ContactSubmission } from "@/features/contact/types/contact.types";
+import type { ContactStatus, SupportFormRecord } from "@/features/contact/types/contact.types";
 
 /* ─── Helpers ────────────────────────────────────────────────── */
-
-function formatDate(weddingDate: string): string {
-  if (!weddingDate) return "—";
-  return new Date(weddingDate).toLocaleDateString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
-}
 
 function timeAgo(ts: number): string {
   const diff = Date.now() - ts;
@@ -49,18 +40,16 @@ function initials(name: string): string {
 }
 
 const STATUS_CONFIG: Record<ContactStatus, { label: string; dot: string; badge: string }> = {
-  new:      { label: "Mới",       dot: "bg-amber-500",  badge: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/20" },
-  read:     { label: "Đã đọc",   dot: "bg-muted-foreground/30", badge: "bg-muted/50 text-muted-foreground border-border/50" },
-  archived: { label: "Lưu trữ",  dot: "bg-muted-foreground/20", badge: "bg-muted/30 text-muted-foreground/60 border-border/30" },
+  PENDING:   { label: "Mới",       dot: "bg-amber-500",  badge: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/20" },
+  CONTACTED: { label: "Đã liên hệ",   dot: "bg-muted-foreground/30", badge: "bg-muted/50 text-muted-foreground border-border/50" },
 };
 
 type FilterTab = "all" | ContactStatus;
 
 const FILTER_TABS: { key: FilterTab; label: string }[] = [
-  { key: "all",      label: "Tất cả" },
-  { key: "new",      label: "Mới" },
-  { key: "read",     label: "Đã đọc" },
-  { key: "archived", label: "Lưu trữ" },
+  { key: "all",       label: "Tất cả" },
+  { key: "PENDING",   label: "Mới" },
+  { key: "CONTACTED", label: "Đã liên hệ" },
 ];
 
 /* ─── Avatar ─────────────────────────────────────────────────── */
@@ -90,7 +79,7 @@ function SubmissionRow({
   selected,
   onClick,
 }: {
-  sub: ContactSubmission;
+  sub: SupportFormRecord;
   selected: boolean;
   onClick: () => void;
 }) {
@@ -104,23 +93,23 @@ function SubmissionRow({
         selected
           ? "bg-amber-50/80 dark:bg-amber-500/8"
           : "hover:bg-muted/40",
-        sub.status === "new" && !selected && "bg-amber-50/20 dark:bg-amber-500/5",
+        sub.status === "PENDING" && !selected && "bg-amber-50/20 dark:bg-amber-500/5",
       )}
     >
       {/* Status dot */}
       <span className={cn("mt-4 h-1.5 w-1.5 shrink-0 rounded-full", cfg.dot)} />
 
-      <Avatar name={sub.name} size="sm" />
+      <Avatar name={sub.fullName} size="sm" />
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
-          <span className={cn("truncate text-sm", sub.status === "new" ? "font-semibold" : "font-medium")}>
-            {sub.name}
+          <span className={cn("truncate text-sm", sub.status === "PENDING" ? "font-semibold" : "font-medium")}>
+            {sub.fullName}
           </span>
-          <span className="shrink-0 text-[10px] text-muted-foreground/60">{timeAgo(sub.receivedAt)}</span>
+          <span className="shrink-0 text-[10px] text-muted-foreground/60">{timeAgo(sub.createdTime)}</span>
         </div>
-        <p className="truncate text-[11px] text-muted-foreground/70">{sub.email}</p>
-        <p className="mt-0.5 line-clamp-1 text-[11px] text-muted-foreground/50">{sub.message}</p>
+        <p className="truncate text-[11px] text-muted-foreground/70">{sub.phone}</p>
+        <p className="mt-0.5 line-clamp-1 text-[11px] text-muted-foreground/50">{sub.reason}</p>
       </div>
 
       {/* Selected indicator */}
@@ -139,7 +128,7 @@ function DetailPanel({
   onSetStatus,
   onDelete,
 }: {
-  sub: ContactSubmission;
+  sub: SupportFormRecord;
   onClose: () => void;
   onSetStatus: (s: ContactStatus) => void;
   onDelete: () => void;
@@ -151,14 +140,14 @@ function DetailPanel({
       {/* Header */}
       <div className="flex items-start justify-between gap-3 border-b border-border/50 px-5 py-4">
         <div className="flex items-center gap-3">
-          <Avatar name={sub.name} size="lg" />
+          <Avatar name={sub.fullName} size="lg" />
           <div>
-            <h2 className="text-base font-semibold leading-tight">{sub.name}</h2>
+            <h2 className="text-base font-semibold leading-tight">{sub.fullName}</h2>
             <a
-              href={`mailto:${sub.email}`}
+              href={`tel:${sub.phone}`}
               className="text-xs text-muted-foreground transition-colors hover:text-amber-600 dark:hover:text-amber-400"
             >
-              {sub.email}
+              {sub.phone}
             </a>
           </div>
         </div>
@@ -175,13 +164,13 @@ function DetailPanel({
       <div className="flex flex-wrap gap-3 border-b border-border/50 px-5 py-3">
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Calendar className="h-3.5 w-3.5 text-amber-500" />
-          <span>Ngày cưới:</span>
-          <span className="font-semibold text-foreground">{formatDate(sub.weddingDate)}</span>
+          <span>TG khả dụng:</span>
+          <span className="font-semibold text-foreground">{sub.availableTime || "—"}</span>
         </div>
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Mail className="h-3.5 w-3.5 text-amber-500" />
           <span>Nhận lúc:</span>
-          <span className="font-semibold text-foreground">{timeAgo(sub.receivedAt)}</span>
+          <span className="font-semibold text-foreground">{timeAgo(sub.createdTime)}</span>
         </div>
         <span className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider", cfg.badge)}>
           {cfg.label}
@@ -191,61 +180,42 @@ function DetailPanel({
       {/* Message */}
       <div className="flex-1 overflow-y-auto px-5 py-4">
         <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50">
-          Nội dung
+          Nội dung (Lý do)
         </p>
         <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/80">
-          {sub.message}
+          {sub.reason}
         </p>
       </div>
 
       {/* Actions */}
       <div className="space-y-2 border-t border-border/50 px-5 py-4">
         <a
-          href={`mailto:${sub.email}?subject=Re: Liên hệ từ JOW Film`}
+          href={`tel:${sub.phone}`}
           className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-500 py-2.5 text-sm font-semibold text-stone-950 transition-colors hover:bg-amber-400"
         >
           <Mail className="h-4 w-4" />
-          Trả lời qua email
+          Gọi điện / Zalo
         </a>
 
         <div className="grid grid-cols-2 gap-2">
-          {sub.status === "new" && (
+          {sub.status === "PENDING" && (
             <button
               type="button"
-              onClick={() => onSetStatus("read")}
-              className="flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-border/60 bg-background py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              onClick={() => onSetStatus("CONTACTED")}
+              className="col-span-2 flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-border/60 bg-background py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             >
               <MailOpen className="h-3.5 w-3.5" />
-              Đánh dấu đã đọc
+              Đánh dấu đã liên hệ
             </button>
           )}
-          {sub.status === "read" && (
+          {sub.status === "CONTACTED" && (
             <button
               type="button"
-              onClick={() => onSetStatus("new")}
-              className="flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-border/60 bg-background py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              onClick={() => onSetStatus("PENDING")}
+              className="col-span-2 flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-border/60 bg-background py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             >
               <Mail className="h-3.5 w-3.5" />
-              Đánh dấu mới
-            </button>
-          )}
-          {sub.status !== "archived" ? (
-            <button
-              type="button"
-              onClick={() => onSetStatus("archived")}
-              className="flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-border/60 bg-background py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            >
-              <Archive className="h-3.5 w-3.5" />
-              Lưu trữ
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => onSetStatus("read")}
-              className="flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-border/60 bg-background py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            >
-              <ArchiveRestore className="h-3.5 w-3.5" />
-              Bỏ lưu trữ
+              Đánh dấu chưa liên hệ
             </button>
           )}
         </div>
@@ -277,24 +247,25 @@ export function ContactInboxPage() {
 
   const filtered = useMemo(() => {
     let list = submissions;
-    if (activeTab !== "all") list = list.filter((s: ContactSubmission) => s.status === activeTab);
+    if (activeTab !== "all") list = list.filter((s: SupportFormRecord) => s.status === activeTab);
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(
-        (s: ContactSubmission) =>
-          s.name.toLowerCase().includes(q) ||
-          s.email.toLowerCase().includes(q) ||
-          s.message.toLowerCase().includes(q),
+        (s: SupportFormRecord) =>
+          s.fullName.toLowerCase().includes(q) ||
+          s.phone.toLowerCase().includes(q) ||
+          s.reason.toLowerCase().includes(q),
       );
     }
-    return [...list].sort((a: ContactSubmission, b: ContactSubmission) => b.receivedAt - a.receivedAt);
+    return [...list].sort((a: SupportFormRecord, b: SupportFormRecord) => b.createdTime - a.createdTime);
   }, [submissions, activeTab, search]);
 
-  const selected = filtered.find((s) => s.id === selectedId) ?? null;
+  const selected = filtered.find((s) => String(s.id) === selectedId) ?? null;
 
-  function handleSelect(sub: ContactSubmission) {
-    setSelectedId(sub.id);
-    if (sub.status === "new") setStatus({ id: sub.id, status: "read" });
+  function handleSelect(sub: SupportFormRecord) {
+    setSelectedId(String(sub.id));
+    // Remove auto-updating status to read since it's now either PENDING or CONTACTED. 
+    // It should be marked as CONTACTED manually by the user, not just by clicking on it.
   }
 
   function handleDelete() {
@@ -305,12 +276,12 @@ export function ContactInboxPage() {
   }
 
   if (isLoading) {
-    return <PageContainer title="Contact Inbox" description="Loading..."><div className="p-8">Loading...</div></PageContainer>;
+    return <PageContainer title="Contact Inbox" description="Đang tải..."><div className="p-8">Loading...</div></PageContainer>;
   }
 
-  const unreadCount = submissions.filter((s: ContactSubmission) => s.status === "new").length;
+  const unreadCount = submissions.filter((s: SupportFormRecord) => s.status === "PENDING").length;
   const today = new Date().toDateString();
-  const todayCount = submissions.filter((s: ContactSubmission) => new Date(s.receivedAt).toDateString() === today).length;
+  const todayCount = submissions.filter((s: SupportFormRecord) => new Date(s.createdTime).toDateString() === today).length;
 
   return (
     <PageContainer
@@ -323,7 +294,7 @@ export function ContactInboxPage() {
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: "Tổng liên hệ", value: submissions.length, color: "text-foreground" },
-          { label: "Chưa đọc", value: unreadCount, color: "text-amber-600 dark:text-amber-400" },
+          { label: "Mới (Chưa LH)", value: unreadCount, color: "text-amber-600 dark:text-amber-400" },
           { label: "Hôm nay", value: todayCount, color: "text-foreground" },
         ].map((s) => (
           <div
@@ -348,7 +319,7 @@ export function ContactInboxPage() {
               <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/50" />
               <input
                 type="text"
-                placeholder="Tìm theo tên, email..."
+                placeholder="Tìm theo tên, sđt..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full rounded-lg border border-input bg-muted/30 py-2 pl-8 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground/40 focus:border-amber-500 focus:bg-background"
@@ -369,7 +340,7 @@ export function ContactInboxPage() {
                 const count =
                   tab.key === "all"
                     ? submissions.length
-                    : submissions.filter((s) => s.status === tab.key).length;
+                    : submissions.filter((s: SupportFormRecord) => s.status === tab.key).length;
                 return (
                   <button
                     key={tab.key}
@@ -400,11 +371,11 @@ export function ContactInboxPage() {
                 <p className="text-sm text-muted-foreground/50">Không có liên hệ nào</p>
               </div>
             ) : (
-              filtered.map((sub) => (
+              filtered.map((sub: SupportFormRecord) => (
                 <SubmissionRow
                   key={sub.id}
                   sub={sub}
-                  selected={selectedId === sub.id}
+                  selected={selectedId === String(sub.id)}
                   onClick={() => handleSelect(sub)}
                 />
               ))
@@ -419,7 +390,7 @@ export function ContactInboxPage() {
               sub={selected}
               onClose={() => setSelectedId(null)}
               onSetStatus={(s) => setStatus({ id: selected.id, status: s })}
-              onDelete={() => setDeleteId(selected.id)}
+              onDelete={() => setDeleteId(String(selected.id))}
             />
           </div>
         ) : (

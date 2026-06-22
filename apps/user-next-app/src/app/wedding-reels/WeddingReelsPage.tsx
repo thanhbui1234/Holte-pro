@@ -4,8 +4,14 @@ import { PageTitleBar } from "@/components/ui/PageTitleBar";
 import { REELS } from "@/data/videos";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { BlurFade, Skeleton } from "shared-ui";
+import type { ReelItem } from "@/types/content";
 
-export function WeddingReelsPage() {
+interface WeddingReelsPageProps {
+  reels?: ReelItem[];
+}
+
+export function WeddingReelsPage({ reels }: WeddingReelsPageProps) {
+  const displayReels = reels ?? REELS;
   return (
     <main>
       <PageTitleBar
@@ -20,8 +26,8 @@ export function WeddingReelsPage() {
       >
         <div className="mx-auto max-w-6xl">
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
-            {REELS.map((reel, index) => (
-              <ReelCard key={reel.title} reel={reel} index={index} />
+            {displayReels.map((reel, index) => (
+              <ReelCard key={`${reel.title}-${index}`} reel={reel} index={index} />
             ))}
           </div>
         </div>
@@ -31,7 +37,7 @@ export function WeddingReelsPage() {
 }
 
 interface ReelCardProps {
-  reel: (typeof REELS)[number];
+  reel: ReelItem;
   index: number;
 }
 

@@ -100,7 +100,7 @@ export function WeddingReelsSection({ reels = DEFAULT_REELS }: WeddingReelsSecti
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {reels.map((reel, index) => (
-            <ReelCard key={reel.title} reel={reel} index={index} />
+            <ReelCard key={`${reel.title}-${index}`} reel={reel} index={index} />
           ))}
         </div>
 

@@ -7,8 +7,14 @@ import {
   getYouTubeEmbedUrl,
 } from "@/data/videos";
 import { BlurFade, HeroVideoDialog } from "shared-ui";
+import type { HighlightVideo } from "@/types/content";
 
-export function WeddingHighlightPage() {
+interface WeddingHighlightPageProps {
+  videos?: HighlightVideo[];
+}
+
+export function WeddingHighlightPage({ videos }: WeddingHighlightPageProps) {
+  const displayVideos = videos ?? HIGHLIGHT_VIDEOS;
   return (
     <main>
       <PageTitleBar
@@ -24,7 +30,7 @@ export function WeddingHighlightPage() {
         <div className="mx-auto max-w-7xl">
           {/* Grid — 2 cols mobile, 3 cols desktop */}
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
-            {HIGHLIGHT_VIDEOS.map((video, index) => (
+            {displayVideos.map((video, index) => (
               <BlurFade key={video.id} delay={0.05 + index * 0.06} inView>
                 <div className="group relative overflow-hidden rounded-xl md:rounded-2xl">
                   <HeroVideoDialog

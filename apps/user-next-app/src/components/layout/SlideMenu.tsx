@@ -10,8 +10,8 @@ const NAV_ITEMS = [
   { index: "01", label: "Home", href: "/" },
   { index: "02", label: "Wedding Highlights", href: "/wedding-highlight" },
   { index: "03", label: "Wedding Reels", href: "/wedding-reels" },
-  // { index: "04", label: "Traditional Films", href: "/traditional-film" },
-  { index: "04", label: "Contact Us", href: "/contact" },
+  { index: "04", label: "Traditional Films", href: "/traditional-film" },
+  { index: "05", label: "Contact Us", href: "/contact" },
 ];
 
 interface SlideMenuProps {

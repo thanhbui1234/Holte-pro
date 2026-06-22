@@ -8,14 +8,16 @@ export interface ContactCtaData {
   backgroundColor: string;
 }
 
-export type ContactStatus = "new" | "read" | "archived";
+export type ContactStatus = "PENDING" | "CONTACTED";
 
-export interface ContactSubmission {
-  id: string;
-  name: string;
-  email: string;
-  weddingDate: string;
-  message: string;
+export interface SupportFormRecord {
+  id: string | number; // Note: API returns Long, so it's likely number, but keeping string|number for safety
+  phone: string;
+  fullName: string;
+  availableTime: string;
+  reason: string;
   status: ContactStatus;
-  receivedAt: number;
+  supporter: string | null;
+  createdTime: number;
+  updatedTime: number;
 }
