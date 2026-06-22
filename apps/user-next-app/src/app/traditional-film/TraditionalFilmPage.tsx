@@ -5,8 +5,14 @@ import { PageTitleBar } from "@/components/ui/PageTitleBar";
 import { FILMS, getYouTubeEmbedUrl } from "@/data/videos";
 import { BlurFade } from "shared-ui";
 import { ChevronDown } from "lucide-react";
+import type { FilmItem } from "@/types/content";
 
-export function TraditionalFilmPage() {
+interface TraditionalFilmPageProps {
+  films?: FilmItem[];
+}
+
+export function TraditionalFilmPage({ films }: TraditionalFilmPageProps) {
+  const displayFilms = films ?? FILMS;
   // Scroll to anchor on mount (e.g. /traditional-film#film-1)
   useEffect(() => {
     const hash = window.location.hash;
@@ -48,11 +54,11 @@ export function TraditionalFilmPage() {
           {/* Film 1 (First Video) */}
           <div id="film-0" className="scroll-mt-24">
             <BlurFade delay={0.05} inView>
-              <FilmCard film={FILMS[0]} />
+              <FilmCard film={displayFilms[0]} />
             </BlurFade>
 
             {/* Scroll Down button placed inside film 1's flow */}
-            {FILMS.length > 1 && (
+            {displayFilms.length > 1 && (
               <div className="mt-8 flex justify-center">
                 <button
                   onClick={handleScrollDown}
@@ -66,16 +72,16 @@ export function TraditionalFilmPage() {
           </div>
 
           {/* Remaining content: other films */}
-          {FILMS.length > 1 && (
+          {displayFilms.length > 1 && (
             <div className="flex flex-col gap-16 md:gap-24 mt-16 md:mt-24">
-              {FILMS.slice(1).map((film, index) => (
+              {displayFilms.slice(1).map((film, index) => (
                 <div key={film.id + (index + 1)} id={`film-${index + 1}`} className="scroll-mt-24">
                   {/* Divider */}
                   <div className="mb-12 flex items-center gap-4 md:mb-16">
                     <span className="h-px flex-1 bg-stone-200 dark:bg-stone-800" />
                     <span className="text-[10px] uppercase tracking-widest text-stone-300 dark:text-stone-700">
                       {String(index + 2).padStart(2, "0")} /{" "}
-                      {String(FILMS.length).padStart(2, "0")}
+                      {String(displayFilms.length).padStart(2, "0")}
                     </span>
                     <span className="h-px flex-1 bg-stone-200 dark:bg-stone-800" />
                   </div>
@@ -94,7 +100,7 @@ export function TraditionalFilmPage() {
 }
 
 interface FilmCardProps {
-  film: (typeof FILMS)[number];
+  film: FilmItem;
 }
 
 function FilmCard({ film }: FilmCardProps) {
@@ -118,7 +124,7 @@ function FilmCard({ film }: FilmCardProps) {
   );
 }
 
-function FilmDetails({ film }: { film: (typeof FILMS)[number] }) {
+function FilmDetails({ film }: { film: FilmItem }) {
   return (
     <div className="mt-4 md:mt-5">
       <p className="text-[10px] uppercase tracking-[0.25em] text-amber-400 dark:text-amber-400">

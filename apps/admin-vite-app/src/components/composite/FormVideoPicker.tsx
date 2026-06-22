@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useController, type Control, type Path } from "react-hook-form";
-import { Video, X } from "lucide-react";
+import { Video, X, Pencil } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { VideoLibraryModal } from "./VideoLibraryModal";
 
@@ -52,27 +52,33 @@ export function FormVideoPicker<TFieldValues extends Record<string, any>>({
       <div className="relative">
         {hasValue ? (
           <div className="relative overflow-hidden rounded-lg border bg-muted/30">
-            <div className="aspect-video cursor-pointer" onClick={() => setModalOpen(true)}>
+            <div className="aspect-video">
               <iframe
                 src={value.includes("watch?v=") ? value.replace("watch?v=", "embed/") : value}
-                className="pointer-events-none h-full w-full border-0"
+                className="h-full w-full border-0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 title="Selected video"
               />
             </div>
-            <button
-              type="button"
-              onClick={handleRemove}
-              className="absolute right-2 top-2 z-20 rounded-full bg-black/60 p-1.5 text-white transition hover:bg-black/80"
-              aria-label="Xóa video"
-            >
-              <X className="h-4 w-4" />
-            </button>
-            <div
-              className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-black/50 opacity-0 transition-opacity hover:opacity-100"
-              onClick={() => setModalOpen(true)}
-            >
-              <p className="font-medium text-white">Nhấp để thay đổi video</p>
+            <div className="absolute right-2 top-2 z-20 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setModalOpen(true)}
+                className="rounded-full bg-black/60 p-1.5 text-white transition hover:bg-black/80 shadow-sm"
+                aria-label="Thay đổi video"
+                title="Thay đổi video"
+              >
+                <Pencil className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={handleRemove}
+                className="rounded-full bg-black/60 p-1.5 text-white transition hover:bg-black/80 shadow-sm"
+                aria-label="Xóa video"
+                title="Xóa video"
+              >
+                <X className="h-4 w-4" />
+              </button>
             </div>
           </div>
         ) : (

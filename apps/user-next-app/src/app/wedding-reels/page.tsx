@@ -1,5 +1,8 @@
 import { generateMetadata } from "@/app/metadata";
 import { WeddingReelsPage } from "./WeddingReelsPage";
+import { getAppVideoList } from "@/lib/video.api";
+import { mapToReelItem } from "@/lib/video.mapper";
+import { VideoCategory } from "@/types/video.types";
 
 export const metadata = generateMetadata({
   title: "Wedding Reels",
@@ -15,6 +18,13 @@ export const metadata = generateMetadata({
   ],
 });
 
-export default function Page() {
-  return <WeddingReelsPage />;
+export default async function Page() {
+  const videos = await getAppVideoList({
+    categoryIds: [VideoCategory.ENGAGEMENT],
+    statuses: ["UPLOADED"],
+  });
+
+  const reels = videos.length > 0 ? videos.map(mapToReelItem) : undefined;
+
+  return <WeddingReelsPage reels={reels} />;
 }

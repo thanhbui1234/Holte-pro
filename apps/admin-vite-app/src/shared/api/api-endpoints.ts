@@ -21,4 +21,10 @@ export const API_ENDPOINTS = {
   CREATE_SECTION: "/cms-api/v1/create-section",
   UPDATE_SECTION: "/cms-api/v1/update-section",
   REMOVE_SECTION: "/cms-api/v1/remove-section",
+  
+  // Support Form Endpoints
+  GET_LIST_SUPPORT_FORM: "/cms-api/v1/get-list-support-form",
+  GET_SUPPORT_FORM: "/cms-api/v1/get-support-form",
+  UPDATE_SUPPORT_FORM_STATUS: "/cms-api/v1/update-support-form-status",
+  REMOVE_SUPPORT_FORM: "/cms-api/v1/remove-support-form",
 } as const;

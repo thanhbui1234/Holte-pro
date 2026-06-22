@@ -22,12 +22,13 @@ export function useUpdateContactCta() {
   });
 }
 
-export function useContactSubmissions() {
+export function useContactSubmissions(filters?: { phone?: string; status?: import("../types/contact.types").ContactStatus; supporter?: string }) {
   return useQuery({
-    queryKey: ["contact-submissions"],
+    queryKey: ["contact-submissions", filters],
     queryFn: async () => {
-      const res = await contactApi.getSubmissions();
-      return res.data;
+      const res = await contactApi.getSubmissions(filters);
+      // Fallback to empty array if response is malformed or missing
+      return res?.data?.data?.supportForms || [];
     },
   });
 }
@@ -35,8 +36,8 @@ export function useContactSubmissions() {
 export function useUpdateContactStatus() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, status }: { id: string; status: import("../types/contact.types").ContactStatus }) => 
-      contactApi.updateStatus(id, status),
+    mutationFn: ({ id, status, supporter }: { id: string | number; status: import("../types/contact.types").ContactStatus; supporter?: string }) => 
+      contactApi.updateStatus(id, status, supporter),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contact-submissions"] });
     },

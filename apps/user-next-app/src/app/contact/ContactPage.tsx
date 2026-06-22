@@ -1,22 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { PageTitleBar } from "@/components/ui/PageTitleBar";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { BlurFade } from "shared-ui";
+import { createSupportFormAction } from "@/actions/support";
 
 interface FormState {
   name: string;
-  email: string;
+  phone: string;
   date: string;
   message: string;
 }
 
-const INITIAL_FORM: FormState = { name: "", email: "", date: "", message: "" };
+const INITIAL_FORM: FormState = { name: "", phone: "", date: "", message: "" };
 
 export function ContactPage() {
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
   const [submitted, setSubmitted] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
   const [formRef, formVisible] = useScrollAnimation({ threshold: 0.1 });
 
   const handleChange = (
@@ -27,7 +30,21 @@ export function ContactPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setErrorMsg(null);
+    startTransition(async () => {
+      const res = await createSupportFormAction({
+        phone: form.phone,
+        fullName: form.name,
+        availableTime: form.date,
+        reason: form.message,
+      });
+
+      if (res.success) {
+        setSubmitted(true);
+      } else {
+        setErrorMsg(res.error || "An error occurred while sending the message");
+      }
+    });
   };
 
   return (
@@ -92,16 +109,18 @@ export function ContactPage() {
                       value={form.name}
                       onChange={handleChange}
                       required
+                      disabled={isPending}
                     />
                     <FormField
-                      label="Email"
-                      id="contact-email"
-                      name="email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={form.email}
+                      label="Phone Number"
+                      id="contact-phone"
+                      name="phone"
+                      type="tel"
+                      placeholder="0901234567"
+                      value={form.phone}
                       onChange={handleChange}
                       required
+                      disabled={isPending}
                     />
                   </div>
 
@@ -114,6 +133,7 @@ export function ContactPage() {
                       placeholder=""
                       value={form.date}
                       onChange={handleChange}
+                      disabled={isPending}
                     />
                   </div>
 
@@ -131,16 +151,24 @@ export function ContactPage() {
                       placeholder="Share your vision, venue, and any special moments..."
                       value={form.message}
                       onChange={handleChange}
+                      disabled={isPending}
                       className="w-full resize-none rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900 placeholder-stone-400 outline-none transition-all duration-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 dark:border-stone-600 dark:bg-stone-700/50 dark:text-white dark:placeholder-stone-500"
                     />
                   </div>
 
+                  {errorMsg && (
+                    <div className="mb-4 text-center text-sm font-medium text-red-500">
+                      {errorMsg}
+                    </div>
+                  )}
+
                   <button
                     type="submit"
                     id="contact-submit"
-                    className="w-full rounded-xl bg-amber-500 py-3.5 text-sm font-medium uppercase tracking-widest text-stone-900 transition-all duration-300 hover:bg-amber-400 hover:shadow-lg hover:shadow-amber-500/20 active:scale-[0.98]"
+                    disabled={isPending}
+                    className="w-full rounded-xl bg-amber-500 py-3.5 text-sm font-medium uppercase tracking-widest text-stone-900 transition-all duration-300 hover:bg-amber-400 hover:shadow-lg hover:shadow-amber-500/20 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
                   >
-                    Send Message
+                    {isPending ? "Sending..." : "Send Message"}
                   </button>
                 </form>
               </BlurFade>
@@ -161,6 +189,7 @@ interface FormFieldProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
+  disabled?: boolean;
 }
 
 function FormField({
@@ -172,6 +201,7 @@ function FormField({
   value,
   onChange,
   required,
+  disabled,
 }: FormFieldProps) {
   return (
     <div>
@@ -189,7 +219,8 @@ function FormField({
         value={value}
         onChange={onChange}
         required={required}
-        className="w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900 placeholder-stone-400 outline-none transition-all duration-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 dark:border-stone-600 dark:bg-stone-700/50 dark:text-white dark:placeholder-stone-500"
+        disabled={disabled}
+        className="w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900 placeholder-stone-400 outline-none transition-all duration-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 disabled:opacity-60 dark:border-stone-600 dark:bg-stone-700/50 dark:text-white dark:placeholder-stone-500"
       />
     </div>
   );
