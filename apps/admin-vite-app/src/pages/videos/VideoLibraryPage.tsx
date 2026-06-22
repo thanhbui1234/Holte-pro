@@ -3,9 +3,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Film, Loader2, Plus, Upload as UploadIcon, Link as LinkIcon, CheckCircle2, Video, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Input, Textarea, Button, MediaUpload, HeroVideoDialog } from "shared-ui";
 import { PageContainer } from "@/components/composite/PageContainer";
-import { videoApi } from "@/shared/api";
+import { videoApi, getApiErrorMessage, extractApiError } from "@/shared/api";
 import { useVideoUpload } from "@/shared/hooks/use-video-upload";
 import { cn } from "@/shared/lib/utils";
+import { toast } from "sonner";
 
 type AddTabValue = "upload" | "url";
 
@@ -229,12 +230,22 @@ export function VideoLibraryPage() {
     if (videoToRemove === null) return;
     setIsRemoving(true);
     try {
-      await videoApi.remove(videoToRemove);
+      const res = await videoApi.remove(videoToRemove);
+
+      if (res.data?.error) {
+        const { errorCode, errorMsg } = res.data.error;
+        toast.error(getApiErrorMessage(errorCode, errorMsg));
+        setVideoToRemove(null);
+        return;
+      }
+
       queryClient.invalidateQueries({ queryKey: ["video-list"] });
       setVideoToRemove(null);
     } catch (error) {
       console.error(error);
-      alert("Xóa video thất bại.");
+      const { errorCode, errorMsg } = extractApiError(error);
+      toast.error(getApiErrorMessage(errorCode, errorMsg));
+      setVideoToRemove(null);
     } finally {
       setIsRemoving(false);
     }

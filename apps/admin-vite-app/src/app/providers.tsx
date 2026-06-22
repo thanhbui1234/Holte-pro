@@ -5,6 +5,7 @@ import { ApiQueryProvider, NextQueryProvider } from "shared-api/react-query";
 import { ApiClientProvider } from "shared-api/hooks";
 import { apiClient } from "@/shared/api";
 import { UploadProvider } from "@/shared/context/UploadContext";
+import { Toaster } from "sonner";
 
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
@@ -16,6 +17,8 @@ export function AppProviders({ children }: { children: ReactNode }) {
           </UploadProvider>
         </ApiQueryProvider>
       </ApiClientProvider>
+      <Toaster position="bottom-right" richColors />
     </BrowserRouter>
   );
 }
+
