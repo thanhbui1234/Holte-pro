@@ -4,11 +4,43 @@ import type {
   AppApiResponse,
   VideoRecord,
   AppVideoListRequest,
+  SectionRecord,
+  SectionListResponse,
 } from "@/types/video.types";
 
 /**
- * Fetch public video list from backend.
- * Uses Next.js fetch caching: revalidates every hour, tagged "videos" for on-demand revalidation.
+ * Fetch the public sections list from the backend.
+ * Revalidates every hour; tagged "sections" for on-demand revalidation.
+ */
+export async function getAppSections(): Promise<SectionRecord[]> {
+  try {
+    const response = await serverFetch<AppApiResponse<SectionListResponse>>(
+      API_ENDPOINTS.GET_LIST_SECTION,
+      {
+        method: "POST",
+        body: JSON.stringify({}),
+        next: {
+          revalidate: 3600,
+          tags: ["sections"],
+        },
+      },
+    );
+
+    if (response.error) {
+      console.error("[video.api] API error:", response.error.errorMsg);
+      return [];
+    }
+
+    return response.data.sections ?? [];
+  } catch (error) {
+    console.error("[video.api] Failed to fetch sections:", error);
+    return [];
+  }
+}
+
+/**
+ * Fetch the public video list (legacy — used by /wedding-highlight etc.).
+ * Revalidates every hour; tagged "videos" for on-demand revalidation.
  */
 export async function getAppVideoList(
   params: AppVideoListRequest = {},
@@ -30,7 +62,7 @@ export async function getAppVideoList(
       return [];
     }
 
-    return response.data.videos;
+    return response.data.videos ?? [];
   } catch (error) {
     console.error("[video.api] Failed to fetch videos:", error);
     return [];
