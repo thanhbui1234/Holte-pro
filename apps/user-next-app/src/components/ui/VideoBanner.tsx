@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
 import type { BannerConfig } from "@/types/content";
@@ -44,6 +44,86 @@ function toYouTubeBackgroundEmbed(url: string): string {
   return url;
 }
 
+// ---------------------------------------------------------------------------
+// Cinematic Loading Overlay
+// ---------------------------------------------------------------------------
+
+function CinematicLoader({ visible }: { visible: boolean }) {
+  return (
+    <div
+      className="pointer-events-none absolute inset-0 z-[18] flex items-center justify-center overflow-hidden bg-stone-950 transition-opacity duration-[1500ms] ease-in-out"
+      style={{ opacity: visible ? 1 : 0 }}
+    >
+      {/* Ambient gradient glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(251,191,36,0.06)_0%,_transparent_70%)]" />
+
+      {/* Pulsing concentric rings */}
+      <div className="absolute flex items-center justify-center">
+        {[120, 180, 260].map((size, i) => (
+          <div
+            key={size}
+            className="absolute rounded-full border border-amber-400/10"
+            style={{
+              width: size,
+              height: size,
+              animation: `cinematic-pulse ${2.5 + i * 0.4}s ease-in-out infinite`,
+              animationDelay: `${i * 0.3}s`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Horizontal shimmer line */}
+      <div className="absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 overflow-hidden">
+        <div
+          className="h-full w-1/3 bg-gradient-to-r from-transparent via-amber-400/30 to-transparent"
+          style={{ animation: "cinematic-shimmer 2.5s ease-in-out infinite" }}
+        />
+      </div>
+
+      {/* Floating particles */}
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div
+          key={i}
+          className="absolute h-1 w-1 rounded-full bg-amber-400/20"
+          style={{
+            left: `${20 + i * 12}%`,
+            top: `${30 + (i % 3) * 20}%`,
+            animation: `cinematic-float ${3 + i * 0.5}s ease-in-out infinite`,
+            animationDelay: `${i * 0.4}s`,
+          }}
+        />
+      ))}
+
+      {/* Corner accents */}
+      <div className="absolute left-8 top-8 h-12 w-12 border-l border-t border-amber-400/15" />
+      <div className="absolute right-8 top-8 h-12 w-12 border-r border-t border-amber-400/15" />
+      <div className="absolute bottom-8 left-8 h-12 w-12 border-b border-l border-amber-400/15" />
+      <div className="absolute bottom-8 right-8 h-12 w-12 border-b border-r border-amber-400/15" />
+
+      {/* Keyframes injected via style tag */}
+      <style>{`
+        @keyframes cinematic-pulse {
+          0%, 100% { transform: scale(1); opacity: 0.3; }
+          50% { transform: scale(1.15); opacity: 0.08; }
+        }
+        @keyframes cinematic-shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(400%); }
+        }
+        @keyframes cinematic-float {
+          0%, 100% { transform: translateY(0) scale(1); opacity: 0.2; }
+          50% { transform: translateY(-20px) scale(1.5); opacity: 0.5; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main Banner Component
+// ---------------------------------------------------------------------------
+
 export function VideoBanner(props: Partial<BannerConfig>) {
   const { videoSrc, logoSrc, scrollTargetId } = { ...DEFAULTS, ...props };
 
@@ -54,14 +134,41 @@ export function VideoBanner(props: Partial<BannerConfig>) {
   const isYouTube = isYouTubeUrl(videoSrc);
   const embedUrl = isYouTube ? toYouTubeBackgroundEmbed(videoSrc) : null;
 
+  // ---------------------------------------------------------------------------
+  // Loading states
+  // ---------------------------------------------------------------------------
+
+  // True while the video/iframe is still loading
+  const [isLoading, setIsLoading] = useState(true);
+
   // Overlay that hides YouTube's initial title/channel flash.
-  // Fades out after YouTube has had time to hide its own UI (~2.5s).
   const [overlayVisible, setOverlayVisible] = useState(isYouTube);
+
+  // Logo fade-in animation after 3 seconds
+  const [logoVisible, setLogoVisible] = useState(false);
+
   useEffect(() => {
     if (!isYouTube) return;
     const timer = setTimeout(() => setOverlayVisible(false), 2500);
     return () => clearTimeout(timer);
   }, [isYouTube]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLogoVisible(true), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // For YouTube: dismiss the loader after a safe timeout (iframe has no reliable "loaded" event for video playback)
+  useEffect(() => {
+    if (!isYouTube) return;
+    const timer = setTimeout(() => setIsLoading(false), 3500);
+    return () => clearTimeout(timer);
+  }, [isYouTube]);
+
+  // For native <video>: dismiss loader when the video starts playing
+  const handleVideoCanPlay = useCallback(() => {
+    setIsLoading(false);
+  }, []);
 
   return (
     <section
@@ -70,8 +177,14 @@ export function VideoBanner(props: Partial<BannerConfig>) {
       className="relative w-full overflow-hidden"
       style={{ height: "100dvh" }}
     >
-      {/* Logo overlay */}
-      <div className="absolute inset-0 z-20 flex items-center justify-center px-6">
+      {/* ── Cinematic loading overlay ────────────────────────────────────── */}
+      <CinematicLoader visible={isLoading} />
+
+      {/* ── Logo overlay ─────────────────────────────────────────────────── */}
+      <div
+        className="absolute inset-0 z-20 flex items-center justify-center px-6 transition-opacity duration-[2000ms] ease-in-out"
+        style={{ opacity: logoVisible ? 1 : 0 }}
+      >
         <Image
           src={resolvedLogoSrc}
           alt="JOW Film"
@@ -106,7 +219,7 @@ export function VideoBanner(props: Partial<BannerConfig>) {
         />
       )}
 
-      {/* Background media — YouTube iframe or local video file */}
+      {/* ── Background media ──────────────────────────────────────────── */}
       {isYouTube && embedUrl ? (
         <iframe
           src={embedUrl}
@@ -114,15 +227,10 @@ export function VideoBanner(props: Partial<BannerConfig>) {
           allow="autoplay; encrypted-media"
           allowFullScreen={false}
           className="pointer-events-none absolute inset-0 h-full w-full"
-          /**
-           * YouTube iframes don't fill 16:9 containers at all viewport ratios.
-           * We scale up the iframe so the video covers the full screen (similar
-           * to object-fit: cover).
-           */
           style={{
             border: "none",
-            width: "177.78vh", // 16/9 * 100vh
-            height: "56.25vw", // 9/16 * 100vw
+            width: "177.78vh",
+            height: "56.25vw",
             minWidth: "100%",
             minHeight: "100%",
             top: "50%",
@@ -138,6 +246,7 @@ export function VideoBanner(props: Partial<BannerConfig>) {
           loop
           playsInline
           preload="auto"
+          onCanPlay={handleVideoCanPlay}
           className="pointer-events-none absolute inset-0 h-full w-full object-cover"
         >
           <source src={videoSrc} type="video/mp4" />
