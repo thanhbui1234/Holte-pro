@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { videoApi } from "@/shared/api";
-
+import { triggerNextJsRevalidate } from "@/shared/api/revalidate";
 export type UploadStatus = "uploading" | "processing" | "success" | "error";
 
 export interface UploadJob {
@@ -124,6 +124,9 @@ export function UploadProvider({ children }: { children: React.ReactNode }) {
 
         updateJob(jobId, { status: "success" });
         queryClient.invalidateQueries({ queryKey: ["video-list"] });
+        
+        // Trigger Next.js cache revalidation
+        triggerNextJsRevalidate("videos");
 
         // Auto remove successful job after 3s
         setTimeout(() => removeJob(jobId), 3000);
