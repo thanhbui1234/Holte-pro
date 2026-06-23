@@ -143,6 +143,17 @@ export interface TraditionalFilmsSectionData {
   items: TraditionalFilmSectionItem[];
 }
 
+/** Shape of `data.map` for the `contact-cta` section */
+export interface ContactCtaSectionData {
+  eyebrow?: string;
+  titlePrefix?: string;
+  titleHighlight?: string;
+  description?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+  backgroundColor?: string;
+}
+
 /** Generic section record returned by GET_LIST_SECTION */
 export interface SectionRecord {
   id: number;

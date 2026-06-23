@@ -17,9 +17,10 @@ const NAV_ITEMS = [
 interface SlideMenuProps {
   open: boolean;
   onClose: () => void;
+  activeSections?: string[];
 }
 
-export function SlideMenu({ open, onClose }: SlideMenuProps) {
+export function SlideMenu({ open, onClose, activeSections = [] }: SlideMenuProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { start } = useLoadingBar();
@@ -42,6 +43,15 @@ export function SlideMenu({ open, onClose }: SlideMenuProps) {
       router.push(href);
     }, 350);
   };
+
+  const navItems = NAV_ITEMS.filter((item) => {
+    if (item.label === "Home") return true; // Always show home
+    if (item.label === "Wedding Highlights") return activeSections.includes("wedding-highlights");
+    if (item.label === "Wedding Reels") return activeSections.includes("wedding-reels");
+    if (item.label === "Traditional Films") return activeSections.includes("traditional-films");
+    if (item.label === "Contact Us") return activeSections.includes("contact-cta");
+    return true;
+  });
 
   return (
     <>
@@ -75,7 +85,9 @@ export function SlideMenu({ open, onClose }: SlideMenuProps) {
 
         {/* Nav links */}
         <ul className="flex flex-1 flex-col justify-center gap-1 px-8">
-          {NAV_ITEMS.map((item, i) => (
+          {navItems.map((item, i) => {
+            const indexStr = (i + 1).toString().padStart(2, "0");
+            return (
             <li key={item.href}>
               <button
                 onClick={() => handleNavClick(item.href)}
@@ -97,7 +109,7 @@ export function SlideMenu({ open, onClose }: SlideMenuProps) {
                   ? "text-amber-400 dark:text-amber-400"
                   : "text-stone-400 group-hover:text-amber-600 dark:text-stone-600 dark:group-hover:text-amber-500"
                   }`}>
-                  {item.index}
+                  {indexStr}
                 </span>
 
                 {/* Label */}
@@ -127,7 +139,8 @@ export function SlideMenu({ open, onClose }: SlideMenuProps) {
                 </svg>
               </button>
             </li>
-          ))}
+            );
+          })}
         </ul>
 
         {/* Bottom — socials + tagline */}

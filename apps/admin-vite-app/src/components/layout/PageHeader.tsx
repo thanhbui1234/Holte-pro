@@ -35,7 +35,7 @@ export function PageHeader({ title, breadcrumb, onMenuClick }: PageHeaderProps) 
 
         <div className="flex items-center gap-2">
           <a
-            href="http://localhost:3000"
+            href={import.meta.env.VITE_SITE_USER_URL || "http://localhost:3000"}
             target="_blank"
             rel="noreferrer noopener"
             className="hidden items-center gap-2 rounded-full border bg-background px-3 py-1.5 text-xs font-medium text-foreground/80 shadow-sm transition-all hover:-translate-y-px hover:border-amber-500/60 hover:text-amber-700 dark:hover:text-amber-300 sm:inline-flex"
