@@ -63,6 +63,13 @@ export function VideoBanner(props: Partial<BannerConfig>) {
     return () => clearTimeout(timer);
   }, [isYouTube]);
 
+  // Logo fade-in animation after 3 seconds
+  const [logoVisible, setLogoVisible] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setLogoVisible(true), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <section
       id="home"
@@ -71,7 +78,10 @@ export function VideoBanner(props: Partial<BannerConfig>) {
       style={{ height: "100dvh" }}
     >
       {/* Logo overlay */}
-      <div className="absolute inset-0 z-20 flex items-center justify-center px-6">
+      <div 
+        className="absolute inset-0 z-20 flex items-center justify-center px-6 transition-opacity duration-[2000ms] ease-in-out"
+        style={{ opacity: logoVisible ? 1 : 0 }}
+      >
         <Image
           src={resolvedLogoSrc}
           alt="JOW Film"

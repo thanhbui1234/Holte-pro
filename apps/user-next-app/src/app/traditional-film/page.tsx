@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { generateMetadata } from "@/app/metadata";
 import { TraditionalFilmPage } from "./TraditionalFilmPage";
 import { getAppSections } from "@/lib/video.api";
@@ -28,9 +29,13 @@ export default async function Page() {
     sections,
     "traditional-films",
   );
-  const films = filmData
-    ? mapTraditionalFilmSectionToFilms(filmData)
-    : undefined;
+  
+  // If the section is inactive or missing, return a 404
+  if (!filmData) {
+    notFound();
+  }
+
+  const films = mapTraditionalFilmSectionToFilms(filmData);
 
   return <TraditionalFilmPage films={films} />;
 }

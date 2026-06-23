@@ -9,6 +9,7 @@ import {
   findCustomSections,
   mapHighlightSectionToVideos,
   mapReelSectionToReels,
+  mapTraditionalFilmSectionToFilms,
 } from "@/lib/video.mapper";
 import { CustomSectionRenderer } from "@/components/sections/custom/CustomSectionRenderer";
 import type {
@@ -16,6 +17,8 @@ import type {
   AboutSectionData,
   WeddingHighlightsSectionData,
   WeddingReelsSectionData,
+  TraditionalFilmsSectionData,
+  ContactCtaSectionData,
 } from "@/types/video.types";
 
 const WeddingHighlightSection = dynamic(
@@ -29,6 +32,13 @@ const WeddingReelsSection = dynamic(
   () =>
     import("@/components/sections/WeddingReelsSection").then(
       (m) => m.WeddingReelsSection,
+    ),
+  { ssr: true },
+);
+const TraditionalFilmSection = dynamic(
+  () =>
+    import("@/components/sections/TraditionalFilmSection").then(
+      (m) => m.TraditionalFilmSection,
     ),
   { ssr: true },
 );
@@ -65,32 +75,80 @@ export default async function Home() {
   );
   const reels = reelsData ? mapReelSectionToReels(reelsData) : undefined;
 
+  // ── Traditional Films ────────────────────────────────────────────────────────
+  const traditionalData = findSection<TraditionalFilmsSectionData>(
+    sections,
+    "traditional-films",
+  );
+  const traditionalFilms = traditionalData
+    ? mapTraditionalFilmSectionToFilms(traditionalData)
+    : undefined;
+
+  // ── Contact CTA ──────────────────────────────────────────────────────────────
+  const contactData = findSection<ContactCtaSectionData>(sections, "contact-cta");
+
   // ── Custom Sections ──────────────────────────────────────────────────────────
   const customSections = findCustomSections(sections);
 
   return (
     <main>
-      <VideoBanner
-        videoSrc={bannerData?.videoSrc}
-        logoSrc={bannerData?.logoSrc}
-      />
-      <AboutSection
-        eyebrow={aboutData?.eyebrow}
-        titlePrefix={aboutData?.titlePrefix}
-        titleHighlight={aboutData?.titleHighlight}
-        descriptionEn={aboutData?.descriptionEn}
-        descriptionVi={aboutData?.descriptionVi}
-        pillars={aboutData?.pillars}
-        legacyLabel={aboutData?.legacyLabel}
-        stats={aboutData?.stats}
-        images={aboutData?.images?.map((img) => ({ src: img.src, label: img.description }))}
-      />
-      <WeddingHighlightSection videos={highlights} />
-      <WeddingReelsSection reels={reels} />
+      {bannerData && (
+        <VideoBanner
+          videoSrc={bannerData.videoSrc}
+          logoSrc={bannerData.logoSrc}
+        />
+      )}
+      
+      {aboutData && (
+        <AboutSection
+          eyebrow={aboutData.eyebrow}
+          titlePrefix={aboutData.titlePrefix}
+          titleHighlight={aboutData.titleHighlight}
+          descriptionEn={aboutData.descriptionEn}
+          descriptionVi={aboutData.descriptionVi}
+          pillars={aboutData.pillars}
+          legacyLabel={aboutData.legacyLabel}
+          stats={aboutData.stats}
+          images={aboutData.images?.map((img) => ({ src: img.src, label: img.description }))}
+        />
+      )}
+
+      {highlightData && (
+        <WeddingHighlightSection 
+          videos={highlights} 
+          backgroundColor={highlightData.config?.backgroundColor} 
+        />
+      )}
+
+      {reelsData && (
+        <WeddingReelsSection 
+          reels={reels} 
+          backgroundColor={reelsData.config?.backgroundColor} 
+        />
+      )}
+
+      {traditionalData && (
+        <TraditionalFilmSection 
+          films={traditionalFilms} 
+          backgroundColor={traditionalData.config?.backgroundColor} 
+        />
+      )}
+
       {customSections.map((section) => (
         <CustomSectionRenderer key={section.id} section={section} />
       ))}
-      <ContactPreview />
+
+      {contactData && (
+        <ContactPreview 
+          eyebrow={contactData.eyebrow}
+          titlePrefix={contactData.titlePrefix}
+          titleHighlight={contactData.titleHighlight}
+          description={contactData.description}
+          ctaLabel={contactData.ctaLabel}
+          ctaHref={contactData.ctaHref}
+          backgroundColor={contactData.backgroundColor}
+        />
+      )}
     </main>
   );
 }

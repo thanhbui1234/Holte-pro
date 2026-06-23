@@ -25,9 +25,10 @@ function getYouTubeEmbedUrl(videoId: string): string {
 
 interface WeddingHighlightSectionProps {
   videos?: HighlightVideo[];
+  backgroundColor?: string;
 }
 
-export function WeddingHighlightSection({ videos = DEFAULT_VIDEOS }: WeddingHighlightSectionProps) {
+export function WeddingHighlightSection({ videos = DEFAULT_VIDEOS, backgroundColor }: WeddingHighlightSectionProps) {
   const [headerRef, headerVisible] = useScrollAnimation({ threshold: 0.1 });
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -63,6 +64,7 @@ export function WeddingHighlightSection({ videos = DEFAULT_VIDEOS }: WeddingHigh
       id="wedding-highlight"
       data-header-theme="light"
       className="min-h-screen bg-stone-50 px-5 py-20 dark:bg-stone-900"
+      style={{ backgroundColor: backgroundColor || undefined }}
     >
       <div className="mx-auto max-w-7xl">
         <div

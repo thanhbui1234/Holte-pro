@@ -49,7 +49,7 @@ export function findSection<T>(
   sections: SectionRecord[],
   name: string,
 ): T | null {
-  const section = sections.find((s) => s.name === name && !s.data.empty);
+  const section = sections.find((s) => s.name === name && s.status === "ACTIVE" && !s.data.empty);
   if (!section) return null;
   return section.data.map as T;
 }
