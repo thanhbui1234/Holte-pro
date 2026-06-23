@@ -6,12 +6,14 @@ import { FILMS, getYouTubeEmbedUrl } from "@/data/videos";
 import { BlurFade } from "shared-ui";
 import { ChevronDown } from "lucide-react";
 import type { FilmItem } from "@/types/content";
+import type { SectionConfig } from "@/types/video.types";
 
 interface TraditionalFilmPageProps {
   films?: FilmItem[];
+  config?: SectionConfig;
 }
 
-export function TraditionalFilmPage({ films }: TraditionalFilmPageProps) {
+export function TraditionalFilmPage({ films, config }: TraditionalFilmPageProps) {
   const displayFilms = films ?? FILMS;
   // Scroll to anchor on mount (e.g. /traditional-film#film-1)
   useEffect(() => {
@@ -41,9 +43,9 @@ export function TraditionalFilmPage({ films }: TraditionalFilmPageProps) {
   return (
     <main className="bg-white dark:bg-stone-950 pb-16 md:pb-24">
       <PageTitleBar
-        label="Heritage & Culture"
-        title="Traditional"
-        highlightWord="Films"
+        label={config?.eyebrow ?? "Heritage & Culture"}
+        title={config?.titlePrefix ?? "Traditional"}
+        highlightWord={config?.titleHighlight ?? "Films"}
       />
 
       <section

@@ -29,5 +29,5 @@ export default async function Page() {
     ? mapHighlightSectionToVideos(highlightData)
     : undefined;
 
-  return <WeddingHighlightPage videos={highlights} />;
+  return <WeddingHighlightPage videos={highlights} config={highlightData?.config} />;
 }

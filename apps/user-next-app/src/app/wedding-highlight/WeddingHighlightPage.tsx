@@ -31,18 +31,22 @@ function toThumbnailUrl(idOrUrl: string): string {
   return `https://img.youtube.com/vi/${idOrUrl}/hqdefault.jpg`;
 }
 
+import type { HighlightVideo } from "@/types/content";
+import type { SectionConfig } from "@/types/video.types";
+
 interface WeddingHighlightPageProps {
   videos?: HighlightVideo[];
+  config?: SectionConfig;
 }
 
-export function WeddingHighlightPage({ videos }: WeddingHighlightPageProps) {
+export function WeddingHighlightPage({ videos, config }: WeddingHighlightPageProps) {
   const displayVideos = videos ?? HIGHLIGHT_VIDEOS;
   return (
     <main>
       <PageTitleBar
-        label="Featured Works"
-        title="Wedding"
-        highlightWord="Highlights"
+        label={config?.eyebrow ?? "Featured Works"}
+        title={config?.titlePrefix ?? "Wedding"}
+        highlightWord={config?.titleHighlight ?? "Highlights"}
       />
 
       <section

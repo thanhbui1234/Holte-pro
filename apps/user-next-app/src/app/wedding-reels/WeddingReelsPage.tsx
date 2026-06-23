@@ -5,19 +5,21 @@ import { REELS } from "@/data/videos";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { BlurFade, HeroVideoDialog, Skeleton } from "shared-ui";
 import type { ReelItem } from "@/types/content";
+import type { SectionConfig } from "@/types/video.types";
 
 interface WeddingReelsPageProps {
   reels?: ReelItem[];
+  config?: SectionConfig;
 }
 
-export function WeddingReelsPage({ reels }: WeddingReelsPageProps) {
+export function WeddingReelsPage({ reels, config }: WeddingReelsPageProps) {
   const displayReels = reels ?? REELS;
   return (
     <main>
       <PageTitleBar
-        label="Short Films"
-        title="Wedding"
-        highlightWord="Reels"
+        label={config?.eyebrow ?? "Short Films"}
+        title={config?.titlePrefix ?? "Wedding"}
+        highlightWord={config?.titleHighlight ?? "Reels"}
       />
 
       <section

@@ -37,5 +37,5 @@ export default async function Page() {
 
   const films = mapTraditionalFilmSectionToFilms(filmData);
 
-  return <TraditionalFilmPage films={films} />;
+  return <TraditionalFilmPage films={films} config={filmData.config} />;
 }

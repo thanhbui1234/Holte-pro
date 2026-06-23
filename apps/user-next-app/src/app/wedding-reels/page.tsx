@@ -27,5 +27,5 @@ export default async function Page() {
   );
   const reels = reelsData ? mapReelSectionToReels(reelsData) : undefined;
 
-  return <WeddingReelsPage reels={reels} />;
+  return <WeddingReelsPage reels={reels} config={reelsData?.config} />;
 }
