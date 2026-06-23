@@ -115,9 +115,11 @@ export function WeddingHighlightsPage() {
     );
   }
 
+  const pageTitle = [serverConfig.titlePrefix, serverConfig.titleHighlight].filter(Boolean).join(" ") || "Highlight Đám Cưới";
+
   return (
     <PageContainer
-      title="Highlight Đám Cưới"
+      title={pageTitle}
       description="Video highlight nổi bật. Carousel dạng thẻ trên desktop, lưới trên mobile."
     >
       {/* Config fields — no own SaveBar */}

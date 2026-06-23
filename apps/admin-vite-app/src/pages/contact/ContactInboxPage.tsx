@@ -167,6 +167,13 @@ function DetailPanel({
           <span>TG khả dụng:</span>
           <span className="font-semibold text-foreground">{sub.availableTime || "—"}</span>
         </div>
+        {sub.requesterEmail && (
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Mail className="h-3.5 w-3.5 text-amber-500" />
+            <span>Email:</span>
+            <span className="font-semibold text-foreground">{sub.requesterEmail}</span>
+          </div>
+        )}
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Mail className="h-3.5 w-3.5 text-amber-500" />
           <span>Nhận lúc:</span>
@@ -189,13 +196,25 @@ function DetailPanel({
 
       {/* Actions */}
       <div className="space-y-2 border-t border-border/50 px-5 py-4">
-        <a
-          href={`tel:${sub.phone}`}
-          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-500 py-2.5 text-sm font-semibold text-stone-950 transition-colors hover:bg-amber-400"
-        >
-          <Mail className="h-4 w-4" />
-          Gọi điện / Zalo
-        </a>
+        <div className={cn("grid gap-2", sub.requesterEmail ? "grid-cols-2" : "grid-cols-1")}>
+          <a
+            href={`tel:${sub.phone}`}
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-500 py-2.5 text-sm font-semibold text-stone-950 transition-colors hover:bg-amber-400"
+          >
+            <Mail className="h-4 w-4" />
+            Gọi điện / Zalo
+          </a>
+
+          {sub.requesterEmail && (
+            <a
+              href={`mailto:${sub.requesterEmail}`}
+              className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-100 py-2.5 text-sm font-semibold text-amber-900 transition-colors hover:bg-amber-200 dark:bg-amber-500/20 dark:text-amber-300 dark:hover:bg-amber-500/30"
+            >
+              <Mail className="h-4 w-4" />
+              Gửi Email
+            </a>
+          )}
+        </div>
 
         <div className="grid grid-cols-2 gap-2">
           {sub.status === "PENDING" && (

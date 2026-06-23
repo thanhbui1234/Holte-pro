@@ -26,9 +26,20 @@ function getYouTubeEmbedUrl(videoId: string): string {
 interface WeddingHighlightSectionProps {
   videos?: HighlightVideo[];
   backgroundColor?: string;
+  eyebrow?: string;
+  titlePrefix?: string;
+  titleHighlight?: string;
+  description?: string;
 }
 
-export function WeddingHighlightSection({ videos = DEFAULT_VIDEOS, backgroundColor }: WeddingHighlightSectionProps) {
+export function WeddingHighlightSection({
+  videos = DEFAULT_VIDEOS,
+  backgroundColor,
+  eyebrow = "Featured Works",
+  titlePrefix = "Wedding",
+  titleHighlight = "Highlights",
+  description = "Your love story, distilled into a cinematic masterpiece",
+}: WeddingHighlightSectionProps) {
   const [headerRef, headerVisible] = useScrollAnimation({ threshold: 0.1 });
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -78,22 +89,22 @@ export function WeddingHighlightSection({ videos = DEFAULT_VIDEOS, backgroundCol
         >
           <BlurFade delay={0.05} inView>
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-amber-400 dark:text-amber-400">
-              Featured Works
+              {eyebrow}
             </p>
           </BlurFade>
           <BlurFade delay={0.15} inView>
             <Link href="/wedding-highlight">
               <h2 className="font-title text-5xl font-light tracking-wide text-stone-900 md:text-7xl dark:text-stone-100">
-                Wedding{" "}
+                {titlePrefix}{" "}
                 <Highlighter action="underline" color="#ffb900" strokeWidth={2} animationDuration={800} isView>
-                  <em className="not-italic font-normal italic">Highlights</em>
+                  <em className="not-italic font-normal italic">{titleHighlight}</em>
                 </Highlighter>
               </h2>
             </Link>
           </BlurFade>
           <BlurFade delay={0.25} inView>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-stone-500 dark:text-stone-400">
-              Your love story, distilled into a cinematic masterpiece
+              {description}
             </p>
           </BlurFade>
         </div>
