@@ -94,12 +94,18 @@ const SiteStructuredData = () => {
 
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { getAppSections } from "@/lib/video.api";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const sections = await getAppSections();
+  const activeSections = sections
+    .filter((s) => s.status === "ACTIVE")
+    .map((s) => s.name);
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -107,7 +113,7 @@ export default function RootLayout({
       </head>
       <body>
         <Providers>
-          <Header />
+          <Header activeSections={activeSections} />
           {children}
           <Footer />
         </Providers>

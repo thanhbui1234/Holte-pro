@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Facebook, Instagram, Mail, Menu } from "lucide-react";
 import { SlideMenu } from "./SlideMenu";
 
-export function Header() {
+export function Header({ activeSections = [] }: { activeSections?: string[] }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showLogo, setShowLogo] = useState(false);
   const [isDarkSection, setIsDarkSection] = useState(true);
@@ -160,7 +160,7 @@ export function Header() {
         </div>
       </header>
 
-      <SlideMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <SlideMenu open={menuOpen} onClose={() => setMenuOpen(false)} activeSections={activeSections} />
     </>
   );
 }

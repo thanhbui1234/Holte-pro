@@ -19,9 +19,10 @@ const DEFAULT_REELS: ReelItem[] = [
 
 interface WeddingReelsSectionProps {
   reels?: ReelItem[];
+  backgroundColor?: string;
 }
 
-export function WeddingReelsSection({ reels = DEFAULT_REELS }: WeddingReelsSectionProps) {
+export function WeddingReelsSection({ reels = DEFAULT_REELS, backgroundColor }: WeddingReelsSectionProps) {
   const [headerRef, headerVisible] = useScrollAnimation({ threshold: 0.1 });
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -38,6 +39,7 @@ export function WeddingReelsSection({ reels = DEFAULT_REELS }: WeddingReelsSecti
       id="wedding-reels"
       data-header-theme="dark"
       className="min-h-screen overflow-hidden bg-stone-950 px-6 py-24"
+      style={{ backgroundColor: backgroundColor || undefined }}
     >
       <div className="mx-auto max-w-6xl">
         <div
