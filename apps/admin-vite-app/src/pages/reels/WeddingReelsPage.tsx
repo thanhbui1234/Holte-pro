@@ -124,9 +124,11 @@ export function WeddingReelsPage() {
     );
   }
 
+  const pageTitle = [serverConfig.titlePrefix, serverConfig.titleHighlight].filter(Boolean).join(" ") || "Reels Đám Cưới";
+
   return (
     <PageContainer
-      title="Reels Đám Cưới"
+      title={pageTitle}
       description="Reels ngắn dọc hiển thị dạng cuộn ngang."
     >
       {/* Config fields */}

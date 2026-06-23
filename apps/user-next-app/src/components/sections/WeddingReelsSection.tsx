@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { BlurFade, Highlighter, Skeleton, HeroVideoDialog } from "shared-ui";
@@ -20,18 +20,70 @@ const DEFAULT_REELS: ReelItem[] = [
 interface WeddingReelsSectionProps {
   reels?: ReelItem[];
   backgroundColor?: string;
+  eyebrow?: string;
+  titlePrefix?: string;
+  titleHighlight?: string;
+  description?: string;
 }
 
-export function WeddingReelsSection({ reels = DEFAULT_REELS, backgroundColor }: WeddingReelsSectionProps) {
+export function WeddingReelsSection({
+  reels = DEFAULT_REELS,
+  backgroundColor,
+  eyebrow = "Short Films",
+  titlePrefix = "Wedding",
+  titleHighlight = "Reels",
+  description = "Short-form wedding content crafted for effortless sharing across social media",
+}: WeddingReelsSectionProps) {
   const [headerRef, headerVisible] = useScrollAnimation({ threshold: 0.1 });
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const scrollToDot = (index: number) => {
+    if (!scrollRef.current) return;
+    const container = scrollRef.current;
+    const maxScroll = container.scrollWidth - container.clientWidth;
+    const targetScroll = (index / (reels.length - 1)) * maxScroll;
+    container.scrollTo({
+      left: targetScroll,
+      behavior: "smooth",
+    });
+  };
 
   const scroll = (direction: "left" | "right") => {
     if (!scrollRef.current) return;
-    scrollRef.current.scrollBy({
-      left: direction === "left" ? -320 : 320,
-      behavior: "smooth",
-    });
+    const container = scrollRef.current;
+    // card width + gap (approx 220 + 16 = 236)
+    const cardWidth = 236;
+    const maxScroll = container.scrollWidth - container.clientWidth;
+
+    if (direction === "left") {
+      if (container.scrollLeft <= 10) {
+        container.scrollTo({ left: maxScroll, behavior: "smooth" });
+      } else {
+        container.scrollBy({ left: -cardWidth, behavior: "smooth" });
+      }
+    } else {
+      if (container.scrollLeft >= maxScroll - 10) {
+        container.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        container.scrollBy({ left: cardWidth, behavior: "smooth" });
+      }
+    }
+  };
+
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+    const container = scrollRef.current;
+    const maxScroll = container.scrollWidth - container.clientWidth;
+    if (maxScroll <= 0) {
+      setActiveIndex(0);
+      return;
+    }
+    const ratio = container.scrollLeft / maxScroll;
+    const newIndex = Math.round(ratio * (reels.length - 1));
+    if (newIndex !== activeIndex) {
+      setActiveIndex(newIndex);
+    }
   };
 
   return (
@@ -54,26 +106,25 @@ export function WeddingReelsSection({ reels = DEFAULT_REELS, backgroundColor }: 
           <div>
             <BlurFade delay={0.05} inView>
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
-                Short Films
+                {eyebrow}
               </p>
             </BlurFade>
             <BlurFade delay={0.15} inView>
               <Link href="/wedding-reels">
                 <h2 className="font-title text-5xl font-light tracking-wide text-white md:text-7xl">
-                  Wedding{" "}
+                  {titlePrefix}{" "}
                   <Highlighter action="underline" color="#ffb900" strokeWidth={2} animationDuration={800} isView>
-                    <em className="not-italic font-normal italic">Reels</em>
+                    <em className="not-italic font-normal italic">{titleHighlight}</em>
                   </Highlighter>
                 </h2>
               </Link>
             </BlurFade>
             <BlurFade delay={0.25} inView>
               <p className="mt-4 max-w-md text-sm leading-relaxed text-stone-400">
-                Short-form wedding content crafted for effortless sharing across social media
+                {description}
               </p>
             </BlurFade>
           </div>
-
           <div className="flex gap-3">
             <button
               onClick={() => scroll("left")}
@@ -98,11 +149,14 @@ export function WeddingReelsSection({ reels = DEFAULT_REELS, backgroundColor }: 
 
         <div
           ref={scrollRef}
-          className="flex gap-4 overflow-x-auto pb-4"
+          onScroll={handleScroll}
+          className="relative flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {reels.map((reel, index) => (
-            <ReelCard key={`${reel.title}-${index}`} reel={reel} index={index} />
+            <div key={`${reel.title}-${index}`} className="snap-start shrink-0">
+              <ReelCard reel={reel} index={index} />
+            </div>
           ))}
         </div>
 
@@ -110,10 +164,12 @@ export function WeddingReelsSection({ reels = DEFAULT_REELS, backgroundColor }: 
           className="mt-6 flex justify-center gap-1.5"
           style={{ opacity: headerVisible ? 1 : 0, transition: "opacity 700ms ease 300ms" }}
         >
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div
+          {reels.map((_, i) => (
+            <button
               key={i}
-              className={`h-0.5 rounded-full transition-all duration-300 ${i === 0 ? "w-8 bg-amber-400" : "w-3 bg-stone-700"}`}
+              onClick={() => scrollToDot(i)}
+              aria-label={`Go to slide ${i + 1}`}
+              className={`h-1.5 rounded-full transition-all duration-300 ${i === activeIndex ? "w-8 bg-amber-400" : "w-3 bg-stone-700 hover:bg-stone-500"}`}
             />
           ))}
         </div>

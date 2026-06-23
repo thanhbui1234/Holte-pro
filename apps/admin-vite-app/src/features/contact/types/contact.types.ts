@@ -14,6 +14,7 @@ export interface SupportFormRecord {
   id: string | number; // Note: API returns Long, so it's likely number, but keeping string|number for safety
   phone: string;
   fullName: string;
+  requesterEmail?: string;
   availableTime: string;
   reason: string;
   status: ContactStatus;

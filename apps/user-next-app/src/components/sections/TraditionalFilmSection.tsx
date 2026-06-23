@@ -10,9 +10,20 @@ import type { FilmItem } from "@/types/content";
 export interface TraditionalFilmSectionProps {
   films?: FilmItem[];
   backgroundColor?: string;
+  eyebrow?: string;
+  titlePrefix?: string;
+  titleHighlight?: string;
+  description?: string;
 }
 
-export function TraditionalFilmSection({ films = FILMS, backgroundColor }: TraditionalFilmSectionProps) {
+export function TraditionalFilmSection({
+  films = FILMS,
+  backgroundColor,
+  eyebrow = "Heritage & Culture",
+  titlePrefix = "Traditional",
+  titleHighlight = "Films",
+  description = "A long-form wedding film that follows the complete timeline of your wedding day.",
+}: TraditionalFilmSectionProps) {
   const [headerRef, headerVisible] = useScrollAnimation({ threshold: 0.1 });
 
   return (
@@ -35,7 +46,7 @@ export function TraditionalFilmSection({ films = FILMS, backgroundColor }: Tradi
         >
           <BlurFade delay={0.05} inView>
             <p className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
-              Heritage &amp; Culture
+              {eyebrow}
             </p>
           </BlurFade>
           <BlurFade delay={0.15} inView>
@@ -48,16 +59,15 @@ export function TraditionalFilmSection({ films = FILMS, backgroundColor }: Tradi
                   animationDuration={800}
                   isView
                 >
-                  Traditional{" "}
-                  <em className="not-italic font-normal italic">Films</em>
+                  {titlePrefix}{" "}
+                  <em className="not-italic font-normal italic">{titleHighlight}</em>
                 </Highlighter>
               </h2>
             </Link>
           </BlurFade>
           <BlurFade delay={0.25} inView>
             <p className="mx-auto mt-5 max-w-lg text-sm leading-relaxed text-amber-200/60">
-              A long-form wedding film that follows the complete timeline of
-              your wedding day.
+              {description}
             </p>
           </BlurFade>
         </div>

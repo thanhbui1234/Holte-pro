@@ -11,11 +11,12 @@ import { createSupportFormAction } from "@/actions/support";
 interface FormState {
   name: string;
   phone: string;
+  email: string;
   date: Date | undefined;
   message: string;
 }
 
-const INITIAL_FORM: FormState = { name: "", phone: "", date: undefined, message: "" };
+const INITIAL_FORM: FormState = { name: "", phone: "", email: "", date: undefined, message: "" };
 
 export function ContactPage() {
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
@@ -41,6 +42,7 @@ export function ContactPage() {
       const res = await createSupportFormAction({
         phone: form.phone,
         fullName: form.name,
+        requesterEmail: form.email,
         availableTime: form.date ? format(form.date, "yyyy-MM-dd") : "",
         reason: form.message,
       });
@@ -128,6 +130,19 @@ export function ContactPage() {
                       required
                       disabled={isPending}
                     />
+                    <div className="md:col-span-2">
+                      <FormField
+                        label="Email Address"
+                        id="contact-email"
+                        name="email"
+                        type="email"
+                        placeholder="customer@example.com"
+                        value={form.email}
+                        onChange={handleChange}
+                        required
+                        disabled={isPending}
+                      />
+                    </div>
                   </div>
 
                   <div className="mb-4">

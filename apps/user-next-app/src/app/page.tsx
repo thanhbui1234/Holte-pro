@@ -116,21 +116,33 @@ export default async function Home() {
       {highlightData && (
         <WeddingHighlightSection 
           videos={highlights} 
-          backgroundColor={highlightData.config?.backgroundColor} 
+          backgroundColor={highlightData.config?.backgroundColor}
+          eyebrow={highlightData.config?.eyebrow}
+          titlePrefix={highlightData.config?.titlePrefix}
+          titleHighlight={highlightData.config?.titleHighlight}
+          description={highlightData.config?.description}
         />
       )}
 
       {reelsData && (
         <WeddingReelsSection 
           reels={reels} 
-          backgroundColor={reelsData.config?.backgroundColor} 
+          backgroundColor={reelsData.config?.backgroundColor}
+          eyebrow={reelsData.config?.eyebrow}
+          titlePrefix={reelsData.config?.titlePrefix}
+          titleHighlight={reelsData.config?.titleHighlight}
+          description={reelsData.config?.description}
         />
       )}
 
       {traditionalData && (
         <TraditionalFilmSection 
           films={traditionalFilms} 
-          backgroundColor={traditionalData.config?.backgroundColor} 
+          backgroundColor={traditionalData.config?.backgroundColor}
+          eyebrow={traditionalData.config?.eyebrow}
+          titlePrefix={traditionalData.config?.titlePrefix}
+          titleHighlight={traditionalData.config?.titleHighlight}
+          description={traditionalData.config?.description}
         />
       )}
 

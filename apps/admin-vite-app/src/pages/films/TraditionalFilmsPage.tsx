@@ -136,9 +136,11 @@ export function TraditionalFilmsPage() {
     );
   }
 
+  const pageTitle = [serverConfig.titlePrefix, serverConfig.titleHighlight].filter(Boolean).join(" ") || "Phim Truyền Thống";
+
   return (
     <PageContainer
-      title="Phim Truyền Thống"
+      title={pageTitle}
       description="Phim dài nổi bật trong phần di sản."
     >
       {/* Config fields */}

@@ -88,57 +88,57 @@ export function SlideMenu({ open, onClose, activeSections = [] }: SlideMenuProps
           {navItems.map((item, i) => {
             const indexStr = (i + 1).toString().padStart(2, "0");
             return (
-            <li key={item.href}>
-              <button
-                onClick={() => handleNavClick(item.href)}
-                className={`group flex w-full items-center gap-4 rounded-lg px-2 py-4 text-left transition-all duration-200 ${pathname === item.href
-                  ? "bg-amber-50 dark:bg-amber-900/20"
-                  : "hover:bg-stone-100 dark:hover:bg-stone-800/50"
-                  }`}
-                style={{
-                  transform: open ? "translateX(0)" : "translateX(-16px)",
-                  opacity: open ? 1 : 0,
-                  transitionProperty: "transform, opacity, background-color",
-                  transitionDuration: "500ms, 400ms, 200ms",
-                  transitionTimingFunction: "cubic-bezier(0.25,0.46,0.45,0.94), ease, ease",
-                  transitionDelay: open ? `${80 + i * 50}ms, ${80 + i * 50}ms, 0ms` : "0ms, 0ms, 0ms",
-                }}
-              >
-                {/* Number */}
-                <span className={`w-7 shrink-0 text-xs tabular-nums transition-colors duration-200 ${pathname === item.href
-                  ? "text-amber-400 dark:text-amber-400"
-                  : "text-stone-400 group-hover:text-amber-600 dark:text-stone-600 dark:group-hover:text-amber-500"
-                  }`}>
-                  {indexStr}
-                </span>
-
-                {/* Label */}
-                <span className={`text-xl font-light tracking-wide transition-colors duration-200 ${pathname === item.href
-                  ? "text-amber-400 dark:text-amber-400 font-normal"
-                  : "text-stone-800 group-hover:text-stone-950 dark:text-stone-200 dark:group-hover:text-white"
-                  }`}>
-                  {item.label}
-                </span>
-
-                {/* Arrow */}
-                <svg
-                  className={`ml-auto h-4 w-4 transition-all duration-200 ${pathname === item.href
-                    ? "translate-x-1 text-amber-400 opacity-100 dark:text-amber-400"
-                    : "translate-x-0 text-stone-300 opacity-0 group-hover:translate-x-1 group-hover:text-amber-600 group-hover:opacity-100 dark:text-stone-700 dark:group-hover:text-amber-400"
+              <li key={item.href}>
+                <button
+                  onClick={() => handleNavClick(item.href)}
+                  className={`group flex w-full items-center gap-4 rounded-lg px-2 py-4 text-left transition-all duration-200 ${pathname === item.href
+                    ? "bg-amber-50 dark:bg-amber-900/20"
+                    : "hover:bg-stone-100 dark:hover:bg-stone-800/50"
                     }`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+                  style={{
+                    transform: open ? "translateX(0)" : "translateX(-16px)",
+                    opacity: open ? 1 : 0,
+                    transitionProperty: "transform, opacity, background-color",
+                    transitionDuration: "500ms, 400ms, 200ms",
+                    transitionTimingFunction: "cubic-bezier(0.25,0.46,0.45,0.94), ease, ease",
+                    transitionDelay: open ? `${80 + i * 50}ms, ${80 + i * 50}ms, 0ms` : "0ms, 0ms, 0ms",
+                  }}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </button>
-            </li>
+                  {/* Number */}
+                  <span className={`w-7 shrink-0 text-xs tabular-nums transition-colors duration-200 ${pathname === item.href
+                    ? "text-amber-400 dark:text-amber-400"
+                    : "text-stone-400 group-hover:text-amber-600 dark:text-stone-600 dark:group-hover:text-amber-500"
+                    }`}>
+                    {indexStr}
+                  </span>
+
+                  {/* Label */}
+                  <span className={`text-xl font-light tracking-wide transition-colors duration-200 ${pathname === item.href
+                    ? "text-amber-400 dark:text-amber-400 font-normal"
+                    : "text-stone-800 group-hover:text-stone-950 dark:text-stone-200 dark:group-hover:text-white"
+                    }`}>
+                    {item.label}
+                  </span>
+
+                  {/* Arrow */}
+                  <svg
+                    className={`ml-auto h-4 w-4 transition-all duration-200 ${pathname === item.href
+                      ? "translate-x-1 text-amber-400 opacity-100 dark:text-amber-400"
+                      : "translate-x-0 text-stone-300 opacity-0 group-hover:translate-x-1 group-hover:text-amber-600 group-hover:opacity-100 dark:text-stone-700 dark:group-hover:text-amber-400"
+                      }`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+              </li>
             );
           })}
         </ul>
@@ -152,15 +152,14 @@ export function SlideMenu({ open, onClose, activeSections = [] }: SlideMenuProps
             transition: "opacity 500ms ease 400ms, transform 500ms ease 400ms",
           }}
         >
-          <p className="mb-4 text-xs leading-relaxed text-stone-400 dark:text-stone-600">
+          {/* <p className="mb-4 text-xs leading-relaxed text-stone-400 dark:text-stone-600">
             Crafting timeless wedding films <br />
             across Vietnam.
           </p>
 
-          {/* Theme Toggle */}
           <div className="mb-4">
             <ThemeToggle />
-          </div>
+          </div> */}
 
           <div className="flex items-center gap-4">
             <a
