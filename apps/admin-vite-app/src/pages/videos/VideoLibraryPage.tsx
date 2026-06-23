@@ -4,6 +4,7 @@ import { Film, Loader2, Plus, Upload as UploadIcon, Link as LinkIcon, CheckCircl
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Input, Textarea, Button, MediaUpload, HeroVideoDialog } from "shared-ui";
 import { PageContainer } from "@/components/composite/PageContainer";
 import { videoApi, getApiErrorMessage, extractApiError } from "@/shared/api";
+import { triggerNextJsRevalidate } from "@/shared/api/revalidate";
 import { useVideoUpload } from "@/shared/hooks/use-video-upload";
 import { cn } from "@/shared/lib/utils";
 import { toast } from "sonner";
@@ -49,8 +50,8 @@ function AddVideoModal({ open, onOpenChange, onSuccess }: { open: boolean, onOpe
         title: urlTitle || "Imported via URL",
         description: urlDescription,
         privacyStatus: "public",
-        visible: true,
-      });
+        });
+      triggerNextJsRevalidate("videos");
       onSuccess();
       onOpenChange(false);
       setYoutubeLink("");
@@ -240,6 +241,7 @@ export function VideoLibraryPage() {
       }
 
       queryClient.invalidateQueries({ queryKey: ["video-list"] });
+      triggerNextJsRevalidate("videos");
       setVideoToRemove(null);
     } catch (error) {
       console.error(error);
