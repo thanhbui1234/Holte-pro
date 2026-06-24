@@ -20,14 +20,20 @@ const DEFAULT_IMAGES: AboutImage[] = [
 
 interface AboutSectionProps {
   eyebrow?: string;
+  eyebrowColor?: string;
   titlePrefix?: string;
+  titlePrefixColor?: string;
   titleHighlight?: string;
+  titleHighlightColor?: string;
   /** HTML string from API (EN) */
   descriptionEn?: string;
+  descriptionEnColor?: string;
   /** HTML string from API (VI) */
   descriptionVi?: string;
+  descriptionViColor?: string;
   pillars?: string[];
   legacyLabel?: string;
+  backgroundColor?: string;
   stats?: StatItem[];
   /** All images from API — first becomes heroImage, rest become grid images */
   images?: AboutImage[];
@@ -35,12 +41,18 @@ interface AboutSectionProps {
 
 export function AboutSection({
   eyebrow,
+  eyebrowColor,
   titlePrefix,
+  titlePrefixColor,
   titleHighlight,
+  titleHighlightColor,
   descriptionEn,
+  descriptionEnColor,
   descriptionVi,
+  descriptionViColor,
   pillars,
   legacyLabel,
+  backgroundColor,
   stats = DEFAULT_STATS,
   images,
 }: AboutSectionProps) {
@@ -68,6 +80,7 @@ export function AboutSection({
       id="about"
       data-header-theme="dark"
       className="relative min-h-screen overflow-hidden bg-stone-950 px-6 py-24 md:px-16 lg:px-24"
+      style={backgroundColor ? { backgroundColor } : undefined}
     >
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.03]"
@@ -87,16 +100,26 @@ export function AboutSection({
           }}
         >
           <BlurFade delay={0.1} inView>
-            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
+            <p
+              className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] text-amber-400"
+              style={eyebrowColor ? { color: eyebrowColor } : undefined}
+            >
               {displayEyebrow}
             </p>
           </BlurFade>
 
           <BlurFade delay={0.2} inView>
             <h2 className="font-title mb-8 text-5xl font-light leading-snug tracking-wide text-white md:text-6xl">
-              {displayPrefix}{" "}
+              <span style={titlePrefixColor ? { color: titlePrefixColor } : undefined}>
+                {displayPrefix}
+              </span>{" "}
               <Highlighter action="underline" color="#ffb900" strokeWidth={2} animationDuration={800} isView>
-                <em className="not-italic font-normal italic text-amber-400">{displayHighlight}</em>
+                <em
+                  className="not-italic font-normal italic text-amber-400"
+                  style={titleHighlightColor ? { color: titleHighlightColor } : undefined}
+                >
+                  {displayHighlight}
+                </em>
               </Highlighter>
             </h2>
           </BlurFade>
@@ -106,6 +129,7 @@ export function AboutSection({
             {descriptionEn ? (
               <div
                 className="mb-4 text-base leading-relaxed text-stone-200 [&_strong]:font-medium [&_strong]:text-stone-100 [&_em]:italic [&_em]:text-amber-400"
+                style={descriptionEnColor ? { color: descriptionEnColor } : undefined}
                 dangerouslySetInnerHTML={{ __html: descriptionEn }}
               />
             ) : (
@@ -124,6 +148,7 @@ export function AboutSection({
             {descriptionVi ? (
               <div
                 className="mb-6 text-sm italic leading-relaxed text-stone-500 border-l border-stone-800 pl-4 [&_strong]:not-italic [&_strong]:font-medium [&_strong]:text-stone-400"
+                style={descriptionViColor ? { color: descriptionViColor } : undefined}
                 dangerouslySetInnerHTML={{ __html: descriptionVi }}
               />
             ) : (

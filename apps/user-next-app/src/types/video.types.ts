@@ -62,9 +62,13 @@ export interface HighlightSectionItem {
 /** Config block shared by most sections */
 export interface SectionConfig {
   eyebrow?: string;
+  eyebrowColor?: string;
   titlePrefix?: string;
+  titlePrefixColor?: string;
   titleHighlight?: string;
+  titleHighlightColor?: string;
   description?: string;
+  descriptionColor?: string;
   backgroundColor?: string;
 }
 
@@ -91,10 +95,15 @@ export interface AboutSectionStat {
 /** Shape of `data.map` for the `about` section */
 export interface AboutSectionData {
   eyebrow?: string;
+  eyebrowColor?: string;
   titlePrefix?: string;
+  titlePrefixColor?: string;
   titleHighlight?: string;
+  titleHighlightColor?: string;
   descriptionEn?: string;
+  descriptionEnColor?: string;
   descriptionVi?: string;
+  descriptionViColor?: string;
   pillars?: string[];
   legacyLabel?: string;
   backgroundColor?: string;

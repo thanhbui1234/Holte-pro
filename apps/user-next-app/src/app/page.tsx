@@ -99,12 +99,18 @@ export default async function Home() {
               <AboutSection
                 key={section.id}
                 eyebrow={aboutData.eyebrow}
+                eyebrowColor={aboutData.eyebrowColor}
                 titlePrefix={aboutData.titlePrefix}
+                titlePrefixColor={aboutData.titlePrefixColor}
                 titleHighlight={aboutData.titleHighlight}
+                titleHighlightColor={aboutData.titleHighlightColor}
                 descriptionEn={aboutData.descriptionEn}
+                descriptionEnColor={aboutData.descriptionEnColor}
                 descriptionVi={aboutData.descriptionVi}
+                descriptionViColor={aboutData.descriptionViColor}
                 pillars={aboutData.pillars}
                 legacyLabel={aboutData.legacyLabel}
+                backgroundColor={aboutData.backgroundColor}
                 stats={aboutData.stats}
                 images={aboutData.images?.map((img) => ({ src: img.src, label: img.description }))}
               />
@@ -117,9 +123,13 @@ export default async function Home() {
                 videos={highlights}
                 backgroundColor={highlightData.config?.backgroundColor}
                 eyebrow={highlightData.config?.eyebrow}
+                eyebrowColor={highlightData.config?.eyebrowColor}
                 titlePrefix={highlightData.config?.titlePrefix}
+                titlePrefixColor={highlightData.config?.titlePrefixColor}
                 titleHighlight={highlightData.config?.titleHighlight}
+                titleHighlightColor={highlightData.config?.titleHighlightColor}
                 description={highlightData.config?.description}
+                descriptionColor={highlightData.config?.descriptionColor}
               />
             ) : null;
 
@@ -130,9 +140,13 @@ export default async function Home() {
                 reels={reels}
                 backgroundColor={reelsData.config?.backgroundColor}
                 eyebrow={reelsData.config?.eyebrow}
+                eyebrowColor={reelsData.config?.eyebrowColor}
                 titlePrefix={reelsData.config?.titlePrefix}
+                titlePrefixColor={reelsData.config?.titlePrefixColor}
                 titleHighlight={reelsData.config?.titleHighlight}
+                titleHighlightColor={reelsData.config?.titleHighlightColor}
                 description={reelsData.config?.description}
+                descriptionColor={reelsData.config?.descriptionColor}
               />
             ) : null;
 

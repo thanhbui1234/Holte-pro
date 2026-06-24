@@ -16,10 +16,15 @@ import type { AboutData } from "@/features/about/types/about.types";
 function mapToAboutData(map: Record<string, unknown>): AboutData {
   return {
     eyebrow: (map.eyebrow as string) ?? "",
+    eyebrowColor: (map.eyebrowColor as string) ?? "",
     titlePrefix: (map.titlePrefix as string) ?? "",
+    titlePrefixColor: (map.titlePrefixColor as string) ?? "",
     titleHighlight: (map.titleHighlight as string) ?? "",
+    titleHighlightColor: (map.titleHighlightColor as string) ?? "",
     descriptionEn: (map.descriptionEn as string) ?? "",
+    descriptionEnColor: (map.descriptionEnColor as string) ?? "",
     descriptionVi: (map.descriptionVi as string) ?? "",
+    descriptionViColor: (map.descriptionViColor as string) ?? "",
     pillars: (map.pillars as string[]) ?? [],
     legacyLabel: (map.legacyLabel as string) ?? "",
     backgroundColor: (map.backgroundColor as string) ?? "#0a0a0a",
@@ -74,16 +79,45 @@ export function AboutPage() {
           title="Tiêu đề"
           description="Eyebrow, tiêu đề dài chia thành tiền tố + từ in nghiêng nổi bật."
         >
-          <div className="grid gap-4 md:grid-cols-2">
-            <FormField label="Eyebrow" htmlFor="about-eyebrow" className="md:col-span-2">
-              <Input id="about-eyebrow" {...register("eyebrow")} />
+          <div className="space-y-4">
+            <FormField label="Eyebrow" htmlFor="about-eyebrow">
+              <div className="flex gap-2">
+                <Input id="about-eyebrow" className="flex-1" {...register("eyebrow")} />
+                <Controller
+                  control={control}
+                  name="eyebrowColor"
+                  render={({ field }) => (
+                    <ColorField id="about-eyebrow-color" value={field.value} onChange={field.onChange} />
+                  )}
+                />
+              </div>
             </FormField>
-            <FormField label="Tiền tố tiêu đề" htmlFor="about-prefix">
-              <Input id="about-prefix" {...register("titlePrefix")} />
-            </FormField>
-            <FormField label="Từ in nghiêng nổi bật" htmlFor="about-highlight">
-              <Input id="about-highlight" {...register("titleHighlight")} />
-            </FormField>
+            <div className="grid gap-4 md:grid-cols-2">
+              <FormField label="Tiền tố tiêu đề" htmlFor="about-prefix">
+                <div className="flex gap-2">
+                  <Input id="about-prefix" className="flex-1" {...register("titlePrefix")} />
+                  <Controller
+                    control={control}
+                    name="titlePrefixColor"
+                    render={({ field }) => (
+                      <ColorField id="about-prefix-color" value={field.value} onChange={field.onChange} />
+                    )}
+                  />
+                </div>
+              </FormField>
+              <FormField label="Từ in nghiêng nổi bật" htmlFor="about-highlight">
+                <div className="flex gap-2">
+                  <Input id="about-highlight" className="flex-1" {...register("titleHighlight")} />
+                  <Controller
+                    control={control}
+                    name="titleHighlightColor"
+                    render={({ field }) => (
+                      <ColorField id="about-highlight-color" value={field.value} onChange={field.onChange} />
+                    )}
+                  />
+                </div>
+              </FormField>
+            </div>
           </div>
         </SectionCard>
 
@@ -121,6 +155,16 @@ export function AboutPage() {
                   />
                 )}
               />
+              <div className="mt-2 flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Màu chữ</span>
+                <Controller
+                  control={control}
+                  name="descriptionEnColor"
+                  render={({ field }) => (
+                    <ColorField id="about-desc-en-color" value={field.value} onChange={field.onChange} />
+                  )}
+                />
+              </div>
             </FormField>
             <FormField label="Mô tả tiếng Việt">
               <Controller
@@ -134,6 +178,16 @@ export function AboutPage() {
                   />
                 )}
               />
+              <div className="mt-2 flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Màu chữ</span>
+                <Controller
+                  control={control}
+                  name="descriptionViColor"
+                  render={({ field }) => (
+                    <ColorField id="about-desc-vi-color" value={field.value} onChange={field.onChange} />
+                  )}
+                />
+              </div>
             </FormField>
             <div className="grid gap-4 md:grid-cols-2">
               <FormField label="Trụ cột cốt lõi" hint="Hiển thị ngay trong mô tả.">

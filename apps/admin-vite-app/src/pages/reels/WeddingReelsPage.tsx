@@ -137,37 +137,48 @@ export function WeddingReelsPage() {
         title="Tiêu đề phần"
         description="Kiểm soát cách phần này hiển thị trên trang công khai."
       >
-        <div className="grid gap-4 md:grid-cols-2">
-          <FormField label="Eyebrow" htmlFor="cfg-eyebrow">
-            <Input id="cfg-eyebrow" placeholder="Featured Works" {...regCfg("eyebrow")} />
-          </FormField>
-          <FormField label="Màu nền" htmlFor="cfg-bg">
-            <Controller
-              control={ctrlCfg}
-              name="backgroundColor"
-              render={({ field }) => (
+        <div className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <FormField label="Eyebrow" htmlFor="cfg-eyebrow">
+              <div className="flex gap-2">
+                <Input id="cfg-eyebrow" className="flex-1" placeholder="Featured Works" {...regCfg("eyebrow")} />
+                <Controller control={ctrlCfg} name="eyebrowColor" render={({ field }) => (
+                  <ColorField id="cfg-eyebrow-color" value={field.value ?? ""} onChange={field.onChange} />
+                )} />
+              </div>
+            </FormField>
+            <FormField label="Màu nền" htmlFor="cfg-bg">
+              <Controller control={ctrlCfg} name="backgroundColor" render={({ field }) => (
                 <ColorField id="cfg-bg" value={field.value} onChange={field.onChange} />
-              )}
-            />
-          </FormField>
-          <FormField label="Tiền tố tiêu đề" htmlFor="cfg-title">
-            <Input id="cfg-title" placeholder="Wedding" {...regCfg("titlePrefix")} />
-          </FormField>
-          <FormField label="Từ in nghiêng nổi bật" htmlFor="cfg-highlight">
-            <Input id="cfg-highlight" placeholder="Reels" {...regCfg("titleHighlight")} />
-          </FormField>
-          <FormField label="Mô tả" className="md:col-span-2">
-            <Controller
-              control={ctrlCfg}
-              name="description"
-              render={({ field }) => (
-                <RichTextEditor
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
-                  placeholder="Mô tả ngắn cho phần này"
-                />
-              )}
-            />
+              )} />
+            </FormField>
+            <FormField label="Tiền tố tiêu đề" htmlFor="cfg-title">
+              <div className="flex gap-2">
+                <Input id="cfg-title" className="flex-1" placeholder="Wedding" {...regCfg("titlePrefix")} />
+                <Controller control={ctrlCfg} name="titlePrefixColor" render={({ field }) => (
+                  <ColorField id="cfg-title-color" value={field.value ?? ""} onChange={field.onChange} />
+                )} />
+              </div>
+            </FormField>
+            <FormField label="Từ in nghiêng nổi bật" htmlFor="cfg-highlight">
+              <div className="flex gap-2">
+                <Input id="cfg-highlight" className="flex-1" placeholder="Reels" {...regCfg("titleHighlight")} />
+                <Controller control={ctrlCfg} name="titleHighlightColor" render={({ field }) => (
+                  <ColorField id="cfg-highlight-color" value={field.value ?? ""} onChange={field.onChange} />
+                )} />
+              </div>
+            </FormField>
+          </div>
+          <FormField label="Mô tả">
+            <Controller control={ctrlCfg} name="description" render={({ field }) => (
+              <RichTextEditor value={field.value ?? ""} onChange={field.onChange} placeholder="Mô tả ngắn cho phần này" />
+            )} />
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Màu chữ</span>
+              <Controller control={ctrlCfg} name="descriptionColor" render={({ field }) => (
+                <ColorField id="cfg-desc-color" value={field.value ?? ""} onChange={field.onChange} />
+              )} />
+            </div>
           </FormField>
         </div>
       </SectionCard>

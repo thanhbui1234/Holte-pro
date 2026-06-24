@@ -21,18 +21,26 @@ interface WeddingReelsSectionProps {
   reels?: ReelItem[];
   backgroundColor?: string;
   eyebrow?: string;
+  eyebrowColor?: string;
   titlePrefix?: string;
+  titlePrefixColor?: string;
   titleHighlight?: string;
+  titleHighlightColor?: string;
   description?: string;
+  descriptionColor?: string;
 }
 
 export function WeddingReelsSection({
   reels = DEFAULT_REELS,
   backgroundColor,
   eyebrow = "Short Films",
+  eyebrowColor,
   titlePrefix = "Wedding",
+  titlePrefixColor,
   titleHighlight = "Reels",
+  titleHighlightColor,
   description = "Short-form wedding content crafted for effortless sharing across social media",
+  descriptionColor,
 }: WeddingReelsSectionProps) {
   const [headerRef, headerVisible] = useScrollAnimation({ threshold: 0.1 });
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -105,22 +113,31 @@ export function WeddingReelsSection({
         >
           <div>
             <BlurFade delay={0.05} inView>
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
+              <p
+                className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-amber-400"
+                style={eyebrowColor ? { color: eyebrowColor } : undefined}
+              >
                 {eyebrow}
               </p>
             </BlurFade>
             <BlurFade delay={0.15} inView>
               <Link href="/wedding-reels">
                 <h2 className="font-title text-5xl font-light tracking-wide text-white md:text-7xl">
-                  {titlePrefix}{" "}
+                  <span style={titlePrefixColor ? { color: titlePrefixColor } : undefined}>{titlePrefix}</span>{" "}
                   <Highlighter action="underline" color="#ffb900" strokeWidth={2} animationDuration={800} isView>
-                    <em className="not-italic font-normal italic">{titleHighlight}</em>
+                    <em
+                      className="not-italic font-normal italic"
+                      style={titleHighlightColor ? { color: titleHighlightColor } : undefined}
+                    >{titleHighlight}</em>
                   </Highlighter>
                 </h2>
               </Link>
             </BlurFade>
             <BlurFade delay={0.25} inView>
-              <p className="mt-4 max-w-md text-sm leading-relaxed text-stone-400">
+              <p
+                className="mt-4 max-w-md text-sm leading-relaxed text-stone-400"
+                style={descriptionColor ? { color: descriptionColor } : undefined}
+              >
                 {description}
               </p>
             </BlurFade>
