@@ -4,6 +4,7 @@ import { PageTitleBar } from "@/components/ui/PageTitleBar";
 import { HIGHLIGHT_VIDEOS } from "@/data/videos";
 import { BlurFade, HeroVideoDialog } from "shared-ui";
 import type { HighlightVideo } from "@/types/content";
+import type { SectionConfig } from "@/types/video.types";
 
 /** Build YouTube embed URL from a bare ID or any YouTube URL */
 function toEmbedUrl(idOrUrl: string): string {
@@ -30,9 +31,6 @@ function toThumbnailUrl(idOrUrl: string): string {
   // Bare ID
   return `https://img.youtube.com/vi/${idOrUrl}/hqdefault.jpg`;
 }
-
-import type { HighlightVideo } from "@/types/content";
-import type { SectionConfig } from "@/types/video.types";
 
 interface WeddingHighlightPageProps {
   videos?: HighlightVideo[];
