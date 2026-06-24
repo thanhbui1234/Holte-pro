@@ -134,12 +134,11 @@ export function WeddingReelsSection({
               </Link>
             </BlurFade>
             <BlurFade delay={0.25} inView>
-              <p
-                className="mt-4 max-w-md text-sm leading-relaxed text-stone-400"
+              <div
+                className="mt-4 max-w-md text-sm leading-relaxed text-stone-400 [&_p]:mb-2 last:[&_p]:mb-0"
                 style={descriptionColor ? { color: descriptionColor } : undefined}
-              >
-                {description}
-              </p>
+                dangerouslySetInnerHTML={{ __html: description }}
+              />
             </BlurFade>
           </div>
           <div className="flex gap-3">

@@ -53,11 +53,13 @@ export function AboutSection({
   pillars,
   legacyLabel,
   backgroundColor,
-  stats = DEFAULT_STATS,
+  stats,
   images,
 }: AboutSectionProps) {
   const [titleRef, titleVisible] = useScrollAnimation({ threshold: 0.1 });
   const [imageRef, imageVisible] = useScrollAnimation({ threshold: 0.1 });
+
+  const displayStats = stats ?? DEFAULT_STATS;
 
   // Split API images: first → hero, rest → grid (max 2)
   const heroImage: AboutImage = images?.[0] ?? DEFAULT_HERO_IMAGE;
@@ -161,7 +163,7 @@ export function AboutSection({
           </BlurFade>
 
           <div className="grid grid-cols-3 gap-6 border-t border-stone-800 pt-10">
-            {stats.map((stat, i) => (
+            {displayStats.map((stat, i) => (
               <div
                 key={stat.label}
                 style={{
