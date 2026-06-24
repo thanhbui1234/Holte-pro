@@ -18,13 +18,13 @@ export function HeaderPage() {
     handleSubmit,
     reset,
     formState: { isDirty },
-  } = useForm<HeaderData>({ defaultValues: data });
+  } = useForm<HeaderData>({ defaultValues: data ?? undefined });
 
   useEffect(() => {
     if (data) reset(data);
   }, [data, reset]);
 
-  const submit = handleSubmit((values) => {
+  const submit = handleSubmit((values: HeaderData) => {
     save(values);
     reset(values);
   });
@@ -72,7 +72,7 @@ export function HeaderPage() {
         <SaveBar
           isDirty={isDirty}
           onSave={submit}
-          onReset={() => reset(data)}
+          onReset={() => reset(data ?? undefined)}
           saveLabel="Lưu header"
         />
       </PageContainer>

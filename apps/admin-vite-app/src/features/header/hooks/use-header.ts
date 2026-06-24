@@ -11,7 +11,7 @@ export function useHeader() {
       const res = await sectionApi.getList({ name: "header" });
       const section = (res.data.data.sections ?? [])[0];
       if (!section) return null;
-      return { sectionId: section.id, ...(section.data?.map as HeaderData) };
+      return { sectionId: section.id, ...(section.data?.map as unknown as HeaderData) };
     },
   });
 }
@@ -22,7 +22,7 @@ export function useUpdateHeader() {
     mutationFn: async (data: HeaderData) => {
       const cached = queryClient.getQueryData<{ sectionId: number } & HeaderData>(QUERY_KEY);
       if (!cached?.sectionId) throw new Error("Header section not loaded");
-      return sectionApi.update({ id: cached.sectionId, data });
+      return sectionApi.update({ id: cached.sectionId, data: data as unknown as Record<string, unknown> });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });

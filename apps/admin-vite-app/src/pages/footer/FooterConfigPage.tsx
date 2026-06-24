@@ -19,13 +19,13 @@ export function FooterConfigPage() {
     handleSubmit,
     reset,
     formState: { isDirty },
-  } = useForm<FooterData>({ defaultValues: data });
+  } = useForm<FooterData>({ defaultValues: data ?? undefined });
 
   useEffect(() => {
     if (data) reset(data);
   }, [data, reset]);
 
-  const submit = handleSubmit((values) => {
+  const submit = handleSubmit((values: FooterData) => {
     save(values);
     reset(values);
   });
@@ -117,7 +117,7 @@ export function FooterConfigPage() {
         <SaveBar
           isDirty={isDirty}
           onSave={submit}
-          onReset={() => reset(data)}
+          onReset={() => reset(data ?? undefined)}
           saveLabel="Lưu footer"
         />
       </PageContainer>

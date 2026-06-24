@@ -13,7 +13,6 @@ export type { FilmItem, FilmPreviewImage } from "@/features/films/types/films.ty
 export type { ContactCtaData, ContactStatus, SupportFormRecord } from "@/features/contact/types/contact.types";
 export type { FooterData } from "@/features/footer/types/footer.types";
 export type { SectionRecord } from "@/features/layout/types/layout.types";
-export type { NavMenuItem } from "@/features/menu/types/menu.types";
 
 // Shared/composed types
 export type { ThemedSection } from "./common.types";

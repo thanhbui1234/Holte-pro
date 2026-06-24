@@ -11,7 +11,7 @@ export function useFooter() {
       const res = await sectionApi.getList({ name: "footer" });
       const section = (res.data.data.sections ?? [])[0];
       if (!section) return null;
-      return { sectionId: section.id, ...(section.data?.map as FooterData) };
+      return { sectionId: section.id, ...(section.data?.map as unknown as FooterData) };
     },
   });
 }
@@ -22,7 +22,7 @@ export function useUpdateFooter() {
     mutationFn: async (data: FooterData) => {
       const cached = queryClient.getQueryData<{ sectionId: number } & FooterData>(QUERY_KEY);
       if (!cached?.sectionId) throw new Error("Footer section not loaded");
-      return sectionApi.update({ id: cached.sectionId, data });
+      return sectionApi.update({ id: cached.sectionId, data: data as unknown as Record<string, unknown> });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
