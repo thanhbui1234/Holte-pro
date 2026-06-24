@@ -42,14 +42,16 @@ export function CustomSectionsPage() {
 
   const [createOpen, setCreateOpen] = useState(false);
   const [newName, setNewName] = useState("");
+  const [newDesc, setNewDesc] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<SectionRecord | null>(null);
 
   function handleCreate() {
     const name = newName.trim();
     if (!name) return;
-    createSection(name, {
+    createSection({ name, description: newDesc.trim() || undefined }, {
       onSuccess: () => {
         setNewName("");
+        setNewDesc("");
         setCreateOpen(false);
       },
     });
@@ -134,6 +136,18 @@ export function CustomSectionsPage() {
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder="e.g. Our Story, Packages, FAQ…"
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium" htmlFor="section-desc">
+                Description <span className="font-normal text-muted-foreground">(optional)</span>
+              </label>
+              <input
+                id="section-desc"
+                value={newDesc}
+                onChange={(e) => setNewDesc(e.target.value)}
+                placeholder="e.g. Shows latest news in grid layout…"
                 className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30"
               />
             </div>

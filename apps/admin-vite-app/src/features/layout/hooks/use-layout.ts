@@ -31,7 +31,9 @@ export function useSections() {
     queryFn: async () => {
       const res = await sectionApi.getList();
       const sections = res.data.data.sections ?? [];
-      return [...sections].sort((a, b) => a.displayOrder - b.displayOrder);
+      return [...sections]
+        .filter((s) => s.type !== "INVARIANT")
+        .sort((a, b) => a.displayOrder - b.displayOrder);
     },
   });
 }

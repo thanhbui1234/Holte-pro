@@ -17,8 +17,8 @@ export function useCustomSections() {
 export function useCreateCustomSection() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (name: string) =>
-      sectionApi.create({ name, displayOrder: Math.floor(Date.now() / 1000), data: {} }),
+    mutationFn: ({ name, description }: { name: string; description?: string }) =>
+      sectionApi.create({ name, description, type: "CUSTOM", status: "ACTIVE", displayOrder: Math.floor(Date.now() / 1000), data: {} }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.sections.list() });
     },

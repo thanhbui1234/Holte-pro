@@ -10,7 +10,6 @@ import { TraditionalFilmsPage } from "@/pages/films/TraditionalFilmsPage";
 import { ContactCtaPage } from "@/pages/contact/ContactCtaPage";
 import { ContactInboxPage } from "@/pages/contact/ContactInboxPage";
 import { HeaderPage } from "@/pages/header/HeaderPage";
-import { MenuConfigPage } from "@/pages/menu/MenuConfigPage";
 import { FooterConfigPage } from "@/pages/footer/FooterConfigPage";
 import { CustomSectionsPage } from "@/pages/custom-sections/CustomSectionsPage";
 import { CustomSectionEditorPage } from "@/pages/custom-sections/CustomSectionEditorPage";
@@ -18,8 +17,6 @@ import { SectionsHubPage } from "@/pages/sections-hub/SectionsHubPage";
 import { LoginPage } from "@/pages/auth/LoginPage";
 import { OAuthCallbackPage } from "@/pages/auth/OAuthCallbackPage";
 import { VideoLibraryPage } from "@/pages/videos/VideoLibraryPage";
-import { SectionCrudListPage } from "@/pages/section-crud/SectionCrudListPage";
-import { SectionCrudFormPage } from "@/pages/section-crud/SectionCrudFormPage";
 import { useAuth } from "@/features/auth";
 
 function PrivateRoute() {
@@ -48,11 +45,7 @@ export function App() {
             <Route path="custom-sections/:id" element={<CustomSectionEditorPage />} />
           </Route>
           <Route path="header" element={<HeaderPage />} />
-          <Route path="menu" element={<MenuConfigPage />} />
           <Route path="footer" element={<FooterConfigPage />} />
-          <Route path="section-crud" element={<SectionCrudListPage />} />
-          <Route path="section-crud/new" element={<SectionCrudFormPage />} />
-          <Route path="section-crud/:id" element={<SectionCrudFormPage />} />
           <Route path="contact-inbox" element={<ContactInboxPage />} />
           <Route path="video-library" element={<VideoLibraryPage />} />
         </Route>

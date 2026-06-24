@@ -95,6 +95,7 @@ const SiteStructuredData = () => {
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { getAppSections } from "@/lib/video.api";
+import type { HeaderSectionData, FooterSectionData } from "@/types/video.types";
 
 export default async function RootLayout({
   children,
@@ -106,6 +107,12 @@ export default async function RootLayout({
     .filter((s) => s.status === "ACTIVE")
     .map((s) => s.name);
 
+  const headerSection = sections.find((s) => s.name === "header");
+  const headerData = headerSection?.data?.map as HeaderSectionData | undefined;
+
+  const footerSection = sections.find((s) => s.name === "footer");
+  const footerData = footerSection?.data?.map as FooterSectionData | undefined;
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -113,9 +120,9 @@ export default async function RootLayout({
       </head>
       <body>
         <Providers>
-          <Header activeSections={activeSections} />
+          <Header activeSections={activeSections} headerData={headerData} />
           {children}
-          <Footer />
+          <Footer footerData={footerData} />
         </Providers>
       </body>
     </html>

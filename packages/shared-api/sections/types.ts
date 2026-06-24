@@ -15,6 +15,7 @@ export interface SectionRecord {
 
 export interface CreateSectionRequest {
   name: string;
+  type?: string;
   description?: string;
   displayOrder?: number;
   status?: string;

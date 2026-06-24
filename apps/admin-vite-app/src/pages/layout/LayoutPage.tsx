@@ -82,8 +82,15 @@ const FIXED_SECTIONS: { label: string; description: string; icon: IconComponent 
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function resolveMeta(name: string): SectionMeta {
-  return SECTION_META[name] ?? FALLBACK_META;
+function resolveMeta(section: SectionRecord): SectionMeta {
+  if (section.type === "CUSTOM") {
+    return {
+      label: section.name,
+      description: section.description || "Phần tùy chỉnh",
+      icon: Settings2,
+    };
+  }
+  return SECTION_META[section.name] ?? FALLBACK_META;
 }
 
 function getSectionPreview(section: SectionRecord): string {
@@ -206,7 +213,7 @@ export function LayoutPage() {
               key={section.id}
               section={section}
               index={index}
-              meta={resolveMeta(section.name)}
+              meta={resolveMeta(section)}
               preview={getSectionPreview(section)}
               isDragDisabled={isSaving}
               isToggling={isToggling}

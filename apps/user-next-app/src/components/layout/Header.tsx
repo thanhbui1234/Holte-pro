@@ -6,13 +6,23 @@ import Image from "next/image";
 import Link from "next/link";
 import { Facebook, Instagram, Mail, Menu } from "lucide-react";
 import { SlideMenu } from "./SlideMenu";
+import type { HeaderSectionData } from "@/types/video.types";
 
-export function Header({ activeSections = [] }: { activeSections?: string[] }) {
+interface HeaderProps {
+  activeSections?: string[];
+  headerData?: HeaderSectionData;
+}
+
+export function Header({ activeSections = [], headerData }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showLogo, setShowLogo] = useState(false);
   const [isDarkSection, setIsDarkSection] = useState(true);
   const pathname = usePathname();
   const isDetailPage = pathname !== "/";
+
+  const facebookUrl = headerData?.facebookUrl ?? "https://facebook.com";
+  const instagramUrl = headerData?.instagramUrl ?? "https://instagram.com";
+  const emailHref = headerData?.emailHref ?? "mailto:hello@jowfilm.vn";
 
   const updateTheme = useCallback(() => {
     const headerBottom = 70;
@@ -133,7 +143,7 @@ export function Header({ activeSections = [] }: { activeSections?: string[] }) {
         {/* Right: Social icons */}
         <div className="flex items-center gap-4">
           <a
-            href="https://facebook.com"
+            href={facebookUrl}
             target="_blank"
             rel="noopener noreferrer"
             className={`transition-colors duration-500 hover:opacity-70 ${textColor}`}
@@ -142,7 +152,7 @@ export function Header({ activeSections = [] }: { activeSections?: string[] }) {
             <Facebook className="h-4 w-4" />
           </a>
           <a
-            href="https://instagram.com"
+            href={instagramUrl}
             target="_blank"
             rel="noopener noreferrer"
             className={`transition-colors duration-500 hover:opacity-70 ${textColor}`}
@@ -151,7 +161,7 @@ export function Header({ activeSections = [] }: { activeSections?: string[] }) {
             <Instagram className="h-4 w-4" />
           </a>
           <a
-            href="mailto:hello@jowfilm.vn"
+            href={emailHref}
             className={`transition-colors duration-500 hover:opacity-70 ${textColor}`}
             aria-label="Email"
           >
@@ -160,7 +170,14 @@ export function Header({ activeSections = [] }: { activeSections?: string[] }) {
         </div>
       </header>
 
-      <SlideMenu open={menuOpen} onClose={() => setMenuOpen(false)} activeSections={activeSections} />
+      <SlideMenu
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        activeSections={activeSections}
+        facebookUrl={facebookUrl}
+        instagramUrl={instagramUrl}
+        emailHref={emailHref}
+      />
     </>
   );
 }

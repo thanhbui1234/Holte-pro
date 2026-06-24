@@ -154,6 +154,28 @@ export interface ContactCtaSectionData {
   backgroundColor?: string;
 }
 
+/** Shape of `data.map` for the `header` INVARIANT section */
+export interface HeaderSectionData {
+  facebookUrl?: string;
+  instagramUrl?: string;
+  emailHref?: string;
+}
+
+/** Shape of `data.map` for the `footer` INVARIANT section */
+export interface FooterSectionData {
+  tagline?: string;
+  contactHeading?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  socialHeading?: string;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  youtubeUrl?: string;
+  copyright?: string;
+  credit?: string;
+}
+
 /** Generic section record returned by GET_LIST_SECTION */
 export interface SectionRecord {
   id: number;

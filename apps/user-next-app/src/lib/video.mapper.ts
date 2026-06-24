@@ -116,7 +116,7 @@ export function mapTraditionalFilmSectionToFilms(
 // Custom section mappers (type === "CUSTOM" from GET_LIST_SECTION)
 // ---------------------------------------------------------------------------
 
-function mapCustomSection(record: SectionRecord): CustomSection {
+export function mapCustomSection(record: SectionRecord): CustomSection {
   const map = (record.data?.map ?? {}) as Record<string, unknown>;
   return {
     id: String(record.id),

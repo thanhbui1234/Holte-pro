@@ -7,7 +7,6 @@ import {
   Layers,
   LayoutDashboard,
   LayoutGrid,
-  Navigation,
   PanelsTopLeft,
   Settings2,
   Sparkles,
@@ -43,7 +42,6 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Các phần trang web",
     items: [
       { label: "Trung tâm phần", path: "/sections", icon: Layers },
-      { label: "Phần động", path: "/section-crud", icon: PanelsTopLeft },
     ],
   },
   {
@@ -62,7 +60,6 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Chrome",
     items: [
       { label: "Header", path: "/header", icon: PanelsTopLeft },
-      { label: "Menu", path: "/menu", icon: Navigation },
       { label: "Footer", path: "/footer", icon: Settings2 },
     ],
   },
@@ -125,7 +122,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
               )}
             >
               {!collapsed && (
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70">
+                <p className="text-[11.5px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                   {group.label}
                 </p>
               )}

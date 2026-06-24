@@ -18,9 +18,12 @@ interface SlideMenuProps {
   open: boolean;
   onClose: () => void;
   activeSections?: string[];
+  facebookUrl?: string;
+  instagramUrl?: string;
+  emailHref?: string;
 }
 
-export function SlideMenu({ open, onClose, activeSections = [] }: SlideMenuProps) {
+export function SlideMenu({ open, onClose, activeSections = [], facebookUrl = "https://facebook.com", instagramUrl = "https://instagram.com", emailHref = "mailto:hello@jowfilm.vn" }: SlideMenuProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { start } = useLoadingBar();
@@ -163,7 +166,7 @@ export function SlideMenu({ open, onClose, activeSections = [] }: SlideMenuProps
 
           <div className="flex items-center gap-4">
             <a
-              href="https://facebook.com"
+              href={facebookUrl}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Facebook"
@@ -172,7 +175,7 @@ export function SlideMenu({ open, onClose, activeSections = [] }: SlideMenuProps
               <Facebook className="h-4 w-4" />
             </a>
             <a
-              href="https://instagram.com"
+              href={instagramUrl}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram"
@@ -181,7 +184,7 @@ export function SlideMenu({ open, onClose, activeSections = [] }: SlideMenuProps
               <Instagram className="h-4 w-4" />
             </a>
             <a
-              href="mailto:hello@jowfilm.vn"
+              href={emailHref}
               aria-label="Email"
               className="text-stone-400 transition-colors duration-200 hover:text-amber-600 dark:text-stone-500 dark:hover:text-amber-400"
             >
