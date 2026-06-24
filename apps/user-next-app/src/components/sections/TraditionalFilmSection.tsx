@@ -66,9 +66,10 @@ export function TraditionalFilmSection({
             </Link>
           </BlurFade>
           <BlurFade delay={0.25} inView>
-            <p className="mx-auto mt-5 max-w-lg text-sm leading-relaxed text-amber-200/60">
-              {description}
-            </p>
+            <div
+              className="mx-auto mt-5 max-w-lg text-sm leading-relaxed text-amber-200/60 [&_p]:mb-2 last:[&_p]:mb-0"
+              dangerouslySetInnerHTML={{ __html: description }}
+            />
           </BlurFade>
         </div>
 

@@ -67,9 +67,10 @@ export function ContactPreview(props: ContactPreviewProps) {
         </BlurFade>
 
         <BlurFade delay={0.25} inView>
-          <p className="mx-auto mt-6 max-w-lg text-sm leading-relaxed text-stone-400 md:text-base">
-            {config.description}
-          </p>
+          <div
+            className="mx-auto mt-6 max-w-lg text-sm leading-relaxed text-stone-400 md:text-base [&_p]:mb-2 last:[&_p]:mb-0"
+            dangerouslySetInnerHTML={{ __html: config.description }}
+          />
         </BlurFade>
 
         <BlurFade delay={0.35} inView>
