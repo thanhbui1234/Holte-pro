@@ -157,9 +157,13 @@ export default async function Home() {
                 films={traditionalFilms}
                 backgroundColor={traditionalData.config?.backgroundColor}
                 eyebrow={traditionalData.config?.eyebrow}
+                eyebrowColor={traditionalData.config?.eyebrowColor}
                 titlePrefix={traditionalData.config?.titlePrefix}
+                titlePrefixColor={traditionalData.config?.titlePrefixColor}
                 titleHighlight={traditionalData.config?.titleHighlight}
+                titleHighlightColor={traditionalData.config?.titleHighlightColor}
                 description={traditionalData.config?.description}
+                descriptionColor={traditionalData.config?.descriptionColor}
               />
             ) : null;
 

@@ -9,7 +9,7 @@ export type { HeaderData } from "@/features/header/types/header.types";
 export type { AboutData, AboutImage, AboutStat } from "@/features/about/types/about.types";
 export type { HighlightVideo } from "@/features/highlights/types/highlights.types";
 export type { ReelItem } from "@/features/reels/types/reels.types";
-export type { FilmItem, FilmPreviewImage } from "@/features/films/types/films.types";
+export type { FilmItem } from "@/features/films/types/films.types";
 export type { ContactCtaData, ContactStatus, SupportFormRecord } from "@/features/contact/types/contact.types";
 export type { FooterData } from "@/features/footer/types/footer.types";
 export type { SectionRecord } from "@/features/layout/types/layout.types";

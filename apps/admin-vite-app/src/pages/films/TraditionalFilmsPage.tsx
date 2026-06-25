@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
-import { Palette, Plus, Trash2, Video, Youtube, X } from "lucide-react";
+import { Controller, useForm } from "react-hook-form";
+import { Palette, Plus, Video, Youtube, X } from "lucide-react";
 import { useSection, useUpdateSectionData } from "@/features/layout/hooks/use-layout";
 import { PageContainer } from "@/components/composite/PageContainer";
 import { SectionCard } from "@/components/composite/SectionCard";
@@ -16,16 +16,8 @@ import { VideoLibraryModal } from "@/components/composite/VideoLibraryModal";
 import { SaveBar } from "@/components/composite/SaveBar";
 import { TagInput } from "@/components/composite/TagInput";
 import { Badge, Input, Textarea, Button } from "shared-ui";
-import type { FilmItem, FilmPreviewImage } from "@/features/films/types/films.types";
+import type { FilmItem } from "@/features/films/types/films.types";
 import type { ThemedSection } from "@/shared/types";
-
-const blankPreviewImage = (): FilmPreviewImage => ({
-  src: "",
-  title: "",
-  topic: "",
-  description: "",
-  attribute: "",
-});
 
 const blankFilm = (): FilmItem => ({
   id: `film-${Date.now().toString(36)}`,
@@ -36,7 +28,6 @@ const blankFilm = (): FilmItem => ({
   description: "",
   tags: [],
   image: "",
-  previewImages: [],
 });
 
 function extractYoutubeId(input: string): string | null {
@@ -86,7 +77,6 @@ export function TraditionalFilmsPage() {
   const [videoModalOpen, setVideoModalOpen] = useState(false);
 
   const itemForm = useForm<FilmItem>({ defaultValues: blankFilm() });
-  const previewImages = useFieldArray({ control: itemForm.control, name: "previewImages" });
   const watchedYoutubeUrl = itemForm.watch("youtubeUrl");
   const ytIdPreview = extractYoutubeId(watchedYoutubeUrl);
 
@@ -332,80 +322,6 @@ export function TraditionalFilmsPage() {
             )}
           />
         </FormField>
-
-        {/* Preview images */}
-        <div className="space-y-3 rounded-lg border border-border/60 bg-muted/30 p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">Ảnh xem trước</p>
-              <p className="text-xs text-muted-foreground">
-                Mỗi ảnh có tiêu đề, chủ đề, mô tả và thuộc tính riêng.
-              </p>
-            </div>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={() => previewImages.append(blankPreviewImage())}
-            >
-              <Plus className="h-4 w-4" />
-              Thêm ảnh
-            </Button>
-          </div>
-
-          {previewImages.fields.length === 0 ? (
-            <p className="rounded-md border border-dashed bg-background px-3 py-6 text-center text-xs text-muted-foreground">
-              Chưa có ảnh xem trước.
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {previewImages.fields.map((field, index) => (
-                <div
-                  key={field.id}
-                  className="space-y-3 rounded-md border border-border/60 bg-background p-3"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-                      Ảnh {index + 1}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => previewImages.remove(index)}
-                      className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                      aria-label="Xóa ảnh"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                  <FormMediaField
-                    control={itemForm.control}
-                    name={`previewImages.${index}.src` as const}
-                    label="Nguồn ảnh"
-                    accept="image/*"
-                    urlOnly
-                  />
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <FormField label="Tiêu đề ảnh">
-                      <Input {...itemForm.register(`previewImages.${index}.title` as const)} />
-                    </FormField>
-                    <FormField label="Chủ đề ảnh">
-                      <Input {...itemForm.register(`previewImages.${index}.topic` as const)} />
-                    </FormField>
-                  </div>
-                  <FormField label="Mô tả ảnh">
-                    <Textarea rows={2} {...itemForm.register(`previewImages.${index}.description` as const)} />
-                  </FormField>
-                  <FormField label="Thuộc tính ảnh">
-                    <Input
-                      placeholder="Địa điểm, năm, v.v."
-                      {...itemForm.register(`previewImages.${index}.attribute` as const)}
-                    />
-                  </FormField>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
       </EntityFormDialog>
 
       {/* Delete confirm */}

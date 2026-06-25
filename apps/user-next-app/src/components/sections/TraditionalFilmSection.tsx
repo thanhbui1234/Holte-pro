@@ -11,18 +11,26 @@ export interface TraditionalFilmSectionProps {
   films?: FilmItem[];
   backgroundColor?: string;
   eyebrow?: string;
+  eyebrowColor?: string;
   titlePrefix?: string;
+  titlePrefixColor?: string;
   titleHighlight?: string;
+  titleHighlightColor?: string;
   description?: string;
+  descriptionColor?: string;
 }
 
 export function TraditionalFilmSection({
   films = FILMS,
   backgroundColor,
   eyebrow = "Heritage & Culture",
+  eyebrowColor,
   titlePrefix = "Traditional",
+  titlePrefixColor,
   titleHighlight = "Films",
+  titleHighlightColor,
   description = "A long-form wedding film that follows the complete timeline of your wedding day.",
+  descriptionColor,
 }: TraditionalFilmSectionProps) {
   const [headerRef, headerVisible] = useScrollAnimation({ threshold: 0.1 });
 
@@ -45,7 +53,10 @@ export function TraditionalFilmSection({
           }}
         >
           <BlurFade delay={0.05} inView>
-            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
+            <p
+              className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] text-amber-400"
+              style={eyebrowColor ? { color: eyebrowColor } : undefined}
+            >
               {eyebrow}
             </p>
           </BlurFade>
@@ -59,8 +70,15 @@ export function TraditionalFilmSection({
                   animationDuration={800}
                   isView
                 >
-                  {titlePrefix}{" "}
-                  <em className="not-italic font-normal italic">{titleHighlight}</em>
+                  <span style={titlePrefixColor ? { color: titlePrefixColor } : undefined}>
+                    {titlePrefix}
+                  </span>{" "}
+                  <em
+                    className="not-italic font-normal italic"
+                    style={titleHighlightColor ? { color: titleHighlightColor } : undefined}
+                  >
+                    {titleHighlight}
+                  </em>
                 </Highlighter>
               </h2>
             </Link>
@@ -68,6 +86,7 @@ export function TraditionalFilmSection({
           <BlurFade delay={0.25} inView>
             <div
               className="mx-auto mt-5 max-w-lg text-sm leading-relaxed text-amber-200/60 [&_p]:mb-2 last:[&_p]:mb-0"
+              style={descriptionColor ? { color: descriptionColor } : undefined}
               dangerouslySetInnerHTML={{ __html: description }}
             />
           </BlurFade>

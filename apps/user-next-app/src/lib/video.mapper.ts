@@ -94,13 +94,15 @@ export function mapTraditionalFilmItemToFilm(
   item: TraditionalFilmSectionItem,
 ): FilmItem {
   const embedUrl = item.youtubeUrl || item.videoUrl || "";
+  const ytId = extractYouTubeId(embedUrl);
+  const image = item.image || (ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : "");
   return {
-    id: extractYouTubeId(embedUrl),
+    id: ytId,
     title: item.title,
     subtitle: item.subtitle ?? "",
     description: item.description ?? "",
     tags: item.tags ?? [],
-    image: item.image ?? "",
+    image,
     youtubeEmbedUrl: embedUrl ? toYouTubeEmbedUrl(embedUrl) : "",
   };
 }
