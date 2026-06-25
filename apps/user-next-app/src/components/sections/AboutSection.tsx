@@ -129,11 +129,16 @@ export function AboutSection({
           <BlurFade delay={0.3} inView>
             {/* EN description — use API HTML if provided, else static */}
             {descriptionEn ? (
-              <div
-                className="mb-4 text-base leading-relaxed text-stone-200 [&_strong]:font-medium [&_strong]:text-stone-100 [&_em]:italic [&_em]:text-amber-400"
-                style={descriptionEnColor ? { color: descriptionEnColor } : undefined}
-                dangerouslySetInnerHTML={{ __html: descriptionEn }}
-              />
+              <>
+                <div
+                  className="text-base leading-relaxed text-stone-200 [&_strong]:font-medium [&_strong]:text-stone-100 [&_em]:italic [&_em]:text-amber-400"
+                  style={descriptionEnColor ? { color: descriptionEnColor } : undefined}
+                  dangerouslySetInnerHTML={{ __html: descriptionEn }}
+                />
+                <p className="mb-4 text-base leading-relaxed text-stone-200">
+                  <span className="italic text-amber-400">&ldquo;{legacy}&rdquo;</span>
+                </p>
+              </>
             ) : (
               <p className="mb-4 text-base leading-relaxed text-stone-200">
                 We translate your love story into a cinematic masterpiece. Driven by
