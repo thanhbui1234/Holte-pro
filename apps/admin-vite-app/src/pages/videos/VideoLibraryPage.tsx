@@ -11,11 +11,13 @@ import { toast } from "sonner";
 
 type AddTabValue = "upload" | "url";
 
+const MAX_VIDEO_SIZE = 5 * 1024 * 1024 * 1024; // 5GB
+
 function AddVideoModal({ open, onOpenChange, onSuccess }: { open: boolean, onOpenChange: (open: boolean) => void, onSuccess: () => void }) {
   const [activeTab, setActiveTab] = useState<AddTabValue>("upload");
   const [youtubeLink, setYoutubeLink] = useState("");
   const [isCreatingFromUrl, setIsCreatingFromUrl] = useState(false);
-  
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [youtubeTitle, setYoutubeTitle] = useState("");
   const [youtubeDescription, setYoutubeDescription] = useState("");
@@ -153,6 +155,7 @@ function AddVideoModal({ open, onOpenChange, onSuccess }: { open: boolean, onOpe
                   value=""
                   accept=".mp4,.mov,.avi,.mkv,.wmv,.flv,.webm,video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/x-ms-wmv,video/x-flv,video/webm"
                   placeholder="Kéo thả video hoặc nhấp để tải lên"
+                  maxSize={MAX_VIDEO_SIZE}
                   onChange={(_, file) => {
                     if (file) {
                       setSelectedFile(file);
