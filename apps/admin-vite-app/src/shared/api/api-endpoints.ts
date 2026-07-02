@@ -25,4 +25,9 @@ export const API_ENDPOINTS = {
   GET_SUPPORT_FORM: "/cms-api/v1/get-support-form",
   UPDATE_SUPPORT_FORM_STATUS: "/cms-api/v1/update-support-form-status",
   REMOVE_SUPPORT_FORM: "/cms-api/v1/remove-support-form",
+  
+  // Web Preview Image (OG Image)
+  GET_WEB_PREVIEW_IMAGE_URL: "/cms-api/v1/get-web-preview-image-url",
+  UPSERT_WEB_PREVIEW_IMAGE_URL: "/cms-api/v1/upsert-web-preview-image-url",
+  REMOVE_WEB_PREVIEW_IMAGE_URL: "/cms-api/v1/remove-web-preview-image-url",
 } as const;

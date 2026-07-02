@@ -1,6 +1,7 @@
 import dynamic from "next/dynamic";
 import { AboutSection } from "@/components/sections/AboutSection";
-import { generateMetadata } from "./metadata";
+import { generateSEO } from "./metadata";
+import type { Metadata } from "next";
 import { VideoBanner } from "@/components/ui/VideoBanner";
 import { ContactPreview } from "@/components/sections/ContactPreview";
 import { getAppSections } from "@/lib/video.api";
@@ -43,12 +44,14 @@ const TraditionalFilmSection = dynamic(
   { ssr: true },
 );
 
-export const metadata = generateMetadata({
-  title: "JOW Film",
-  description:
-    "JOW Film — A cinematic wedding film studio. Discover our portfolio of timeless love stories.",
-  canonical: "/",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return generateSEO({
+    title: "JOW Film",
+    description:
+      "JOW Film — A cinematic wedding film studio. Discover our portfolio of timeless love stories.",
+    canonical: "/",
+  });
+}
 
 export default async function Home() {
   const sections = await getAppSections();
