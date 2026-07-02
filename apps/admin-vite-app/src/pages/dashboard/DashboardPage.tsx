@@ -16,8 +16,6 @@ import type { ComponentType, SVGProps } from "react";
 import { useHighlights } from "@/features/highlights";
 import { useReels } from "@/features/reels";
 import { useFilms } from "@/features/films";
-import { useAbout } from "@/features/about";
-import { useBanner } from "@/features/banner";
 import { useFooter } from "@/features/footer";
 import { useSections } from "@/features/layout/hooks/use-layout";
 import { PageContainer } from "@/components/composite/PageContainer";
@@ -69,8 +67,6 @@ export function DashboardPage() {
   const { data: highlights, isLoading: loadingHighlights } = useHighlights();
   const { data: reels, isLoading: loadingReels } = useReels();
   const { data: films, isLoading: loadingFilms } = useFilms();
-  const { data: about, isLoading: loadingAbout } = useAbout();
-  const { data: banner, isLoading: loadingBanner } = useBanner();
   const { data: footer, isLoading: loadingFooter } = useFooter();
 
   const isLoading =
@@ -78,8 +74,6 @@ export function DashboardPage() {
     loadingHighlights ||
     loadingReels ||
     loadingFilms ||
-    loadingAbout ||
-    loadingBanner ||
     loadingFooter;
 
   if (isLoading) {
@@ -90,7 +84,10 @@ export function DashboardPage() {
     );
   }
 
-  const happyCouples = about?.stats?.find((s) => s.label === "Happy Couples")?.value ?? "0";
+  const bannerMap = sections.find((s) => s.name === "banner")?.data?.map ?? {};
+  const aboutMap = sections.find((s) => s.name === "about")?.data?.map ?? {};
+  const aboutStats = (aboutMap.stats as { label: string; value: string }[] | undefined) ?? [];
+  const happyCouples = aboutStats.find((s) => s.label === "Happy Couples")?.value ?? "0";
 
   const metrics = [
     {
@@ -125,8 +122,8 @@ export function DashboardPage() {
 
   // Preview values per section name
   const previewMap: Record<string, string> = {
-    banner: banner?.videoSrc ?? "—",
-    about: `${about?.titlePrefix ?? ""} ${about?.titleHighlight ?? ""}`.trim() || "—",
+    banner: (bannerMap.videoSrc as string | undefined) ?? "—",
+    about: `${(aboutMap.titlePrefix as string | undefined) ?? ""} ${(aboutMap.titleHighlight as string | undefined) ?? ""}`.trim() || "—",
     "wedding-highlights": highlights?.length ? `${highlights.length} video` : "—",
     "wedding-reels": reels?.length ? `${reels.length} reels` : "—",
     "traditional-films": films?.length ? `${films.length} phim` : "—",

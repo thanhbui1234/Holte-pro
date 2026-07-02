@@ -15,6 +15,7 @@ import type { BannerData } from "@/features/banner/types/banner.types";
 function mapToBannerData(map: Record<string, unknown>): BannerData {
   return {
     videoSrc: (map.videoSrc as string) ?? "",
+    mobileVideo: (map.mobileVideo as string) ?? "",
     logoSrc: (map.logoSrc as string) ?? "",
     logoAlt: (map.logoAlt as string) ?? "",
     scrollLabel: (map.scrollLabel as string) ?? "",
@@ -70,7 +71,12 @@ export function BannerPage() {
             <FormVideoPicker
               control={control}
               name="videoSrc"
-              label="Nguồn video"
+              label="Admin Video"
+            />
+            <FormVideoPicker
+              control={control}
+              name="mobileVideo"
+              label="Mobile Video"
             />
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField label="Văn bản alt logo" htmlFor="banner-alt">
