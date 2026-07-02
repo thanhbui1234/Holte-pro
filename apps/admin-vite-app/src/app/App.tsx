@@ -11,6 +11,7 @@ import { ContactCtaPage } from "@/pages/contact/ContactCtaPage";
 import { ContactInboxPage } from "@/pages/contact/ContactInboxPage";
 import { HeaderPage } from "@/pages/header/HeaderPage";
 import { FooterConfigPage } from "@/pages/footer/FooterConfigPage";
+import { WebPreviewImagePage } from "@/pages/web-preview-image/WebPreviewImagePage";
 import { CustomSectionsPage } from "@/pages/custom-sections/CustomSectionsPage";
 import { CustomSectionEditorPage } from "@/pages/custom-sections/CustomSectionEditorPage";
 import { SectionsHubPage } from "@/pages/sections-hub/SectionsHubPage";
@@ -46,6 +47,7 @@ export function App() {
           </Route>
           <Route path="header" element={<HeaderPage />} />
           <Route path="footer" element={<FooterConfigPage />} />
+          <Route path="og-image" element={<WebPreviewImagePage />} />
           <Route path="contact-inbox" element={<ContactInboxPage />} />
           <Route path="video-library" element={<VideoLibraryPage />} />
         </Route>

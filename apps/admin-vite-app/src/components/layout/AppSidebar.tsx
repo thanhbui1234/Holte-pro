@@ -11,6 +11,7 @@ import {
   Settings2,
   Sparkles,
   LogOut,
+  Image as ImageIcon,
 } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
 import { cn } from "@/shared/lib/utils";
@@ -61,6 +62,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: "Header", path: "/header", icon: PanelsTopLeft },
       { label: "Footer", path: "/footer", icon: Settings2 },
+      { label: "OG Image", path: "/og-image", icon: ImageIcon },
     ],
   },
 ];

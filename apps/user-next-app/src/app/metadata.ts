@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getWebPreviewImageUrl } from "@/lib/seo.api";
 
 export const SEO_CONFIG = {
   SITE_URL: "https://holte-pro-user-next-app.vercel.app",
@@ -23,7 +24,7 @@ interface MetadataOptions {
   noIndex?: boolean;
 }
 
-export function generateMetadata({
+export async function generateSEO({
   title = SEO_CONFIG.SITE_NAME,
   description = SEO_CONFIG.DEFAULT_DESCRIPTION,
   keywords = [
@@ -41,9 +42,12 @@ export function generateMetadata({
     "lễ cưới",
   ],
   canonical = "/",
-  openGraphImage = SEO_CONFIG.DEFAULT_OG_IMAGE,
+  openGraphImage,
   noIndex = false,
-}: MetadataOptions = {}): Metadata {
+}: MetadataOptions = {}): Promise<Metadata> {
+  const dynamicOgImage = await getWebPreviewImageUrl();
+  const finalOgImage = openGraphImage || dynamicOgImage || SEO_CONFIG.DEFAULT_OG_IMAGE;
+
   const canonicalUrl = `${SEO_CONFIG.SITE_URL}${canonical}`;
 
   return {
@@ -75,7 +79,7 @@ export function generateMetadata({
       description,
       images: [
         {
-          url: openGraphImage,
+          url: finalOgImage,
           width: 1200,
           height: 630,
           alt: `${SEO_CONFIG.SITE_NAME} — Cinematic Wedding Films`,
@@ -87,7 +91,7 @@ export function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: [`${SEO_CONFIG.SITE_URL}${openGraphImage}`],
+      images: [finalOgImage.startsWith('http') ? finalOgImage : `${SEO_CONFIG.SITE_URL}${finalOgImage}`],
       creator: SEO_CONFIG.TWITTER_HANDLE,
     },
     robots: noIndex

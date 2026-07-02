@@ -3,6 +3,7 @@ import "./globals.css";
 import {
   getOrganizationSchema,
   getWebsiteSchema,
+  generateSEO,
   SEO_CONFIG,
 } from "./metadata";
 import { Providers } from "./providers";
@@ -19,64 +20,9 @@ export const viewport: Viewport = {
   ],
 };
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SEO_CONFIG.SITE_URL),
-  title: {
-    default: SEO_CONFIG.SITE_NAME,
-    template: `%s | ${SEO_CONFIG.SITE_NAME}`,
-  },
-  description: SEO_CONFIG.DEFAULT_DESCRIPTION,
-  keywords: [
-    "wedding film",
-    "wedding cinematography",
-    "wedding highlights",
-    "traditional films",
-    "wedding reels Vietnams",
-    "JOW Film",
-    "phim cưới",
-  ],
-  authors: [{ name: "JOW Film" }],
-  creator: "JOW Film",
-  publisher: "JOW Film",
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: SEO_CONFIG.SITE_URL,
-    siteName: SEO_CONFIG.SITE_NAME,
-    images: [
-      {
-        url: SEO_CONFIG.DEFAULT_OG_IMAGE,
-        width: 1200,
-        height: 630,
-        alt: SEO_CONFIG.SITE_NAME,
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: `${SEO_CONFIG.SITE_NAME} – Cinematic Wedding Films`,
-    description: SEO_CONFIG.DEFAULT_DESCRIPTION,
-    images: [SEO_CONFIG.DEFAULT_OG_IMAGE],
-    creator: SEO_CONFIG.TWITTER_HANDLE,
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  // verification: {},
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return generateSEO();
+}
 
 const SiteStructuredData = () => {
   const graph = {
