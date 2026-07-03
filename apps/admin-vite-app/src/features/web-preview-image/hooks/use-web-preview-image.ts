@@ -9,7 +9,7 @@ export function useWebPreviewImage() {
   return useQuery({
     queryKey: QUERY_KEY,
     queryFn: async () => {
-      const res = await apiClient.post(API_ENDPOINTS.GET_WEB_PREVIEW_IMAGE_URL);
+      const res = await apiClient.post(API_ENDPOINTS.GET_WEB_PREVIEW_IMAGE_URL, {});
       return res.data?.data as WebPreviewImageData;
     },
   });
@@ -32,7 +32,7 @@ export function useRemoveWebPreviewImage() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async () => {
-      const res = await apiClient.post(API_ENDPOINTS.REMOVE_WEB_PREVIEW_IMAGE_URL);
+      const res = await apiClient.post(API_ENDPOINTS.REMOVE_WEB_PREVIEW_IMAGE_URL, {});
       return res.data?.data;
     },
     onSuccess: () => {

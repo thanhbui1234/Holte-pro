@@ -13,9 +13,9 @@ export async function getWebPreviewImageUrl(): Promise<string | null> {
         body: JSON.stringify({}),
       }
     );
-    
+
     if (response.error) {
-      console.error("[seo.api] API error:", response.error.errorMsg);
+      console.error("[seo.api] API error:", response);
       return null;
     }
 
