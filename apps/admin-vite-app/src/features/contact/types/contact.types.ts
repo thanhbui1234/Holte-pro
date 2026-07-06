@@ -6,6 +6,12 @@ export interface ContactCtaData {
   ctaLabel: string;
   ctaHref: string;
   backgroundColor: string;
+  eyebrowColor: string;
+  titleColor: string;
+  highlightColor: string;
+  descriptionColor: string;
+  buttonBgColor: string;
+  buttonTextColor: string;
 }
 
 export type ContactStatus = "PENDING" | "CONTACTED";

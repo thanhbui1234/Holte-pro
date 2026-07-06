@@ -162,6 +162,12 @@ export interface ContactCtaSectionData {
   ctaLabel?: string;
   ctaHref?: string;
   backgroundColor?: string;
+  eyebrowColor?: string;
+  titleColor?: string;
+  highlightColor?: string;
+  descriptionColor?: string;
+  buttonBgColor?: string;
+  buttonTextColor?: string;
 }
 
 /** Shape of `data.map` for the `header` INVARIANT section */

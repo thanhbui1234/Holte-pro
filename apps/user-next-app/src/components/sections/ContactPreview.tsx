@@ -12,6 +12,12 @@ export interface ContactPreviewProps {
   ctaLabel?: string;
   ctaHref?: string;
   backgroundColor?: string;
+  eyebrowColor?: string;
+  titleColor?: string;
+  highlightColor?: string;
+  descriptionColor?: string;
+  buttonBgColor?: string;
+  buttonTextColor?: string;
 }
 
 const DEFAULTS = {
@@ -22,6 +28,12 @@ const DEFAULTS = {
   ctaLabel: "Get in Touch",
   ctaHref: "/contact",
   backgroundColor: "#0a0a0a",
+  eyebrowColor: "#fbbf24",
+  titleColor: "#ffffff",
+  highlightColor: "#fbbf24",
+  descriptionColor: "#a8a29e",
+  buttonBgColor: "#fbbf24",
+  buttonTextColor: "#1c1917",
 };
 
 export function ContactPreview(props: ContactPreviewProps) {
@@ -52,23 +64,30 @@ export function ContactPreview(props: ContactPreviewProps) {
         }}
       >
         <BlurFade delay={0.05} inView>
-          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] text-amber-400">
+          <p
+            className="mb-4 text-xs font-semibold uppercase tracking-[0.3em]"
+            style={{ color: config.eyebrowColor }}
+          >
             {config.eyebrow}
           </p>
         </BlurFade>
 
         <BlurFade delay={0.15} inView>
-          <h2 className="font-title text-5xl font-light tracking-wide text-white md:text-6xl lg:text-7xl">
+          <h2
+            className="font-title text-5xl font-light tracking-wide md:text-6xl lg:text-7xl"
+            style={{ color: config.titleColor }}
+          >
             {config.titlePrefix}{" "}
-            <Highlighter action="underline" color="#fbbf24" strokeWidth={2} animationDuration={800} isView>
-              <em className="not-italic font-normal italic">{config.titleHighlight}</em>
+            <Highlighter action="underline" color={config.highlightColor} strokeWidth={2} animationDuration={800} isView>
+              <em className="not-italic font-normal italic" style={{ color: config.highlightColor }}>{config.titleHighlight}</em>
             </Highlighter>
           </h2>
         </BlurFade>
 
         <BlurFade delay={0.25} inView>
           <div
-            className="mx-auto mt-6 max-w-lg text-sm leading-relaxed text-stone-400 md:text-base [&_p]:mb-2 last:[&_p]:mb-0"
+            className="mx-auto mt-6 max-w-lg text-sm leading-relaxed md:text-base [&_p]:mb-2 last:[&_p]:mb-0"
+            style={{ color: config.descriptionColor }}
             dangerouslySetInnerHTML={{ __html: config.description }}
           />
         </BlurFade>
@@ -77,7 +96,8 @@ export function ContactPreview(props: ContactPreviewProps) {
           <div className="mt-10">
             <Link
               href={config.ctaHref}
-              className="group inline-flex items-center gap-3 rounded-full bg-amber-400 px-8 py-4 text-sm font-medium uppercase tracking-widest text-stone-900 transition-all duration-300 hover:bg-amber-600 hover:shadow-lg hover:shadow-amber-500/20"
+              className="group inline-flex items-center gap-3 rounded-full px-8 py-4 text-sm font-medium uppercase tracking-widest transition-all duration-300 hover:shadow-lg"
+              style={{ backgroundColor: config.buttonBgColor, color: config.buttonTextColor }}
             >
               {config.ctaLabel}
               <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />

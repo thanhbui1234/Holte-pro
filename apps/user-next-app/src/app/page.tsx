@@ -183,6 +183,12 @@ export default async function Home() {
                 ctaLabel={contactData.ctaLabel}
                 ctaHref={contactData.ctaHref}
                 backgroundColor={contactData.backgroundColor}
+                eyebrowColor={contactData.eyebrowColor}
+                titleColor={contactData.titleColor}
+                highlightColor={contactData.highlightColor}
+                descriptionColor={contactData.descriptionColor}
+                buttonBgColor={contactData.buttonBgColor}
+                buttonTextColor={contactData.buttonTextColor}
               />
             ) : null;
 
