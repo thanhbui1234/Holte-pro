@@ -58,6 +58,7 @@ export default async function Home() {
 
   // Pre-extract FIXED section data
   const bannerData = findSection<BannerSectionData>(sections, "banner");
+  console.log('bannerData', bannerData)
   const aboutData = findSection<AboutSectionData>(sections, "about");
   const highlightData = findSection<WeddingHighlightsSectionData>(sections, "wedding-highlights");
   const reelsData = findSection<WeddingReelsSectionData>(sections, "wedding-reels");
@@ -93,6 +94,7 @@ export default async function Home() {
               <VideoBanner
                 key={section.id}
                 videoSrc={bannerData.videoSrc}
+                mobileVideo={bannerData.mobileVideo}
                 logoSrc={bannerData.logoSrc}
               />
             ) : null;

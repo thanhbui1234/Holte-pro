@@ -75,6 +75,7 @@ export interface SectionConfig {
 /** Shape of `data.map` for the `banner` section */
 export interface BannerSectionData {
   videoSrc: string;
+  mobileVideo?: string;
   logoSrc?: string;
   logoAlt?: string;
   scrollLabel?: string;

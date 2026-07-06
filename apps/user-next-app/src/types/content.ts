@@ -8,6 +8,7 @@ export interface SiteConfig {
 
 export interface BannerConfig {
   videoSrc: string;
+  mobileVideo?: string;
   logoSrc: string;
   scrollTargetId: string;
 }

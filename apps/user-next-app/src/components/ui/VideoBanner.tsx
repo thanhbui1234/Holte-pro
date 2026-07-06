@@ -125,14 +125,31 @@ function CinematicLoader({ visible }: { visible: boolean }) {
 // ---------------------------------------------------------------------------
 
 export function VideoBanner(props: Partial<BannerConfig>) {
-  const { videoSrc, logoSrc, scrollTargetId } = { ...DEFAULTS, ...props };
+  const { videoSrc, mobileVideo, logoSrc, scrollTargetId } = { ...DEFAULTS, ...props };
+
+  const [activeVideoSrc, setActiveVideoSrc] = useState(videoSrc);
+
+  useEffect(() => {
+    if (!mobileVideo) return;
+
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+    
+    const handleChange = (e: MediaQueryListEvent | MediaQueryList) => {
+      setActiveVideoSrc(e.matches ? mobileVideo : videoSrc);
+    };
+
+    handleChange(mediaQuery);
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, [videoSrc, mobileVideo]);
 
   // Blob URLs are session-local to the admin app — fall back to the default logo
   const resolvedLogoSrc =
     !logoSrc || isBlobUrl(logoSrc) ? DEFAULT_LOGO_SRC : logoSrc;
 
-  const isYouTube = isYouTubeUrl(videoSrc);
-  const embedUrl = isYouTube ? toYouTubeBackgroundEmbed(videoSrc) : null;
+  const isYouTube = isYouTubeUrl(activeVideoSrc);
+  const embedUrl = isYouTube ? toYouTubeBackgroundEmbed(activeVideoSrc) : null;
 
   // ---------------------------------------------------------------------------
   // Loading states
@@ -241,6 +258,7 @@ export function VideoBanner(props: Partial<BannerConfig>) {
         />
       ) : (
         <video
+          key={activeVideoSrc}
           autoPlay
           muted
           loop
@@ -249,7 +267,7 @@ export function VideoBanner(props: Partial<BannerConfig>) {
           onCanPlay={handleVideoCanPlay}
           className="pointer-events-none absolute inset-0 h-full w-full object-cover"
         >
-          <source src={videoSrc} type="video/mp4" />
+          <source src={activeVideoSrc} type="video/mp4" />
         </video>
       )}
     </section>
