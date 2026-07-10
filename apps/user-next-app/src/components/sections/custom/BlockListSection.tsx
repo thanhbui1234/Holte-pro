@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { ContentBlock, CustomSection } from "shared-ui/canvas";
 import { extractYtId, buildBgStyle } from "shared-ui/canvas";
+import { getThemeFromBgColor } from "@/lib/theme";
 
 const PADDING_CLS: Record<CustomSection["paddingY"], string> = {
   sm: "py-8",
@@ -113,6 +114,7 @@ export function BlockListSection({ section }: { section: CustomSection }) {
     <section
       className={`w-full ${PADDING_CLS[section.paddingY ?? "md"]}`}
       style={buildBgStyle(section)}
+      data-header-theme={getThemeFromBgColor(section.backgroundColor, "light")}
     >
       <div className="mx-auto max-w-6xl space-y-12 px-4 md:px-8">
         {section.blocks.map((block) => (

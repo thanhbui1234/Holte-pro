@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { BlurFade, Highlighter } from "shared-ui";
 import { ArrowRight } from "lucide-react";
+import { getThemeFromBgColor } from "@/lib/theme";
 export interface ContactPreviewProps {
   eyebrow?: string;
   titlePrefix?: string;
@@ -43,7 +44,7 @@ export function ContactPreview(props: ContactPreviewProps) {
   return (
     <section
       id="contact"
-      data-header-theme="dark"
+      data-header-theme={getThemeFromBgColor(config.backgroundColor, "dark")}
       className="relative overflow-hidden px-6 py-24 md:py-32"
       style={{ backgroundColor: config.backgroundColor }}
     >

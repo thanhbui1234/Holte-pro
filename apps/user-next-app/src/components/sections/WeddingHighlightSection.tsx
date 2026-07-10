@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { BlurFade, HeroVideoDialog, Highlighter } from "shared-ui";
 import type { HighlightVideo } from "@/types/content";
+import { getThemeFromBgColor } from "@/lib/theme";
 
 const DEFAULT_VIDEOS: HighlightVideo[] = [
   { id: "SlQR9iu09bQ", title: "Eternal Vows", subtitle: "Đà Lạt · Spring 2024" },
@@ -81,7 +82,7 @@ export function WeddingHighlightSection({
   return (
     <section
       id="wedding-highlight"
-      data-header-theme="light"
+      data-header-theme={getThemeFromBgColor(backgroundColor, "light")}
       className="min-h-screen bg-stone-50 px-5 py-20 dark:bg-stone-900"
       style={{ backgroundColor: backgroundColor || undefined }}
     >

@@ -6,6 +6,7 @@ import { FILMS } from "@/data/videos";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { BlurFade, Highlighter } from "shared-ui";
 import type { FilmItem } from "@/types/content";
+import { getThemeFromBgColor } from "@/lib/theme";
 
 export interface TraditionalFilmSectionProps {
   films?: FilmItem[];
@@ -37,7 +38,7 @@ export function TraditionalFilmSection({
   return (
     <section
       id="traditional-film"
-      data-header-theme="dark"
+      data-header-theme={getThemeFromBgColor(backgroundColor || "#293629", "dark")}
       className="px-6 py-20 md:px-16 md:py-24 lg:px-24"
       style={{ backgroundColor: backgroundColor || "#293629" }}
     >

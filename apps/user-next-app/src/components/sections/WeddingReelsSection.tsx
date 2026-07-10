@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { BlurFade, Highlighter, Skeleton, HeroVideoDialog } from "shared-ui";
 import type { ReelItem } from "@/types/content";
+import { getThemeFromBgColor } from "@/lib/theme";
 
 const DEFAULT_REELS: ReelItem[] = [
   { title: "First Look", duration: "0:45", location: "Đà Lạt" },
@@ -97,7 +98,7 @@ export function WeddingReelsSection({
   return (
     <section
       id="wedding-reels"
-      data-header-theme="dark"
+      data-header-theme={getThemeFromBgColor(backgroundColor, "dark")}
       className="min-h-screen overflow-hidden bg-stone-950 px-6 py-24"
       style={{ backgroundColor: backgroundColor || undefined }}
     >

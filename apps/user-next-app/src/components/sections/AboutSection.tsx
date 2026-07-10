@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { BlurFade, Highlighter, HyperText } from "shared-ui";
 import type { StatItem, AboutImage } from "@/types/content";
+import { getThemeFromBgColor } from "@/lib/theme";
 
 const DEFAULT_STATS: StatItem[] = [
   { value: "200+", label: "Wedding Films" },
@@ -80,7 +81,7 @@ export function AboutSection({
   return (
     <section
       id="about"
-      data-header-theme="dark"
+      data-header-theme={getThemeFromBgColor(backgroundColor, "dark")}
       className="relative min-h-screen overflow-hidden bg-stone-950 px-6 py-24 md:px-16 lg:px-24"
       style={backgroundColor ? { backgroundColor } : undefined}
     >

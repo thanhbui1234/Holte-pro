@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { CustomSection } from "shared-ui/canvas";
 import { buildBgStyle, buildElementStyle, buildGoogleFontsUrl } from "shared-ui/canvas";
 import { CanvasElementRenderer } from "./CanvasElementRenderer";
+import { getThemeFromBgColor } from "@/lib/theme";
 
 const CANVAS_W = 1200;
 
@@ -43,7 +44,11 @@ export function CanvasSection({ section }: { section: CustomSection }) {
   const sorted = [...section.canvasElements].sort((a, b) => a.zIndex - b.zIndex);
 
   return (
-    <div ref={containerRef} className="relative w-full overflow-hidden">
+    <div 
+      ref={containerRef} 
+      className="relative w-full overflow-hidden"
+      data-header-theme={getThemeFromBgColor(section.backgroundColor, "light")}
+    >
       {/* Spacer: gives container correct height so layout flow works */}
       <div style={{ height: section.canvasHeight * scale }} />
 
