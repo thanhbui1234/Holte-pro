@@ -11,6 +11,7 @@ export interface BannerConfig {
   mobileVideo?: string;
   logoSrc: string;
   scrollTargetId: string;
+  loop?: boolean;
 }
 
 export interface StatItem {

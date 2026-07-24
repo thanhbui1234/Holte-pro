@@ -12,6 +12,7 @@ const DEFAULTS: BannerConfig = {
   videoSrc: DEFAULT_VIDEO_SRC,
   logoSrc: DEFAULT_LOGO_SRC,
   scrollTargetId: "about",
+  loop: true,
 };
 
 /** Returns true when the URL is a YouTube embed / watch link */
@@ -25,21 +26,35 @@ function isBlobUrl(src: string): boolean {
 }
 
 /** Converts any YouTube URL to an embed URL with autoplay + mute for background use */
-function toYouTubeBackgroundEmbed(url: string): string {
-  // Already an embed URL — just append params
+function toYouTubeBackgroundEmbed(url: string, loop: boolean = true): string {
+  let videoId = "";
+
+  const embedMatch = url.match(/embed\/([^?&]+)/);
+  if (embedMatch) {
+    videoId = embedMatch[1];
+  } else {
+    const watchMatch = url.match(/[?&]v=([^&]+)/);
+    if (watchMatch) {
+      videoId = watchMatch[1];
+    } else {
+      const shortMatch = url.match(/youtu\.be\/([^?&/]+)/);
+      if (shortMatch) {
+        videoId = shortMatch[1];
+      }
+    }
+  }
+
+  const loopParam = loop ? "&loop=1" : "&loop=0";
+
+  if (videoId) {
+    const playlistParam = loop ? `&playlist=${videoId}` : "";
+    return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1${loopParam}&controls=0&playsinline=1&modestbranding=1&rel=0${playlistParam}`;
+  }
+
+  // Fallback
   if (url.includes("youtube.com/embed/")) {
     const separator = url.includes("?") ? "&" : "?";
-    return `${url}${separator}autoplay=1&mute=1&loop=1&controls=0&playsinline=1&modestbranding=1&rel=0`;
-  }
-  // watch?v= URL
-  const watchMatch = url.match(/[?&]v=([^&]+)/);
-  if (watchMatch) {
-    return `https://www.youtube.com/embed/${watchMatch[1]}?autoplay=1&mute=1&loop=1&controls=0&playsinline=1&modestbranding=1&rel=0&playlist=${watchMatch[1]}`;
-  }
-  // youtu.be/<id>
-  const shortMatch = url.match(/youtu\.be\/([^?&/]+)/);
-  if (shortMatch) {
-    return `https://www.youtube.com/embed/${shortMatch[1]}?autoplay=1&mute=1&loop=1&controls=0&playsinline=1&modestbranding=1&rel=0&playlist=${shortMatch[1]}`;
+    return `${url}${separator}autoplay=1&mute=1${loopParam}&controls=0&playsinline=1&modestbranding=1&rel=0`;
   }
   return url;
 }
@@ -125,7 +140,7 @@ function CinematicLoader({ visible }: { visible: boolean }) {
 // ---------------------------------------------------------------------------
 
 export function VideoBanner(props: Partial<BannerConfig>) {
-  const { videoSrc, mobileVideo, logoSrc, scrollTargetId } = { ...DEFAULTS, ...props };
+  const { videoSrc, mobileVideo, logoSrc, scrollTargetId, loop } = { ...DEFAULTS, ...props };
 
   const [activeVideoSrc, setActiveVideoSrc] = useState(videoSrc);
 
@@ -133,7 +148,7 @@ export function VideoBanner(props: Partial<BannerConfig>) {
     if (!mobileVideo) return;
 
     const mediaQuery = window.matchMedia("(max-width: 767px)");
-    
+
     const handleChange = (e: MediaQueryListEvent | MediaQueryList) => {
       setActiveVideoSrc(e.matches ? mobileVideo : videoSrc);
     };
@@ -149,7 +164,7 @@ export function VideoBanner(props: Partial<BannerConfig>) {
     !logoSrc || isBlobUrl(logoSrc) ? DEFAULT_LOGO_SRC : logoSrc;
 
   const isYouTube = isYouTubeUrl(activeVideoSrc);
-  const embedUrl = isYouTube ? toYouTubeBackgroundEmbed(activeVideoSrc) : null;
+  const embedUrl = isYouTube ? toYouTubeBackgroundEmbed(activeVideoSrc, loop) : null;
 
   // ---------------------------------------------------------------------------
   // Loading states
@@ -261,7 +276,7 @@ export function VideoBanner(props: Partial<BannerConfig>) {
           key={activeVideoSrc}
           autoPlay
           muted
-          loop
+          loop={loop}
           playsInline
           preload="auto"
           onCanPlay={handleVideoCanPlay}
